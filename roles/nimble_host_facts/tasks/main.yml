@@ -1,0 +1,40 @@
+- name: NLT group info
+  shell: >
+    nltadm --group --list | tail -1 | awk '{ print 
+    "{\"group_ip\": \"" $1 "\",\n"
+    "\"user\": \"" $2 "\",\n"
+    "\"status\": \"" $7 "\",\n"
+    "\"protocol\": \"" $8 "\"}\n"
+    }'
+  register: nimble_nltadm_group
+
+- name: NLT components ({{ nimble_host_docker_driver_name }})
+  shell: >
+    nltadm --status | fgrep '{{ nimble_host_docker_driver_name }}' | awk '{ print $2 }'
+  register: nimble_nltadm_docker
+
+- name: "{{ nimble_host_docker_driver_name }} configuration"
+  shell: >
+    grep -v ^# {{ nimble_host_docker_conf_file }} | 
+    awk -F= 'END { printf("\n}\n") }
+    NR == 1 { printf("{\n") }
+    NR > 1 { printf(",\n") }
+    { printf("  \"%s\": \"%s\"", $1, $2) }'
+  register: nimble_docker_options
+
+- name: Probe my IQN
+  command: awk -F = '{ if ($1 == "InitiatorName") print $2 }' {{ nimble_host_iqn_file }}
+  register: nimble_host_iqn
+
+- name: Set facts
+  set_fact:
+    nimble_host_facts: '{
+      "groups": {
+        "main": {{ nimble_nltadm_group.stdout | from_json }}
+      },
+      "docker": {
+        "status": "{{ nimble_nltadm_docker.stdout }}",
+        "options": {{ nimble_docker_options.stdout | from_json }}
+      },
+      "iqn": "{{ nimble_host_iqn.stdout }}"
+    }'

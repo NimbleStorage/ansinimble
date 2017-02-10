@@ -17,8 +17,10 @@ Every role have a set of host variables assigned depending on the operation. Som
 * [nimble_host_facts](roles/nimble_host_facts) - Gathers facts about a host system
 * [nimble_group_facts](roles/nimble_group_facts) - Gathers facts about Nimble array group connected to the host system
 * [nimble_volume_create](roles/nimble_volume_create) - Creates a Nimble volume, either a new one or from a clone
-* [nimble_volume_map](roles/nimble_volume_map) - Maps, formats and mounts a Nimble volume to the host
-* [nimble_volume_unmap](roles/nimble_volume_unmap) - Unmounts, unmaps and offline a Nimble volume from the host
+* [nimble_volume_map](roles/nimble_volume_map) - Maps the volume to the host system
+* [nimble_volume_mount](roles/nimble_volume_mount) - Discovers, formats and mounts a Nimble volume to the host
+* [nimble_volume_unmap](roles/nimble_volume_unmap) - Unmaps and offline a Nimble volume 
+* [nimble_volume_umount](roles/nimble_volume_umount) - Umounts and disconnects a Nimble volume from the host
 * [nimble_volume_restore](roles/nimble_volume_restore) - Restores a Nimble volume from a snapshot, requires the volume to be unmapped
 * [nimble_volume_delete](roles/nimble_volume_delete) - Deletes a Nimble volume (needs to be unmapped first)
 * [nimble_volume_snapshot](roles/nimble_volume_snapshot) - Creates a manual snapshot of a Nimble volume

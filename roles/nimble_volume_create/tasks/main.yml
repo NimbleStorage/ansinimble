@@ -1,0 +1,39 @@
+---
+- name: Ensure nimble_volume
+  debug: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
+  failed_when: nimble_volume is not defined
+
+- name: Merge options
+  set_fact: 
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ nimble_volume_options }}"
+  when: nimble_volume_options is defined
+
+- name: Overlay name into volume options
+  set_fact:
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'name': nimble_volume } ) }}"
+
+# FIXME: Overlay nimble_volume_size
+# FIXME: Overlay nimble_volume_from
+
+# FIXME: Human to machine conversion
+# perfpolicy_id
+# pool_id
+# folder_id
+# base_snap_id
+
+- name: Create Volume
+  uri:
+    url: "{{ nimble_group_url }}/volumes"
+    validate_certs: no
+    method: POST
+    status_code: 201
+    body_format: json
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: "{{ nimble_volume_options_default }}"
+    return_content: yes
+  register: local_volume
+  when: nimble_group_facts | json_query(local_query) == []
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume_options_default.name }}'].name"

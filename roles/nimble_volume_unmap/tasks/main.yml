@@ -1,0 +1,33 @@
+---
+- name: Determine ACR ID
+  set_fact:
+    nimble_volume_acr: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "access_control_records[?vol_name=='{{ nimble_volume }}' && initiator_group_name=='{{ inventory_hostname_short }}'].id | [0]"
+
+- name: Remove Accress Control Record
+  uri:
+    url: "{{ nimble_group_url }}/access_control_records/{{ nimble_volume_acr }}"
+    validate_certs: no
+    method: DELETE
+    status_code: 200
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+
+- name: Get nimble_volume_id
+  set_fact:
+    nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"
+
+- name: Offline nimble_volume
+  uri:
+    url: "{{ nimble_group_url }}/volumes/{{ nimble_volume_id }}?force=true"
+    validate_certs: no
+    method: PUT
+    status_code: 200
+    body_format: json
+    body:
+      data:
+        id: "{{ nimble_volume_id }}"
+        online: False
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"

@@ -1,0 +1,32 @@
+---
+- name: Get nimble_volume_id
+  set_fact:
+    nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"
+
+- name: Determine last snapshot
+  set_fact:
+    nimble_volume_snapshot: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].last_snap.snap_name | [0]"
+  when: nimble_volume_snapshot is undefined
+
+- name: Determine snapshot ID
+  set_fact:
+    nimble_volume_snapshot_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].last_snap.snap_id | [0]"
+
+- name: Restore volume
+  uri:
+    url: "{{ nimble_group_url }}/volumes/{{ nimble_volume_id }}/actions/restore"
+    validate_certs: no
+    method: POST
+    status_code: 200
+    body_format: json
+    body:
+      data:
+        id: "{{ nimble_volume_id }}"
+        base_snap_id: "{{ nimble_volume_snapshot_id }}"
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"

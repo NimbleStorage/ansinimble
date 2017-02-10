@@ -1,0 +1,35 @@
+---
+- name: API token
+  uri:
+    url: "{{ nimble_group_url }}/tokens"
+    validate_certs: no
+    method: POST
+    status_code: 201
+    body_format: json
+    body:
+     data:
+       username: "{{ nimble_host_facts.groups.main.user }}"
+       password: "{{ nimble_group_password }}"
+    return_content: yes
+  register: nimble_group_token
+
+- name: Store group token
+  set_fact:
+    nimble_group_token: "{{ nimble_group_token.json.data.session_token }}"
+
+- name: Retrieve group objects
+  uri:
+    url: "{{ nimble_group_url }}/{{ item.key }}/detail"
+    validate_certs: no
+    method: GET
+    status_code: 200
+    body_format: json
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    return_content: yes
+  with_dict: "{{ nimble_group_facts }}"
+  register: nimble_group_data
+
+- name: Store group facts
+  set_fact: 
+    nimble_group_facts: "{{ nimble_group_facts | combine( {item.item.key: item.json.data} ) }}"
+  with_items: "{{ nimble_group_data.results }}"

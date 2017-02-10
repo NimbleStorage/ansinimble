@@ -1,0 +1,48 @@
+---
+- hosts: localhost
+  become: yes
+  roles:
+    - nimble_host_facts
+    - nimble_group_facts
+    - nimble_volume_create 
+
+- hosts: localhost
+  become: yes
+  roles:
+    - nimble_group_facts
+    - nimble_volume_map
+    - nimble_volume_mount
+    - nimble_volume_snapshot
+    - nimble_volume_umount
+
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Touch a file
+      file:
+        path: "/mnt/{{ nimble_volume }}/myfile.txt"
+        state: touch
+
+- hosts: localhost
+  become: yes
+  roles:
+    - nimble_group_facts
+    - nimble_volume_unmap
+
+- hosts: localhost
+  become: yes
+  roles:
+    - nimble_group_facts
+    - nimble_volume_restore
+    - nimble_volume_map
+
+- hosts: localhost
+  become: yes
+  vars:
+    nimble_volume_size: 30000
+  roles:
+    - nimble_group_facts
+    - nimble_volume_mount
+    - nimble_volume_resize
+    - nimble_volume_unmap
+    - nimble_volume_delete

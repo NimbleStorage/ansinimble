@@ -1,0 +1,10 @@
+nimble_initiator_group_options_default:
+  name: "{{ inventory_hostname_short }}"
+  description: Created by Ansible for {{ inventory_hostname_short }}
+  access_protocol: "{{ nimble_host_facts.groups.main.protocol }}"
+
+nimble_initiator_options_default:
+  label: "{{ inventory_hostname_short }}:sw-iscsi"
+  access_protocol: "{{ nimble_host_facts.groups.main.protocol }}"
+  iqn: "{{ nimble_host_facts.iqn }}"
+  ip_address: "*"

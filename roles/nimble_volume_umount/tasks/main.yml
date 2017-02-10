@@ -1,0 +1,16 @@
+---
+- name: Determine target
+  set_fact:
+    nimble_volume_target: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
+
+- name: Unount volume
+  mount:
+    name: "{{ nimble_volume_mountpoint }}"
+    state: unmounted
+
+- name: Disconnect LUN
+  open_iscsi:
+    login: no
+    target: "{{ nimble_volume_target }}"

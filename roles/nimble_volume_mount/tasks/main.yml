@@ -1,0 +1,35 @@
+---
+- name: Discover Targets
+  open_iscsi: 
+    show_nodes: yes
+    discover: yes
+    portal: "{{ nimble_group_discovery_ip }}"
+
+- name: Discover LUN
+  open_iscsi:
+    auto_node_startup: True
+    discover: True
+    login: True
+    portal: "{{ nimble_group_discovery_ip }}"
+    target: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
+
+- name: Get volume serial number
+  set_fact:
+    nimble_volume_serial_number: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
+
+- name: Create filesystem
+  filesystem: 
+    dev: "{{ nimble_host_device_prefix }}{{ nimble_volume_serial_number }}"
+    fstype: xfs
+    opts: "-L {{ nimble_volume }}"
+
+- name: Mount volume
+  mount:
+    name: "{{ nimble_volume_mountpoint }}"
+    state: mounted
+    src: LABEL={{ nimble_volume }}
+    fstype: xfs

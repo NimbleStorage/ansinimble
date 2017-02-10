@@ -1,0 +1,24 @@
+nimble_host_facts:
+  groups:
+    main:
+      group_ip: 0.0.0.0
+      user: admin
+      last_connection: 0
+      status: disabled
+      protocol: unknown
+  docker:
+    enabled: false
+    options:
+      "nos.sample.option": true
+  oracle:
+    enabled: false
+    options:
+      "orcl.sample.option": true
+  maps:
+    volname:
+      mountpoint: /mnt
+      device: /dev/mapper/mpathx
+
+nimble_host_docker_conf_file: /opt/NimbleStorage/etc/docker-driver.conf
+nimble_host_docker_driver_name: Docker-Driver
+nimble_host_iqn_file: /etc/iscsi/initiatorname.iscsi

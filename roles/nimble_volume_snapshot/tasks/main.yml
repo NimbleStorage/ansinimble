@@ -1,0 +1,20 @@
+---
+- name: Get nimble_volume_id
+  set_fact:
+    nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"
+
+- name: Create snapshot
+  uri:
+    url: "{{ nimble_group_url }}/snapshots"
+    validate_certs: no
+    method: POST
+    status_code: 201
+    body_format: json
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: 
+        vol_id: "{{ nimble_volume_id }}"
+        name: "{{ nimble_volume_snapshot }}"
+    return_content: yes
