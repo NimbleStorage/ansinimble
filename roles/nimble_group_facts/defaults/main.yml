@@ -7,7 +7,6 @@ nimble_group_facts:
   performance_policies:
   pools:
   subnets:
-  users:
   volumes:
 
 nimble_group_http_scheme: https

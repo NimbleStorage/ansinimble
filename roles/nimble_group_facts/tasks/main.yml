@@ -28,8 +28,10 @@
     return_content: yes
   with_dict: "{{ nimble_group_facts }}"
   register: nimble_group_data
+  no_log: True
 
 - name: Store group facts
   set_fact: 
     nimble_group_facts: "{{ nimble_group_facts | combine( {item.item.key: item.json.data} ) }}"
   with_items: "{{ nimble_group_data.results }}"
+  no_log: True
