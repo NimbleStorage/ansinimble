@@ -25,6 +25,9 @@ Every role have a set of host variables assigned depending on the operation. Som
 * [nimble_volume_delete](roles/nimble_volume_delete) - Deletes a Nimble volume (needs to be unmapped first)
 * [nimble_volume_snapshot](roles/nimble_volume_snapshot) - Creates a manual snapshot of a Nimble volume
 * [nimble_volume_resize](roles/nimble_volume_resize) - Resizes a Nimble volume and expands the filesystem (online)
+* [nimble_folder_create](roles/nimble_folder_create) - Creates a Nimble folder
+* [nimble_folder_update](roles/nimble_folder_update) - Updates a Nimble folder
+* [nimble_folder_delete](roles/nimble_folder_delete) - Deletes a Nimble folder
 
 ## Playbooks
 Each role have an example snippet on how to craft a playbook utilizing the particular role.

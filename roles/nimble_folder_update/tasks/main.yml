@@ -1,9 +1,9 @@
 ---
 - name: Merge options
   set_fact: 
-    nimble_folder_update_options_default: "{{ nimble_folder_options_default | combine( { item.key: item.value } ) }}"
+    nimble_folder_update_options_default: "{{ nimble_folder_update_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_folder_update_options }}"
-  when: nimble_folder_options is defined
+  when: nimble_folder_update_options is defined
 
 - name: Get nimble_folder_id
   set_fact:
