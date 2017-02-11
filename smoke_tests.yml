@@ -3,6 +3,8 @@
 - hosts: localhost
   vars:
     nimble_volume: smoke-volume
+    nimble_volume_pool: default
+    nimble_volume_perfpolicy: "Windows File Server"
   become: yes
   roles:
     - nimble_host_facts

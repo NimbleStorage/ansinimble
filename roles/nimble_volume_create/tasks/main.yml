@@ -51,11 +51,32 @@
     nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'name': nimble_volume, 'base_snap_id': nimble_volume_snapshot_id, 'clone': True } ) }}"
   when: nimble_volume_from is defined
 
-# FIXME: Human to machine conversion
-# perfpolicy_id
-# pool_id
-# folder_id
-# base_snap_id
+- name: Lookup perfpolicy
+  set_fact:
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'perfpolicy_id': item } ) }}"
+  with_items:
+    - "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "performance_policies[?name=='{{ nimble_volume_perfpolicy }}'].id | [0]"
+  when: nimble_volume_perfpolicy is defined
+
+- name: Lookup pool
+  set_fact:
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'pool_id': item } ) }}"
+  with_items:
+    - "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "pools[?name=='{{ nimble_volume_pool }}'].id | [0]"
+  when: nimble_volume_pool is defined
+
+- name: Lookup folder
+  set_fact:
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'folder_id': item } ) }}"
+  with_items:
+    - "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "folders[?name=='{{ nimble_volume_folder }}'].id | [0]"
+  when: nimble_volume_folder is defined
 
 - name: Create Volume
   uri:
