@@ -1,0 +1,14 @@
+---
+- name: Get nimble_folder_id
+  set_fact:
+    nimble_folder_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "folders[?name=='{{ nimble_folder }}'].id | [0]"
+
+- name: Delete nimble_folder
+  uri:
+    url: "{{ nimble_group_url }}/folders/{{ nimble_folder_id }}"
+    validate_certs: no
+    method: DELETE
+    status_code: 200
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"

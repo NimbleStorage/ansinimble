@@ -1,24 +1,38 @@
 ---
 # Hello World
 - hosts: localhost
+  become: yes
+  vars:
+    nimble_folder: smoke-folder
+  roles:
+    - nimble_host_facts
+    - nimble_group_facts
+    - nimble_folder_create 
+
+- hosts: localhost
   vars:
     nimble_volume: smoke-volume
     nimble_volume_pool: default
     nimble_volume_perfpolicy: "Windows File Server"
+    nimble_volume_folder: smoke-folder
+    nimble_folder: smoke-folder
   become: yes
   roles:
-    - nimble_host_facts
     - nimble_group_facts
     - nimble_volume_create 
 
-# Create known snapshot
+# Update folder and create known snapshot
 - hosts: localhost
   vars:
     nimble_volume_snapshot: smoke-snap
     nimble_volume: smoke-volume
+    nimble_folder: smoke-folder
+    nimble_folder_update_options:
+      description: "This folder is smoked"
   become: yes
   roles:
     - nimble_group_facts
+    - nimble_folder_update
     - nimble_volume_snapshot
 
 # Map & snap
@@ -151,6 +165,7 @@
 # Resize and delete
 - hosts: localhost
   vars:
+    nimble_folder: smoke-folder
     nimble_volume: smoke-volume
     nimble_volume_size: 30000
   become: yes
@@ -160,3 +175,4 @@
     - nimble_volume_umount
     - nimble_volume_unmap
     - nimble_volume_delete
+    - nimble_folder_delete
