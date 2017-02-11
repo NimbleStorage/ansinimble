@@ -26,6 +26,11 @@
     dev: "{{ nimble_host_device_prefix }}{{ nimble_volume_serial_number }}"
     fstype: xfs
     opts: "-L {{ nimble_volume }}"
+  register: nimble_filesystem_created
+
+- name: Update label if this is an existing filesystem (clone)
+  shell: xfs_admin -L {{ nimble_volume }} -U $(uuidgen) {{ nimble_host_device_prefix }}{{ nimble_volume_serial_number }}
+  when: nimble_filesystem_created.changed == False
 
 - name: Mount volume
   mount:

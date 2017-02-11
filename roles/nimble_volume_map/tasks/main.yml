@@ -31,14 +31,14 @@
 - name: Overlay newly created initiator_group ID
   set_fact:
     nimble_initiator_group_id: "{{ nimble_initiator_group.json.data.id }}"
-  when: nimble_initiator_group.changed == True
+  when: nimble_initiator_group.json.data.id is defined
 
 - name: Find previously created initator_group ID
   set_fact:
     nimble_initiator_group_id: "{{ nimble_group_facts | json_query(local_query) }}"
   vars:
     local_query: "initiator_groups[?name==`{{ inventory_hostname_short }}`].id | [0]"
-  when: nimble_initiator_group.changed == False
+  when: nimble_initiator_group.json.data.id is undefined
 
 - name: Merge nimble_initiator_group_id
   set_fact:
