@@ -10,6 +10,11 @@
     name: "{{ nimble_volume_mountpoint }}"
     state: unmounted
 
+- name: Wipe fstab
+  mount:
+    name: "{{ nimble_volume_mountpoint }}"
+    state: absent
+
 - name: Disconnect LUN
   open_iscsi:
     login: no
