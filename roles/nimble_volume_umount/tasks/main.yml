@@ -5,7 +5,7 @@
   vars:
     local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
 
-- name: Unount volume
+- name: Unmount volume
   mount:
     name: "{{ nimble_volume_mountpoint }}"
     state: unmounted

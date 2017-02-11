@@ -1,12 +1,28 @@
 ---
+# Hello World
 - hosts: localhost
+  vars:
+    nimble_volume: smoke-volume
   become: yes
   roles:
     - nimble_host_facts
     - nimble_group_facts
     - nimble_volume_create 
 
+# Create known snapshot
 - hosts: localhost
+  vars:
+    nimble_volume_snapshot: smoke-snap
+    nimble_volume: smoke-volume
+  become: yes
+  roles:
+    - nimble_group_facts
+    - nimble_volume_snapshot
+
+# Map & snap
+- hosts: localhost
+  vars:
+    nimble_volume: smoke-volume
   become: yes
   roles:
     - nimble_group_facts
@@ -15,7 +31,51 @@
     - nimble_volume_snapshot
     - nimble_volume_umount
 
+# Create a clone from last snapshot
 - hosts: localhost
+  vars:
+    nimble_volume_from: smoke-volume
+    nimble_volume: smoke-volume-clone
+  become: yes
+  roles:
+    - nimble_group_facts
+    - nimble_volume_create
+
+# Whack the clone
+- hosts: localhost
+  vars:
+    nimble_volume: smoke-volume-clone
+  become: yes
+  roles:
+    - nimble_group_facts
+    - nimble_volume_unmap
+    - nimble_volume_delete
+
+# Create a clone from a known snapshot
+- hosts: localhost
+  vars:
+    nimble_volume_from: smoke-volume
+    nimble_volume: smoke-volume-clone
+    nimble_volume_snapshot: smoke-snap
+  become: yes
+  roles:
+    - nimble_group_facts
+    - nimble_volume_create
+
+# Whack the clone
+- hosts: localhost
+  vars:
+    nimble_volume: smoke-volume-clone
+  become: yes
+  roles:
+    - nimble_group_facts
+    - nimble_volume_unmap
+    - nimble_volume_delete
+
+# Touch a file
+- hosts: localhost
+  vars:
+    nimble_volume: smoke-volume
   become: yes
   tasks:
     - name: Touch a file
@@ -23,23 +83,34 @@
         path: "/mnt/{{ nimble_volume }}/myfile.txt"
         state: touch
 
+# Unmap
 - hosts: localhost
+  vars:
+    nimble_volume: smoke-volume
   become: yes
   roles:
     - nimble_group_facts
     - nimble_volume_unmap
 
+# Restore from last snapshot
 - hosts: localhost
+  vars:
+    nimble_volume: smoke-volume
   become: yes
   roles:
     - nimble_group_facts
     - nimble_volume_restore
     - nimble_volume_map
 
+# Restore from a known snapshot
+
+
+# Resize and delete
 - hosts: localhost
-  become: yes
   vars:
+    nimble_volume: smoke-volume
     nimble_volume_size: 30000
+  become: yes
   roles:
     - nimble_group_facts
     - nimble_volume_mount

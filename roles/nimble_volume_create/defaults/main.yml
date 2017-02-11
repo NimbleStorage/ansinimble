@@ -1,2 +1,3 @@
+nimble_volume_size: 1000
 nimble_volume_options_default:
-  size: 10000
+  description: "Volume created by Ansible"

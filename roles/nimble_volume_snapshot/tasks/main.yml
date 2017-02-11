@@ -10,7 +10,7 @@
     url: "{{ nimble_group_url }}/snapshots"
     validate_certs: no
     method: POST
-    status_code: 201
+    status_code: 201,409 # Ok and exists
     body_format: json
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
     body:

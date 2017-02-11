@@ -2,7 +2,7 @@
 Roles and playbooks for mnemonic devices for humans with amnesia 
 
 ## Intro
-This repo contains reusable Ansible roles and playbooks to manage Nimbe Storage infrastructure and surrounding applications.
+This repo contains reusable Ansible roles and playbooks to manage Nimble Storage infrastructure and surrounding applications.
 
 ## Assumptions and prerequisites
 These roles assumes the latest Nimble Linux Toolkit (NLT) is installed on the host being managed by Ansible. The latest version of NLT may be obtained from [InfoSight](https://infosight.nimblestorage.com) (Nimble customers and partners only).

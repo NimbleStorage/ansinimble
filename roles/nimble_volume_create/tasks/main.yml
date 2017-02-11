@@ -9,12 +9,47 @@
   with_dict: "{{ nimble_volume_options }}"
   when: nimble_volume_options is defined
 
-- name: Overlay name into volume options
+- name: Overlay name and size into volume options
   set_fact:
-    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'name': nimble_volume } ) }}"
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'name': nimble_volume, 'size': nimble_volume_size } ) }}"
+  when: nimble_volume_from is undefined
 
-# FIXME: Overlay nimble_volume_size
-# FIXME: Overlay nimble_volume_from
+- block:
+  - name: Get nimble_volume_id
+    set_fact:
+      nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
+    vars:
+      local_query: "volumes[?name=='{{ nimble_volume_from }}'].id | [0]"
+
+  - name: Query for snapshots on nimble_volume
+    uri:
+      url: "{{ nimble_group_url }}/snapshots/detail?vol_id={{ nimble_volume_id }}"
+      validate_certs: no
+      method: GET
+      status_code: 200
+      HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+      return_content: yes
+    register: nimble_volume_snapshots
+
+  - name: Retrieve snapshot id
+    set_fact:
+      nimble_volume_snapshot_id: "{{ nimble_volume_snapshots.json | json_query(local_query) }}"
+    vars:
+      local_query: "data[?name=='{{ nimble_volume_snapshot }}' && vol_id=='{{ nimble_volume_id }}'].id | [0]"
+
+  when: nimble_volume_snapshot is defined and nimble_volume_from is defined
+
+- name: Grab last snapshot if not specified
+  set_fact:
+    nimble_volume_snapshot_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume_from }}'].last_snap.snap_id | [0]"
+  when: nimble_volume_snapshot is undefined and nimble_volume_from is defined
+
+- name: Overlay clone volume options
+  set_fact:
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'name': nimble_volume, 'base_snap_id': nimble_volume_snapshot_id, 'clone': True } ) }}"
+  when: nimble_volume_from is defined
 
 # FIXME: Human to machine conversion
 # perfpolicy_id
