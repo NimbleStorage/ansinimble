@@ -1,0 +1,1 @@
+nimble_volume_mountpoint: /mnt/{{ nimble_volume }}
