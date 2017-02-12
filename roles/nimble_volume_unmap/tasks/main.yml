@@ -31,3 +31,11 @@
         id: "{{ nimble_volume_id }}"
         online: False
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+
+- name: Refresh objects
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_fact_refresh:
+      access_control_records:
+      volumes:

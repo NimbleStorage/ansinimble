@@ -93,3 +93,10 @@
   when: nimble_group_facts | json_query(local_query) == []
   vars:
     local_query: "volumes[?name=='{{ nimble_volume_options_default.name }}'].name"
+
+- name: Refresh volumes
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_fact_refresh:
+      volumes:

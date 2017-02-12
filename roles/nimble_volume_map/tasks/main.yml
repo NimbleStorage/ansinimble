@@ -12,7 +12,6 @@
     method: POST
     status_code: 201
     body_format: json
-    return_content: yes
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
     body:
      data: "{{ nimble_initiator_group_options_default }}"
@@ -51,7 +50,6 @@
     method: POST
     status_code: 201
     body_format: json
-    return_content: yes
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
     body:
      data: "{{ nimble_initiator_options_default }}"
@@ -84,9 +82,8 @@
     url: "{{ nimble_group_url }}/access_control_records"
     validate_certs: no
     method: POST
-    status_code: 201
+    status_code: 201, 409
     body_format: json
-    return_content: yes
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
     body:
      data:
@@ -96,3 +93,13 @@
   when: nimble_group_facts | json_query(local_query) == [] and nimble_volume_id != ''
   vars:
     local_query: "access_control_records[?initiator_group_id=='{{ nimble_initiator_group_id }}' && vol_id=='{{ nimble_volume_id }}'].id"
+
+- name: Refresh objects
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_fact_refresh:
+      volumes:
+      initiator_groups:
+      initiators:
+      access_control_records:

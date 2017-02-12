@@ -21,3 +21,10 @@
     body:
       data: "{{ nimble_folder_update_options_default }}"
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+
+- name: Refresh folders
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_fact_refresh:
+      folders:

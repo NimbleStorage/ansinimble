@@ -31,3 +31,10 @@
     method: DELETE
     status_code: 200
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+
+- name: Refresh volumes
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_fact_refresh:
+      volumes:

@@ -17,6 +17,16 @@
   set_fact:
     nimble_group_token: "{{ nimble_group_token.json.data.session_token }}"
 
+- name: Full download
+  set_fact:
+    nimble_group_objects: "{{ nimble_group_facts }}"
+  when: nimble_group_fact_refresh is undefined
+
+- name: Partial refresh
+  set_fact:
+    nimble_group_objects: "{{ nimble_group_fact_refresh }}"
+  when: nimble_group_fact_refresh is defined
+
 - name: Retrieve group objects
   uri:
     url: "{{ nimble_group_url }}/{{ item.key }}/detail"
@@ -26,12 +36,20 @@
     body_format: json
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
     return_content: yes
-  with_dict: "{{ nimble_group_facts }}"
+  with_dict: "{{ nimble_group_objects }}"
   register: nimble_group_data
   no_log: True
 
 - name: Store group facts
   set_fact: 
-    nimble_group_facts: "{{ nimble_group_facts | combine( {item.item.key: item.json.data} ) }}"
+    nimble_group_facts: "{{ nimble_group_facts | combine( { item.item.key: item.json.data } ) }}"
   with_items: "{{ nimble_group_data.results }}"
   no_log: True
+
+- name: Make variables persistent
+  set_fact:
+    nimble_group_http_scheme: "{{ nimble_group_http_scheme }}"
+    nimble_group_http_port: "{{ nimble_group_http_port }}"
+    nimble_group_api_version: "{{ nimble_group_api_version }}"
+    nimble_group_url: "{{ nimble_group_url }}"
+  when: nimble_group_fact_refresh is undefined

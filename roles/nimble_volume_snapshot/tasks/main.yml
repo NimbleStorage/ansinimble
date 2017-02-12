@@ -18,3 +18,10 @@
         vol_id: "{{ nimble_volume_id }}"
         name: "{{ nimble_volume_snapshot }}"
     return_content: yes
+
+- name: Refresh volumes
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_fact_refresh:
+      volumes:

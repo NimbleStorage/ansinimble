@@ -1,15 +1,6 @@
 ---
 # Hello World
 - hosts: localhost
-  become: yes
-  vars:
-    nimble_folder: smoke-folder
-  roles:
-    - nimble_host_facts
-    - nimble_group_facts
-    - nimble_folder_create 
-
-- hosts: localhost
   vars:
     nimble_volume: smoke-volume
     nimble_volume_pool: default
@@ -18,32 +9,25 @@
     nimble_folder: smoke-folder
   become: yes
   roles:
+    - nimble_host_facts
     - nimble_group_facts
+    - nimble_folder_create 
     - nimble_volume_create 
+    - nimble_volume_map
+    - nimble_volume_mount
+    - nimble_volume_snapshot
 
-# Update folder and create known snapshot
+# Update folder and a known snap
 - hosts: localhost
   vars:
-    nimble_volume_snapshot: smoke-snap
-    nimble_volume: smoke-volume
     nimble_folder: smoke-folder
     nimble_folder_update_options:
       description: "This folder is smoked"
-  become: yes
-  roles:
-    - nimble_group_facts
-    - nimble_folder_update
-    - nimble_volume_snapshot
-
-# Map & snap
-- hosts: localhost
-  vars:
     nimble_volume: smoke-volume
+    nimble_volume_snapshot: smoke-snap
   become: yes
   roles:
-    - nimble_group_facts
-    - nimble_volume_map
-    - nimble_volume_mount
+    - nimble_folder_update
     - nimble_volume_snapshot
 
 # Create a clone from last snapshot
@@ -53,16 +37,7 @@
     nimble_volume: smoke-clone
   become: yes
   roles:
-    - nimble_group_facts
     - nimble_volume_create
-
-# Whack the clone
-- hosts: localhost
-  vars:
-    nimble_volume: smoke-clone
-  become: yes
-  roles:
-    - nimble_group_facts
     - nimble_volume_map
     - nimble_volume_mount
     - nimble_volume_umount
@@ -77,16 +52,7 @@
     nimble_volume_snapshot: smoke-snap
   become: yes
   roles:
-    - nimble_group_facts
     - nimble_volume_create
-
-# Whack the clone
-- hosts: localhost
-  vars:
-    nimble_volume: smoke-clone
-  become: yes
-  roles:
-    - nimble_group_facts
     - nimble_volume_map
     - nimble_volume_mount
     - nimble_volume_umount
@@ -110,7 +76,6 @@
     nimble_volume: smoke-volume
   become: yes
   roles:
-    - nimble_group_facts
     - nimble_volume_umount
     - nimble_volume_unmap
 
@@ -120,7 +85,6 @@
     nimble_volume: smoke-volume
   become: yes
   roles:
-    - nimble_group_facts
     - nimble_volume_restore
     - nimble_volume_map
     - nimble_volume_mount
@@ -145,7 +109,6 @@
     nimble_volume: smoke-volume
   become: yes
   roles:
-    - nimble_group_facts
     - nimble_volume_umount
     - nimble_volume_unmap
 
@@ -156,7 +119,6 @@
     nimble_volume: smoke-volume
   become: yes
   roles:
-    - nimble_group_facts
     - nimble_volume_restore
     - nimble_volume_map
     - nimble_volume_mount
@@ -170,7 +132,6 @@
     nimble_volume_size: 30000
   become: yes
   roles:
-    - nimble_group_facts
     - nimble_volume_resize
     - nimble_volume_umount
     - nimble_volume_unmap

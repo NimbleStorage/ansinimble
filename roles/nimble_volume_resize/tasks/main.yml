@@ -32,3 +32,10 @@
 
 - name: Resize nimble_volume
   command: xfs_growfs {{ nimble_volume_mountpoint }}
+
+- name: Refresh volumes
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_fact_refresh:
+      volumes:
