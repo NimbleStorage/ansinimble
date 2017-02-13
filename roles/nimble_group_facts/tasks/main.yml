@@ -1,4 +1,13 @@
 ---
+- name: Ensure nimble_group_password
+  fail: msg="Missing variable nimble_group_password, please provide the group password in nimble_group_password"
+  when: nimble_group_password is not defined
+
+- name: Host facts
+  include_role:
+    name: nimble_host_facts
+  when: nimble_host_facts is undefined
+
 - name: API token
   uri:
     url: "{{ nimble_group_url }}/tokens"

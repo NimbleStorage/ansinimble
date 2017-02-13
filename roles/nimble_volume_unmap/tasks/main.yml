@@ -1,4 +1,21 @@
 ---
+- name: Ensure nimble_volume
+  fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
+  when: nimble_volume is not defined
+
+- name: Host facts
+  include_role:
+    name: nimble_host_facts
+  when: nimble_host_facts is undefined
+
+- name: Refresh group facts
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_facts:
+      access_control_records:
+      volumes:
+
 - name: Determine ACR ID
   set_fact:
     nimble_volume_acr: "{{ nimble_group_facts | json_query(local_query) }}"

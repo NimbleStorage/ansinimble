@@ -9,8 +9,6 @@
     nimble_folder: smoke-folder
   become: yes
   roles:
-    - nimble_host_facts
-    - nimble_group_facts
     - nimble_folder_create 
     - nimble_volume_create 
     - nimble_volume_map

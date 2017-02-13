@@ -1,9 +1,19 @@
 ---
-- name: Determine ACR ID
-  set_fact:
-    nimble_volume_acr: "{{ nimble_group_facts | json_query(local_query) }}"
+- name: Ensure nimble_volume
+  fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
+  when: nimble_volume is not defined
+
+- name: Host facts
+  include_role:
+    name: nimble_host_facts
+  when: nimble_host_facts is undefined
+
+- name: Refresh group facts
+  include_role:
+    name: nimble_group_facts
   vars:
-    local_query: "access_control_records[?vol_name=='{{ nimble_volume }}' && initiator_group_name=='{{ inventory_hostname_short }}'].id | [0]"
+    nimble_group_facts:
+      volumes:
 
 - name: Get nimble_volume_id
   set_fact:

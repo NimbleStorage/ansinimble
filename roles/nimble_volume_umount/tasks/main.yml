@@ -1,4 +1,20 @@
 ---
+- name: Ensure nimble_volume and nimble_volume_mountpoint
+  fail: msg="Missing variable nimble_volume and nimble_volume_mountpoint, please provide a volume name in nimble_volume and current mountpoint in nimble_volume_mountpoint"
+  when: nimble_volume is not defined and nimble_volume_mountpoint is not defined
+
+- name: Host facts
+  include_role:
+    name: nimble_host_facts
+  when: nimble_host_facts is undefined
+
+- name: Refresh group facts
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_facts:
+      volumes:
+
 - name: Determine target
   set_fact:
     nimble_volume_target: "{{ nimble_group_facts | json_query(local_query) }}"

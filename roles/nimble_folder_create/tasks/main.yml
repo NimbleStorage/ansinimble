@@ -1,7 +1,19 @@
 ---
 - name: Ensure nimble_folder
-  debug: msg="Missing variable nimble_folder, please provide a folder name in nimble_folder"
-  failed_when: nimble_folder is not defined
+  fail: msg="Missing variable nimble_folder, please provide a folder name in nimble_folder"
+  when: nimble_folder is not defined
+
+- name: Host facts
+  include_role:
+    name: nimble_host_facts
+  when: nimble_host_facts is undefined
+
+- name: Refresh pools
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_facts:
+      pools:
 
 - name: Merge options
   set_fact: 

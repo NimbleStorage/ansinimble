@@ -1,9 +1,29 @@
 ---
+- name: Ensure nimble_volume
+  fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
+  when: nimble_volume is not defined
+
+- name: Host facts
+  include_role:
+    name: nimble_host_facts
+  when: nimble_host_facts is undefined
+
+- name: Refresh group facts
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_facts:
+      initiator_groups:
+      volumes:
+      access_control_records:
+      initiators:
+
 - name: Merge nimble_initiator_group_options
   set_fact: 
     nimble_initiator_group_options_default: "{{ nimble_initiator_group_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_initiator_group_options }}"
   when: nimble_initiator_group_options is defined
+
 
 - name: Create Initiator Group
   uri:
