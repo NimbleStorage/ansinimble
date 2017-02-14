@@ -3,10 +3,14 @@
   fail: msg="Missing variable nimble_group_password, please provide the group password in nimble_group_password"
   when: nimble_group_password is not defined
 
-- name: Host facts
-  include_role:
-    name: nimble_host_facts
-  when: nimble_host_facts is undefined
+- block:
+  - fail: msg="Need to collect host facts"
+    when: nimble_host_facts is undefined and nimble_group_verified is undefined
+
+  rescue:
+  - name: Host facts
+    include_role:
+      name: nimble_host_facts
 
 - name: API token
   uri:

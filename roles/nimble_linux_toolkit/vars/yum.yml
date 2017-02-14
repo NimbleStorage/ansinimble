@@ -1,0 +1,5 @@
+nimble_host_packages:
+  - device-mapper-multipath
+  - iscsi-initiator-utils
+  - sg3_utils
+  - xfsprogs

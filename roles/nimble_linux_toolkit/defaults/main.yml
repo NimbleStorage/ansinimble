@@ -1,0 +1,5 @@
+nimble_linux_toolkit_options_default:
+  - "silent-mode"
+  - "accept-eula"
+  - "ncm"
+nimble_linux_toolkit_prefix: /opt/NimbleStorage

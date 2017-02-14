@@ -1,12 +1,12 @@
 ---
 # Hello World
-- hosts: localhost
+- hosts: smokers
   vars:
-    nimble_volume: smoke-volume
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
     nimble_volume_pool: default
     nimble_volume_perfpolicy: "Windows File Server"
-    nimble_volume_folder: smoke-folder
-    nimble_folder: smoke-folder
+    nimble_volume_folder: "{{ inventory_hostname_short }}-fldr"
+    nimble_folder: "{{ inventory_hostname_short }}-fldr"
   become: yes
   roles:
     - nimble_folder_create 
@@ -16,23 +16,23 @@
     - nimble_volume_snapshot
 
 # Update folder and a known snap
-- hosts: localhost
+- hosts: smokers
   vars:
-    nimble_folder: smoke-folder
+    nimble_folder: "{{ inventory_hostname_short }}-fldr"
     nimble_folder_update_options:
       description: "This folder is smoked"
-    nimble_volume: smoke-volume
-    nimble_volume_snapshot: smoke-snap
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+    nimble_volume_snapshot: "{{ inventory_hostname_short }}-snap"
   become: yes
   roles:
     - nimble_folder_update
     - nimble_volume_snapshot
 
 # Create a clone from last snapshot
-- hosts: localhost
+- hosts: smokers
   vars:
-    nimble_volume_from: smoke-volume
-    nimble_volume: smoke-clone
+    nimble_volume_from: "{{ inventory_hostname_short }}-vol"
+    nimble_volume: "{{ inventory_hostname_short }}-cln"
   become: yes
   roles:
     - nimble_volume_create
@@ -43,11 +43,11 @@
     - nimble_volume_delete
 
 # Create a clone from a known snapshot
-- hosts: localhost
+- hosts: smokers
   vars:
-    nimble_volume_from: smoke-volume
-    nimble_volume: smoke-clone
-    nimble_volume_snapshot: smoke-snap
+    nimble_volume_from: "{{ inventory_hostname_short }}-vol"
+    nimble_volume: "{{ inventory_hostname_short }}-cln"
+    nimble_volume_snapshot: "{{ inventory_hostname_short }}-snap"
   become: yes
   roles:
     - nimble_volume_create
@@ -58,9 +58,9 @@
     - nimble_volume_delete
 
 # Touch a file
-- hosts: localhost
+- hosts: smokers
   vars:
-    nimble_volume: smoke-volume
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
   become: yes
   tasks:
     - name: Touch a file
@@ -69,27 +69,27 @@
         state: touch
 
 # Unmap/unmount
-- hosts: localhost
+- hosts: smokers
   vars:
-    nimble_volume: smoke-volume
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
   become: yes
   roles:
     - nimble_volume_umount
     - nimble_volume_unmap
 
 # Restore from last snapshot
-- hosts: localhost
+- hosts: smokers
   vars:
-    nimble_volume: smoke-volume
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
   become: yes
   roles:
     - nimble_volume_restore
     - nimble_volume_map
     - nimble_volume_mount
 
-- hosts: localhost
+- hosts: smokers
   vars: 
-    nimble_volume: smoke-volume
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
   tasks:
     - name: Is the file gone?
       stat:
@@ -102,19 +102,19 @@
       when: nimble_file.stat.exists
 
 # Prep restore from a known snapshot
-- hosts: localhost
+- hosts: smokers
   vars:
-    nimble_volume: smoke-volume
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
   become: yes
   roles:
     - nimble_volume_umount
     - nimble_volume_unmap
 
 # Restore from last snapshot
-- hosts: localhost
+- hosts: smokers
   vars:
-    nimble_snapshot: smoke-snap
-    nimble_volume: smoke-volume
+    nimble_snapshot: "{{ inventory_hostname_short }}-snap"
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
   become: yes
   roles:
     - nimble_volume_restore
@@ -123,10 +123,10 @@
 
 
 # Resize and delete
-- hosts: localhost
+- hosts: smokers
   vars:
-    nimble_folder: smoke-folder
-    nimble_volume: smoke-volume
+    nimble_folder: "{{ inventory_hostname_short }}-fldr"
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
     nimble_volume_size: 30000
   become: yes
   roles:
@@ -135,3 +135,12 @@
     - nimble_volume_unmap
     - nimble_volume_delete
     - nimble_folder_delete
+
+- hosts: smokers
+  become: yes
+  tasks:
+    - include_role: 
+        name: nimble_linux_toolkit
+      vars:
+        nimble_linux_toolkit_state: absent
+

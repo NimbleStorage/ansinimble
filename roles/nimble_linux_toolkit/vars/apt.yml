@@ -1,0 +1,5 @@
+nimble_host_packages:
+  - multipath-tools
+  - open-iscsi
+  - sg3-utils
+  - xfsprogs

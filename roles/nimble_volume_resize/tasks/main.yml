@@ -46,6 +46,10 @@
 - name: Reload devmap
   command: multipath -r
 
+- name: Reload devmap (again)
+  command: multipath -r
+  when: ansible_distribution == 'Ubuntu'
+
 - name: Resize nimble_volume
   command: xfs_growfs {{ nimble_volume_mountpoint }}
 
