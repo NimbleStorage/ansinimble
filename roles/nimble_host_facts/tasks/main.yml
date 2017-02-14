@@ -29,12 +29,12 @@
 
   - name: NLT components ({{ nimble_host_docker_driver_name }})
     shell: >
-      nltadm --status | fgrep '{{ nimble_host_docker_driver_name }}' | awk '{ print $2 }'
+      nltadm --status | fgrep '{{ nimble_host_docker_driver_name | quote }}' | awk '{ print $2 }'
     register: nimble_nltadm_docker
 
   - name: "{{ nimble_host_docker_driver_name }} configuration"
     shell: >
-      grep -v ^# {{ nimble_host_docker_conf_file }} | 
+      grep -v ^# {{ nimble_host_docker_conf_file | quote }} | 
       awk -F= 'END { printf("\n}\n") }
       NR == 1 { printf("{\n") }
       NR > 1 { printf(",\n") }
@@ -42,7 +42,7 @@
     register: nimble_docker_options
 
   - name: Probe my IQN
-    command: awk -F = '{ if ($1 == "InitiatorName") print $2 }' {{ nimble_host_iqn_file }}
+    command: awk -F = '{ if ($1 == "InitiatorName") print $2 }' {{ nimble_host_iqn_file | quote }}
     register: nimble_host_iqn
 
   - name: Set facts

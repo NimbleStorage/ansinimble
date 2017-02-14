@@ -41,7 +41,7 @@
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
 
 - name: Rescan target
-  command: iscsiadm -m node -R -T {{ nimble_volume_target }}
+  command: iscsiadm -m node -R -T {{ nimble_volume_target | quote }}
 
 - name: Reload devmap
   command: multipath -r
@@ -51,7 +51,7 @@
   when: ansible_distribution == 'Ubuntu'
 
 - name: Resize nimble_volume
-  command: xfs_growfs {{ nimble_volume_mountpoint }}
+  command: xfs_growfs {{ nimble_volume_mountpoint | quote }}
 
 - name: Refresh volumes
   include_role:

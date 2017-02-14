@@ -45,8 +45,11 @@
     opts: "-L {{ nimble_volume }}"
   register: nimble_filesystem_created
 
+- set_fact:
+    nimble_volume_device_name: "{{ nimble_host_device_prefix }}{{ nimble_volume_serial_number }}"
+
 - name: Update label if this is an existing filesystem (clone)
-  shell: xfs_admin -L {{ nimble_volume }} -U $(uuidgen) {{ nimble_host_device_prefix }}{{ nimble_volume_serial_number }}
+  shell: xfs_admin -L {{ nimble_volume | quote }} -U {{ {{ ansible_date_time.iso8601_micro | to_uuid }} {{ nimble_volume_device_name | quote |}}
   when: nimble_filesystem_created.changed == False
 
 - name: Mount volume

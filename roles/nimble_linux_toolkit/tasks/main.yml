@@ -46,7 +46,7 @@
     register: nimble_nlt_installed
 
   - name: Keep uninstaller
-    shell: mv {{ lookup('env', 'PWD') }}/nlt_uninstall {{ nimble_linux_toolkit_prefix }}/tmp
+    shell: mv {{ lookup('env', 'PWD') }}/nlt_uninstall {{ nimble_linux_toolkit_prefix | quote }}/tmp
     when: nimble_nlt_installed.changed
 
   when: nimble_linux_toolkit_bundle is defined and (nimble_linux_toolkit_state == 'present' or nimble_linux_toolkit_state == 'running')
@@ -81,6 +81,6 @@
   when: nimble_linux_toolkit_state == 'stopped' or nimble_linux_toolkit_state == 'absent'
 
 - name: Uninstall
-  command: "{{ nimble_linux_toolkit_prefix }}/tmp/nlt_uninstall --silent-mode"
+  command: "{{ nimble_linux_toolkit_prefix | quote }}/tmp/nlt_uninstall --silent-mode"
   when: nimble_linux_toolkit_state == 'absent'
 
