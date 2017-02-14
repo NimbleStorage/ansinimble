@@ -1,7 +1,7 @@
 ---
-- name: Ensure nimble_folder
-  fail: msg="Missing variable nimble_folder, please provide a folder name in nimble_folder"
-  when: nimble_folder is not defined
+- name: Ensure nimble_volume
+  fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
+  when: nimble_volume is not defined
 
 - name: Host facts
   include_role:

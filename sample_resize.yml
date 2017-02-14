@@ -1,0 +1,5 @@
+---
+- hosts: all
+  become: yes
+  roles:
+    - nimble_volume_resize

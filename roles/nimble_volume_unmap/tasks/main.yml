@@ -29,6 +29,7 @@
     method: DELETE
     status_code: 200
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+  when: nimble_volume_acr is defined and nimble_volume_acr != ''
 
 - name: Get nimble_volume_id
   set_fact:

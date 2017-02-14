@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - include_role:
+        name: nimble_host_facts
+    - include_role:
+        name: nimble_group_facts
+
+    - debug: var=nimble_group_facts
+    - debug: var=nimble_host_facts
