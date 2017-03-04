@@ -13,10 +13,10 @@
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      initiator_groups:
-      volumes:
-      access_control_records:
-      initiators:
+      initiator_groups: "fields=name,id"
+      volumes: "fields=name,id,access_control_records"
+      access_control_records: "fields=id,initiator_group_id,vol_id"
+      initiators: "fields=id,label"
 
 - name: Merge nimble_initiator_group_options
   set_fact: 
@@ -113,13 +113,3 @@
   when: nimble_group_facts | json_query(local_query) == [] and nimble_volume_id != ''
   vars:
     local_query: "access_control_records[?initiator_group_id=='{{ nimble_initiator_group_id }}' && vol_id=='{{ nimble_volume_id }}'].id"
-
-- name: Refresh objects
-  include_role:
-    name: nimble_group_facts
-  vars:
-    nimble_group_fact_refresh:
-      volumes:
-      initiator_groups:
-      initiators:
-      access_control_records:

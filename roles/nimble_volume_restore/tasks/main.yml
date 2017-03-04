@@ -13,7 +13,7 @@
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      volumes:
+      volumes: "fields=name,id,last_snap"
 
 - name: Get nimble_volume_id
   set_fact:
@@ -46,10 +46,3 @@
         id: "{{ nimble_volume_id }}"
         base_snap_id: "{{ nimble_volume_snapshot_id }}"
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
-
-- name: Refresh volumes
-  include_role:
-    name: nimble_group_facts
-  vars:
-    nimble_group_fact_refresh:
-      volumes:

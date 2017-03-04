@@ -13,8 +13,8 @@
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      volumes:
-      subnets:
+      volumes: "fields=name,target_name,id,serial_number"
+      subnets: "fields=allow_iscsi,discovery_ip"
 
 - name: Discover Targets
   open_iscsi: 

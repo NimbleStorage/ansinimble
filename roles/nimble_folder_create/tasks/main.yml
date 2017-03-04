@@ -13,7 +13,7 @@
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      pools:
+      pools: "fields=name,id"
 
 - name: Merge options
   set_fact: 
@@ -41,10 +41,3 @@
     HEADER_X-Auth-Token: "{{ nimble_group_token }}"
     body:
       data: "{{ nimble_folder_options_default }}"
-
-- name: Refresh folders
-  include_role:
-    name: nimble_group_facts
-  vars:
-    nimble_group_fact_refresh:
-      folders:

@@ -17,10 +17,10 @@
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      volumes:
-      folders:
-      pools:
-      performance_policies:
+      volumes: "fields=name,id,last_snap"
+      folders: "fields=name,id"
+      pools: "fields=name,id"
+      performance_policies: "fields=name,id"
 
 - name: Merge options
   set_fact: 
@@ -112,10 +112,3 @@
   when: nimble_group_facts | json_query(local_query) == []
   vars:
     local_query: "volumes[?name=='{{ nimble_volume_options_default.name }}'].name"
-
-- name: Refresh volumes
-  include_role:
-    name: nimble_group_facts
-  vars:
-    nimble_group_fact_refresh:
-      volumes:

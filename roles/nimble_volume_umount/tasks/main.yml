@@ -13,7 +13,7 @@
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      volumes:
+      volumes: "fields=name,id,target_name"
 
 - name: Determine target
   set_fact:

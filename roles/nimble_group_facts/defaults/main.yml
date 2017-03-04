@@ -13,3 +13,5 @@ nimble_group_http_scheme: https
 nimble_group_http_port: 5392
 nimble_group_api_version: v1
 nimble_group_url: "{{ nimble_group_http_scheme }}://{{ nimble_host_facts.groups.main.group_ip }}:{{ nimble_group_http_port }}/{{ nimble_group_api_version }}"
+
+nimble_silence_payload: True
