@@ -17,20 +17,7 @@
       subnets: "fields=allow_iscsi,discovery_ip"
 
 - name: Discover Targets
-  open_iscsi: 
-    show_nodes: yes
-    discover: yes
-    portal: "{{ nimble_group_discovery_ip }}"
-
-- name: Discover LUN
-  open_iscsi:
-    auto_node_startup: True
-    discover: True
-    login: True
-    portal: "{{ nimble_group_discovery_ip }}"
-    target: "{{ nimble_group_facts | json_query(local_query) }}"
-  vars:
-    local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
+  command: ncmadm -e {{ nimble_group_discovery_ip }}
 
 - name: Get volume serial number
   set_fact:
@@ -38,15 +25,15 @@
   vars:
     local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
 
+- set_fact:
+    nimble_volume_device_name: "{{ nimble_host_device_prefix }}/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"
+
 - name: Create filesystem
   filesystem: 
-    dev: "{{ nimble_host_device_prefix }}{{ nimble_volume_serial_number }}"
+    dev: "{{ nimble_volume_device_name }}"
     fstype: xfs
     opts: "-L {{ nimble_volume }}"
   register: nimble_filesystem_created
-
-- set_fact:
-    nimble_volume_device_name: "{{ nimble_host_device_prefix }}{{ nimble_volume_serial_number }}"
 
 - name: Update label if this is an existing filesystem (clone)
   shell: xfs_admin -L {{ nimble_volume | quote }} -U {{ ansible_date_time.iso8601_micro | to_uuid }} {{ nimble_volume_device_name | quote }}

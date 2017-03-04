@@ -1,1 +1,2 @@
 nimble_volume_mountpoint: /mnt/{{ nimble_volume }}
+nimble_host_device_prefix: "/dev/nimblestorage"

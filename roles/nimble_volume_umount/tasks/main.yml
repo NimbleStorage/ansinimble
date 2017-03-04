@@ -13,13 +13,13 @@
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      volumes: "fields=name,id,target_name"
+      volumes: "fields=name,id,serial_number"
 
-- name: Determine target
+- name: Determine serial_numbler
   set_fact:
-    nimble_volume_target: "{{ nimble_group_facts | json_query(local_query) }}"
+    nimble_volume_serial_number: "{{ nimble_group_facts | json_query(local_query) }}"
   vars:
-    local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
+    local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
 
 - name: Unmount volume
   mount:
@@ -31,7 +31,5 @@
     name: "{{ nimble_volume_mountpoint }}"
     state: absent
 
-- name: Disconnect LUN
-  open_iscsi:
-    login: no
-    target: "{{ nimble_volume_target }}"
+- name: Dismantle dm/iSCSI stack
+  command: ncmadm --remove {{ nimble_host_device_prefix }}/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}
