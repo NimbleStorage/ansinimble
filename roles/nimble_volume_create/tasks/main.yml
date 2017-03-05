@@ -1,7 +1,7 @@
 ---
 - name: Ensure nimble_volume
   fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
-  when: nimble_volume is not defined 
+  when: nimble_volume is undefined 
 
 - name: Ensure nimble_volume matches XFS label length
   fail: msg="nimble_volume is not allowed more than 12 characters due to the XFS label limitation"
@@ -12,12 +12,29 @@
     name: nimble_host_facts
   when: nimble_host_facts is undefined
 
+- name: Need NimbleOS version upfront
+  include_role:
+    name: nimble_group_facts
+  vars:
+    nimble_group_facts:
+      software_versions: 
+
+- name: Figure out volume fields (NimbleOS >=4)
+  set_fact:
+    nimble_volume_fields: "fields=name,id,last_snap"
+  when: "{{ nimble_group_version | version_compare('4', '>=') }}"
+
+- name: Figure out volume fields (NimbleOS < 4)
+  set_fact:
+    nimble_volume_fields: "fields=name,id"
+  when: "{{ nimble_group_version | version_compare('4', '<') }}"
+
 - name: Refresh group facts
   include_role:
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      volumes: "fields=name,id,last_snap"
+      volumes: "{{ nimble_volume_fields }}"
       folders: "fields=name,id"
       pools: "fields=name,id"
       performance_policies: "fields=name,id"
@@ -58,12 +75,37 @@
 
   when: nimble_volume_snapshot is defined and nimble_volume_from is defined
 
-- name: Grab last snapshot if not specified
+- name: Grab last snapshot if not specified (NimbleOS 4.x)
   set_fact:
     nimble_volume_snapshot_id: "{{ nimble_group_facts | json_query(local_query) }}"
   vars:
     local_query: "volumes[?name=='{{ nimble_volume_from }}'].last_snap.snap_id | [0]"
-  when: nimble_volume_snapshot is undefined and nimble_volume_from is defined
+  when: nimble_volume_snapshot is undefined and nimble_volume_from is defined and "{{ nimble_group_version | version_compare('4', '>=') }}"
+
+- block:
+  - name: Get nimble_volume_id
+    set_fact:
+      nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
+    vars:
+      local_query: "volumes[?name=='{{ nimble_volume_from }}'].id | [0]"
+
+  - name: Query for snapshots on nimble_volume
+    uri:
+      url: "{{ nimble_group_url }}/snapshots/detail?vol_id={{ nimble_volume_id }}"
+      validate_certs: no
+      method: GET
+      status_code: 200
+      HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+      return_content: yes
+    register: nimble_volume_snapshots
+
+  - name: Retrieve snapshot id
+    set_fact:
+      nimble_volume_snapshot_id: "{{ nimble_volume_snapshots.json | json_query(local_query) }}"
+    vars:
+      local_query: "data[?vol_id=='{{ nimble_volume_id }}'].id | [0]"
+
+  when: nimble_volume_snapshot is undefined and nimble_volume_from is defined and "{{ nimble_group_version | version_compare('4', '<') }}"
 
 - name: Overlay clone volume options
   set_fact:

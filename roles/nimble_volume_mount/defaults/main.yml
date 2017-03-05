@@ -1,4 +1,5 @@
 nimble_volume_mountpoint: /mnt/{{ nimble_volume }}
 nimble_group_discovery_ip: "{{ nimble_group_facts | json_query('subnets[?allow_iscsi==`true`].discovery_ip | [0]') }}"
-nimble_host_device_fileglob: "/dev/mapper/mpath*"
 nimble_host_device_prefix: "/dev/nimblestorage"
+nimble_volume_mount_options: "defaults"
+nimble_volume_mkfs_options: ""

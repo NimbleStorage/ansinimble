@@ -110,17 +110,16 @@
     - nimble_volume_umount
     - nimble_volume_unmap
 
-# Restore from last snapshot
+# Restore from known snapshot
 - hosts: smokers
   vars:
-    nimble_snapshot: "{{ inventory_hostname_short }}-snap"
+    nimble_volume_snapshot: "{{ inventory_hostname_short }}-snap"
     nimble_volume: "{{ inventory_hostname_short }}-vol"
   become: yes
   roles:
     - nimble_volume_restore
     - nimble_volume_map
     - nimble_volume_mount
-
 
 # Resize and delete
 - hosts: smokers

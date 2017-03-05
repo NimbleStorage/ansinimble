@@ -1,7 +1,7 @@
 ---
 - name: Ensure nimble_group_password
   fail: msg="Missing variable nimble_group_password, please provide the group password in nimble_group_password"
-  when: nimble_group_password is not defined
+  when: nimble_group_password is undefined
 
 - block:
   - fail: msg="Need to collect host facts"
@@ -30,15 +30,19 @@
   set_fact:
     nimble_group_token: "{{ nimble_group_token.json.data.session_token }}"
 
-- name: Full download
+- name: Build group facts
   set_fact:
     nimble_group_objects: "{{ nimble_group_facts }}"
   when: nimble_group_fact_refresh is undefined
 
-- name: Partial refresh
+- name: Partial group facts refresh
   set_fact:
     nimble_group_objects: "{{ nimble_group_fact_refresh }}"
   when: nimble_group_fact_refresh is defined
+
+- name: NimbleOS version
+  set_fact:
+    nimble_group_objects: "{{ nimble_group_objects | combine( { 'software_versions': '' } ) }}"
 
 - name: Retrieve group objects
   uri:
@@ -58,6 +62,12 @@
     nimble_group_facts: "{{ nimble_group_facts | combine( { item.item.key: item.json.data } ) }}"
   with_items: "{{ nimble_group_data.results }}"
   no_log: "{{ nimble_silence_payload }}"
+
+- name: NimbleOS version
+  set_fact:
+    nimble_group_version: "{{ nimble_group_data | json_query(local_query) }}"
+  vars:
+    local_query: "results[*].json.data[?name=='installed'].[version][][]|[0]"
 
 - name: Make variables persistent
   set_fact:

@@ -1,7 +1,7 @@
 ---
 - name: Ensure nimble_volume and nimble_volume_mountpoint
   fail: msg="Missing variable nimble_volume and nimble_volume_mountpoint, please provide a volume name in nimble_volume and current mountpoint in nimble_volume_mountpoint"
-  when: nimble_volume is not defined and nimble_volume_mountpoint is not defined
+  when: nimble_volume is undefined and nimble_volume_mountpoint is undefined
 
 - name: Host facts
   include_role:
@@ -25,14 +25,20 @@
   vars:
     local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
 
-- set_fact:
+- name: Create device string
+  set_fact:
     nimble_volume_device_name: "{{ nimble_host_device_prefix }}/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"
+
+- name: Wait for device to appear
+  wait_for:
+    path: "{{ nimble_volume_device_name }}"
+    timeout: 30
 
 - name: Create filesystem
   filesystem: 
     dev: "{{ nimble_volume_device_name }}"
     fstype: xfs
-    opts: "-L {{ nimble_volume }}"
+    opts: -L {{ nimble_volume }} {{ nimble_volume_mkfs_options }}
   register: nimble_filesystem_created
 
 - name: Update label if this is an existing filesystem (clone)
@@ -44,4 +50,5 @@
     name: "{{ nimble_volume_mountpoint }}"
     state: mounted
     src: LABEL={{ nimble_volume }}
+    opts: "{{ nimble_volume_mount_options }}"
     fstype: xfs

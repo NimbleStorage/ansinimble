@@ -1,7 +1,7 @@
 ---
 - name: Ensure nimble_volume and nimble_volume_size
   fail: msg="Missing variable nimble_volume or nimble_volume_size, please provide a volume name in nimble_volume and nimble_volume_size (in MiB)"
-  when: nimble_volume is not defined and nimble_volume_size is not defined
+  when: nimble_volume is undefined and nimble_volume_size is undefined
 
 - name: Host facts
   include_role:

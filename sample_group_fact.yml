@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    nimble_group_facts:
+      volumes: "fields=serial_number,size,access_control_records"
+  roles:
+    - nimble_group_facts
+
+- hosts: all
+  become: yes
+  tasks:
+    - debug: var=nimble_group_facts
