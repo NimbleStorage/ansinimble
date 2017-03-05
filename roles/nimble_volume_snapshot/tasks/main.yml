@@ -13,7 +13,7 @@
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      volumes: "fields=name,id"
+      volumes: "fields=name,id&name={{ nimble_volume }}"
 
 - name: Get nimble_volume_id
   set_fact:

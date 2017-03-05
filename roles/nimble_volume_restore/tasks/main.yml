@@ -15,14 +15,14 @@
     nimble_group_facts:
       software_versions: 
 
-- name: Figure out volume fields (NimbleOS >=4)
+- name: Figure out volume query (NimbleOS >=4)
   set_fact:
-    nimble_volume_fields: "fields=name,id,last_snap"
+    nimble_volume_fields: "fields=name,id,last_snap&name={{ nimble_volume }}"
   when: "{{ nimble_group_version | version_compare('4', '>=') }}"
 
-- name: Figure out volume fields (NimbleOS < 4)
+- name: Figure out volume query (NimbleOS < 4)
   set_fact:
-    nimble_volume_fields: "fields=name,id"
+    nimble_volume_fields: "fields=name,id&name={{ nimble_volume }}"
   when: "{{ nimble_group_version | version_compare('4', '<') }}"
 
 - name: Refresh group facts

@@ -14,8 +14,8 @@
   vars:
     nimble_group_facts:
       initiator_groups: "fields=name,id"
-      volumes: "fields=name,id,access_control_records"
-      access_control_records: "fields=id,initiator_group_id,vol_id"
+      volumes: "fields=name,id,access_control_records&name={{ nimble_volume }}"
+      access_control_records: "fields=id,initiator_group_id,vol_id&vol_name={{ nimble_volume }}"
       initiators: "fields=id,label"
 
 - name: Merge nimble_initiator_group_options

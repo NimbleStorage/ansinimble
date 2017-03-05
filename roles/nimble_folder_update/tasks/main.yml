@@ -13,7 +13,7 @@
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      folders: "fields=name,id"
+      folders: "fields=name,id&name={{ nimble_folder }}"
 
 - name: Merge options
   set_fact: 

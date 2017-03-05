@@ -13,8 +13,8 @@
     name: nimble_group_facts
   vars:
     nimble_group_facts:
-      access_control_records: "fields=vol_name,initiator_group_name,id"
-      volumes: "fields=name,id"
+      access_control_records: "fields=vol_name,initiator_group_name,id&vol_name={{ nimble_volume }}"
+      volumes: "fields=name,id&name={{ nimble_volume }}"
 
 - name: Determine ACR ID
   set_fact:
