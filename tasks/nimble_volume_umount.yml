@@ -1,0 +1,33 @@
+---
+- name: Ensure nimble_volume and nimble_volume_mountpoint
+  fail: msg="Missing variable nimble_volume and nimble_volume_mountpoint, please provide a volume name in nimble_volume and current mountpoint in nimble_volume_mountpoint"
+  when: nimble_volume is undefined and nimble_volume_mountpoint is undefined
+
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      volumes: "fields=name,id,serial_number&name={{ nimble_volume }}"
+
+- name: Determine serial_numbler
+  set_fact:
+    nimble_volume_serial_number: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
+
+- name: Unmount volume
+  mount:
+    name: "{{ nimble_volume_mountpoint }}"
+    state: unmounted
+
+- name: Wipe fstab
+  mount:
+    name: "{{ nimble_volume_mountpoint }}"
+    state: absent
+
+- name: Dismantle dm/iSCSI stack
+  command: ncmadm --remove {{ nimble_host_device_prefix }}/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}

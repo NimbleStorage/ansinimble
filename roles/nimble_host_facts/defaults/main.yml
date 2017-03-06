@@ -1,3 +1,0 @@
-nimble_host_docker_conf_file: /opt/NimbleStorage/etc/docker-driver.conf
-nimble_host_docker_driver_name: Docker-Driver
-nimble_host_iqn_file: /etc/iscsi/initiatorname.iscsi

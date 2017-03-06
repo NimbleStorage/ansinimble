@@ -1,6 +1,0 @@
-- hosts: all
-  become: yes
-  roles:
-    - nimble_volume_umount
-    - nimble_volume_unmap
-    - nimble_volume_delete

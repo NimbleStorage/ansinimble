@@ -1,0 +1,146 @@
+---
+# Hello World
+- hosts: smokers
+  vars:
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+    nimble_volume_pool: default
+    nimble_volume_perfpolicy: "Windows File Server"
+    nimble_volume_folder: "{{ inventory_hostname_short }}-fldr"
+    nimble_folder: "{{ inventory_hostname_short }}-fldr"
+    nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_operation: create, nimble_object: folder } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: create, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: mount, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: snapshot, nimble_object: volume } 
+
+# Update folder and a known snap
+- hosts: smokers
+  vars:
+    nimble_folder: "{{ inventory_hostname_short }}-fldr"
+    nimble_folder_update_options:
+      description: "This folder is smoked"
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+    nimble_volume_snapshot: "{{ inventory_hostname_short }}-snap"
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_operation: update, nimble_object: folder } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: snapshot, nimble_object: volume } 
+
+# Create a clone from last snapshot
+- hosts: smokers
+  vars:
+    nimble_volume_from: "{{ inventory_hostname_short }}-vol"
+    nimble_volume: "{{ inventory_hostname_short }}-cln"
+    nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-cln"
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_operation: create, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: mount, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: umount, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: unmap, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: delete, nimble_object: volume } 
+
+# Create a clone from a known snapshot
+- hosts: smokers
+  vars:
+    nimble_volume_from: "{{ inventory_hostname_short }}-vol"
+    nimble_volume: "{{ inventory_hostname_short }}-cln"
+    nimble_volume_snapshot: "{{ inventory_hostname_short }}-snap"
+    nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-cln"
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_operation: create, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: mount, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: umount, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: unmap, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: delete, nimble_object: volume } 
+
+# Touch a file
+- hosts: smokers
+  become: yes
+  vars:
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+  tasks:
+    - name: Touch a file
+      file:
+        path: "/mnt/{{ inventory_hostname_short }}-vol/myfile.txt"
+        state: touch
+
+# Unmap/unmount
+- hosts: smokers
+  vars:
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+    nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_operation: umount, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: unmap, nimble_object: volume } 
+
+# Restore from last snapshot
+- hosts: smokers
+  vars:
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+    nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
+  become: yes
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_operation: restore, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: mount, nimble_object: volume } 
+
+- hosts: smokers
+  vars: 
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+  tasks:
+    - name: Is the file gone?
+      stat:
+        path: "/mnt/{{ inventory_hostname_short }}-vol/myfile.txt"
+      register: nimble_file
+    - debug: var=nimble_file
+    - name: Fail if still there
+      fail:
+        msg: Unable to restore volume
+      when: nimble_file.stat.exists
+
+# Prep restore from a known snapshot
+- hosts: smokers
+  vars:
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+    nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
+  become: yes
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_operation: umount, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: unmap, nimble_object: volume } 
+
+# Restore from known snapshot
+- hosts: smokers
+  vars:
+    nimble_volume_snapshot: "{{ inventory_hostname_short }}-snap"
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+    nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
+  become: yes
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_operation: restore, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: mount, nimble_object: volume } 
+
+# Resize and delete
+- hosts: smokers
+  vars:
+    nimble_folder: "{{ inventory_hostname_short }}-fldr"
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+    nimble_volume_size: 30000
+    nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
+  become: yes
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_operation: resize, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: umount, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: unmap, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: delete, nimble_object: volume } 
+    - { role: NimbleStorage.Ansinimble, nimble_operation: delete, nimble_object: folder } 
+
+- hosts: smokers
+  become: yes
+  vars:
+    nimble_linux_toolkit_state: absent
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_operation: manage, nimble_object: nlt } 

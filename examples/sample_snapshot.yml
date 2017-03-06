@@ -1,0 +1,8 @@
+---
+
+# Provide nimble_volume and nimble_volume_snapshot as extra vars, i.e:
+# $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_volume_snapshot=mysnap1 sample_snapshot.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: snapshot }

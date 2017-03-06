@@ -1,0 +1,11 @@
+---
+- name: Ensure nimble_object is managable
+  fail: msg="nimble_object is undefined or is not a valid nimble_object"
+  when: nimble_object is undefined and nimble_object not in nimble_objects
+
+- name: Ensure nimble_operation is valid
+  fail: msg="nimble_operation is undefined or is not a valid nimble_operation"
+  when: nimble_operation is undefined and nimble_operation not in nimble_operations
+
+- include: nimble_{{ nimble_object }}_{{ nimble_operation }}.yml
+  become: yes

@@ -1,0 +1,103 @@
+---
+- name: Inspect NLT
+  stat:
+    path: "{{ nimble_linux_toolkit_prefix }}"
+  register: nimble_linux_toolkit_installed 
+
+- name: Verify state
+  fail: msg="Please specify state in nimble_linux_toolkit_state as either absent, present, running or stopped"
+  when: nimble_linux_toolkit_state not in ['absent', 'present', 'running', 'stopped'] or nimble_linux_toolkit_state is undefined
+
+- name: Verify package params
+  fail: msg="Please specify the control-node local path to the nlt_installer_0.0.0-0000 file in nimble_linux_toolkit_bundle"
+  when: nimble_linux_toolkit_bundle is undefined and nimble_linux_toolkit_state in ['present', 'running'] and not nimble_linux_toolkit_installed.stat.exists
+
+- name: Verify group options
+  fail: msg="Please see role default variables and make sure to have nimble_group_password exposed to the play."
+  when: >
+    nimble_group_options['ip-address'] is undefined 
+    or nimble_group_options['username'] is undefined
+    or nimble_group_password is undefined
+    and nimble_linux_toolkit_state not in ['present', 'running']
+
+- block:
+  - name: Merge options
+    set_fact:
+      nimble_linux_toolkit_options_default: "{{ nimble_linux_toolkit_options_default | union([ item ]) }}"
+    with_items: "{{ nimble_linux_toolkit_options }}"
+    when: nimble_linux_toolkit_options is defined
+
+  - name: Verify package
+    stat:
+      path: "{{ nimble_linux_toolkit_bundle }}"
+    register: nimble_linux_toolkit_file
+
+  - fail: msg=Unable to find {{ nimble_linux_toolkit_bundle }}
+    when: not nimble_linux_toolkit_file.stat.exists
+
+  - name: RPM-based
+    set_fact:
+      nimble_host_flavor: yum
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  
+  - name: deb-based
+    set_fact:
+      nimble_host_flavor: apt
+    when: ansible_distribution == 'Ubuntu'
+
+  - fail: msg="Unsupported distribution {{ ansible_distribution }}"
+    when: nimble_host_flavor is undefined
+
+  - include_vars: "{{ nimble_host_flavor }}.yml"
+
+  - name: Install prerequisite packages
+    package: name={{ item }} state=present
+    retries: 10
+    delay: 30
+    until: result|success
+    register: result
+    with_items: "{{ nimble_host_packages }}"
+
+  - name: Install/upgrade
+    script: "{{ nimble_linux_toolkit_bundle }} --{{ nimble_linux_toolkit_options_default | join(' --') }}"
+    register: nimble_nlt_installed
+
+  - name: Keep uninstaller
+    shell: mv {{ lookup('env', 'PWD') }}/nlt_uninstall {{ nimble_linux_toolkit_prefix | quote }}/tmp
+    when: nimble_nlt_installed.changed
+
+  when: nimble_linux_toolkit_bundle is defined and (nimble_linux_toolkit_state in ['present', 'running'])
+
+- name: Start and enable
+  service:
+    name: nlt
+    state: started
+    enabled: yes
+  when: nimble_linux_toolkit_state == 'running'
+
+- name: Configure NLT
+  command: >
+    nltadm --group --add --ip-address {{ nimble_group_options['ip-address'] | quote }}
+    --username {{ nimble_group_options['username'] | quote }}
+    --password {{ nimble_group_password | quote }}
+  register: nimble_nlt_configured
+  failed_when: "'Successfully' not in nimble_nlt_configured.stdout"
+  when: nimble_linux_toolkit_state == 'running'
+
+- name: Verify NLT
+  command: nltadm --group --verify --ip-address {{ nimble_group_options['ip-address'] | quote }}
+  register: nimble_nlt_verified
+  failed_when: "'Successfully' not in nimble_nlt_verified.stdout"
+  when: nimble_linux_toolkit_state == 'running'
+
+- name: Stop and disable
+  service:
+    name: nlt
+    state: stopped
+    enabled: no
+  when: nimble_linux_toolkit_state == 'stopped' or nimble_linux_toolkit_state == 'absent'
+
+- name: Uninstall
+  command: "{{ nimble_linux_toolkit_prefix | quote }}/tmp/nlt_uninstall --silent-mode"
+  when: nimble_linux_toolkit_state == 'absent'
+

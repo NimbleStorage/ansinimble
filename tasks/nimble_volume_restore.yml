@@ -1,0 +1,90 @@
+---
+- name: Ensure nimble_volume
+  fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
+  when: nimble_volume is undefined
+
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Need NimbleOS version upfront
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      software_versions: 
+
+- name: Figure out volume query (NimbleOS >=4)
+  set_fact:
+    nimble_volume_fields: "fields=name,id,last_snap&name={{ nimble_volume }}"
+  when: "{{ nimble_group_version | version_compare('4', '>=') }}"
+
+- name: Figure out volume query (NimbleOS < 4)
+  set_fact:
+    nimble_volume_fields: "fields=name,id&name={{ nimble_volume }}"
+  when: "{{ nimble_group_version | version_compare('4', '<') }}"
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      volumes: "{{ nimble_volume_fields }}"
+
+- name: Get nimble_volume_id
+  set_fact:
+    nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"
+
+- name: Determine last snapshot ID
+  set_fact:
+    nimble_volume_snapshot_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].last_snap.snap_id | [0]"
+  when: nimble_volume_snapshot is undefined and "{{ nimble_group_version | version_compare('4', '>=') }}"
+
+- block:
+  - name: Query for snapshots on nimble_volume
+    uri:
+      url: "{{ nimble_group_url }}/snapshots/detail?vol_id={{ nimble_volume_id }}"
+      validate_certs: no
+      method: GET
+      status_code: 200
+      HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+      return_content: yes
+    register: nimble_volume_snapshots
+    retries: "{{ nimble_uri_retries }}"
+    delay: "{{ nimble_uri_delay }}"
+    until: nimble_volume_snapshots | success
+
+  - name: Retrieve snapshot ID
+    set_fact:
+      nimble_volume_snapshot_id: "{{ nimble_volume_snapshots.json | json_query(local_query) }}"
+    vars:
+      local_query: "data[?vol_id=='{{ nimble_volume_id }}' && name=='{{ nimble_volume_snapshot }}'].id | [0]"
+    when: nimble_volume_snapshot is defined
+
+  - name: Retrieve last snapshot ID (NimbleOS < 4)
+    set_fact:
+      nimble_volume_snapshot_id: "{{ nimble_volume_snapshots.json | json_query(local_query) }}"
+    vars:
+      local_query: "data[?vol_id=='{{ nimble_volume_id }}'].id | [0]"
+    when: nimble_volume_snapshot is undefined and "{{ nimble_group_version | version_compare('4', '<') }}"
+
+  when: nimble_volume_snapshot is defined or {{ nimble_group_version | version_compare('4', '<') }}
+
+- name: Restore volume
+  uri:
+    url: "{{ nimble_group_url }}/volumes/{{ nimble_volume_id }}/actions/restore"
+    validate_certs: no
+    method: POST
+    status_code: 200
+    body_format: json
+    body:
+      data:
+        id: "{{ nimble_volume_id }}"
+        base_snap_id: "{{ nimble_volume_snapshot_id }}"
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_volume_restored
+  until: nimble_volume_restored | success

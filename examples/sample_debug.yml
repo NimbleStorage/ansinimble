@@ -1,0 +1,7 @@
+---
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_object: group, nimble_operation: facts }
+  tasks:
+    - debug: var=nimble_group_facts
+    - debug: var=nimble_host_facts

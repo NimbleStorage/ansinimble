@@ -1,0 +1,4 @@
+---
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_object: nlt, nimble_operation: absent }

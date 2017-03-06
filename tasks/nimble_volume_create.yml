@@ -1,0 +1,162 @@
+---
+- name: Ensure nimble_volume
+  fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
+  when: nimble_volume is undefined 
+
+- name: Ensure nimble_volume matches XFS label length
+  fail: msg="nimble_volume is not allowed more than 12 characters due to the XFS label limitation"
+  when: "{{ nimble_volume | length }} > 12"
+
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Need NimbleOS version upfront
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      software_versions: 
+
+- name: Figure out volume query (NimbleOS >=4)
+  set_fact:
+    nimble_volume_query: "fields=name,id,last_snap"
+  when: "{{ nimble_group_version | version_compare('4', '>=') }}"
+
+- name: Figure out volume query (NimbleOS < 4)
+  set_fact:
+    nimble_volume_query: "fields=name,id"
+  when: "{{ nimble_group_version | version_compare('4', '<') }}"
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      volumes: "{{ nimble_volume_query }}"
+      folders: "fields=name,id"
+      pools: "fields=name,id"
+      performance_policies: "fields=name,id"
+
+- name: Merge options
+  set_fact: 
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ nimble_volume_options }}"
+  when: nimble_volume_options is defined
+
+- name: Overlay name and size into volume options
+  set_fact:
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'name': nimble_volume, 'size': nimble_volume_size } ) }}"
+  when: nimble_volume_from is undefined
+
+- block:
+  - name: Get nimble_volume_id
+    set_fact:
+      nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
+    vars:
+      local_query: "volumes[?name=='{{ nimble_volume_from }}'].id | [0]"
+
+  - name: Query for snapshots on nimble_volume
+    uri:
+      url: "{{ nimble_group_url }}/snapshots/detail?vol_id={{ nimble_volume_id }}"
+      validate_certs: no
+      method: GET
+      status_code: 200
+      HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+      return_content: yes
+    register: nimble_volume_snapshots
+    retries: "{{ nimble_uri_retries }}"
+    delay: "{{ nimble_uri_delay }}"
+    until: nimble_volume_snapshots | success
+
+  - name: Retrieve snapshot id
+    set_fact:
+      nimble_volume_snapshot_id: "{{ nimble_volume_snapshots.json | json_query(local_query) }}"
+    vars:
+      local_query: "data[?name=='{{ nimble_volume_snapshot }}' && vol_id=='{{ nimble_volume_id }}'].id | [0]"
+
+  when: nimble_volume_snapshot is defined and nimble_volume_from is defined
+
+- name: Grab last snapshot if not specified (NimbleOS 4.x)
+  set_fact:
+    nimble_volume_snapshot_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume_from }}'].last_snap.snap_id | [0]"
+  when: nimble_volume_snapshot is undefined and nimble_volume_from is defined and "{{ nimble_group_version | version_compare('4', '>=') }}"
+
+- block:
+  - name: Get nimble_volume_id (NimbleOS < 4)
+    set_fact:
+      nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
+    vars:
+      local_query: "volumes[?name=='{{ nimble_volume_from }}'].id | [0]"
+
+  - name: Query for snapshots on nimble_volume (NimbleOS < 4)
+    uri:
+      url: "{{ nimble_group_url }}/snapshots/detail?vol_id={{ nimble_volume_id }}"
+      validate_certs: no
+      method: GET
+      status_code: 200
+      HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+      return_content: yes
+    register: nimble_volume_snapshots
+    retries: "{{ nimble_uri_retries }}"
+    delay: "{{ nimble_uri_delay }}"
+    until: nimble_volume_snapshots | success
+
+  - name: Retrieve snapshot id (NimbleOS < 4)
+    set_fact:
+      nimble_volume_snapshot_id: "{{ nimble_volume_snapshots.json | json_query(local_query) }}"
+    vars:
+      local_query: "data[?vol_id=='{{ nimble_volume_id }}'].id | [0]"
+
+  when: nimble_volume_snapshot is undefined and nimble_volume_from is defined and "{{ nimble_group_version | version_compare('4', '<') }}"
+
+- name: Overlay clone volume options
+  set_fact:
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'name': nimble_volume, 'base_snap_id': nimble_volume_snapshot_id, 'clone': True } ) }}"
+  when: nimble_volume_from is defined
+
+- name: Lookup perfpolicy
+  set_fact:
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'perfpolicy_id': item } ) }}"
+  with_items:
+    - "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "performance_policies[?name=='{{ nimble_volume_perfpolicy }}'].id | [0]"
+  when: nimble_volume_perfpolicy is defined
+
+- name: Lookup pool
+  set_fact:
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'pool_id': item } ) }}"
+  with_items:
+    - "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "pools[?name=='{{ nimble_volume_pool }}'].id | [0]"
+  when: nimble_volume_pool is defined
+
+- name: Lookup folder
+  set_fact:
+    nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { 'folder_id': item } ) }}"
+  with_items:
+    - "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "folders[?name=='{{ nimble_volume_folder }}'].id | [0]"
+  when: nimble_volume_folder is defined
+
+- name: Create Volume
+  uri:
+    url: "{{ nimble_group_url }}/volumes"
+    validate_certs: no
+    method: POST
+    status_code: 201
+    body_format: json
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: "{{ nimble_volume_options_default }}"
+    return_content: yes
+  register: local_volume
+  when: nimble_group_facts | json_query(local_query) == []
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume_options_default.name }}'].name"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  until: local_volume | success

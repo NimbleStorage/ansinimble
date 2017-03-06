@@ -1,0 +1,45 @@
+---
+- name: Ensure nimble_folder
+  fail: msg="Missing variable nimble_folder, please provide a folder name in nimble_folder"
+  when: nimble_folder is not defined
+
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Refresh pools
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      pools: "fields=name,id"
+
+- name: Merge options
+  set_fact: 
+    nimble_folder_options_default: "{{ nimble_folder_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ nimble_folder_options }}"
+  when: nimble_folder_options is defined
+
+- name: Get nimble_folder_pool_id
+  set_fact:
+    nimble_folder_pool_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "pools[?name=='{{ nimble_folder_pool | default('default') }}'].id | [0]"
+
+- name: Overlay name and pool_id into folder options
+  set_fact:
+    nimble_folder_options_default: "{{ nimble_folder_options_default | combine( { 'name': nimble_folder, 'pool_id': nimble_folder_pool_id } ) }}"
+
+- name: Create folder
+  uri:
+    url: "{{ nimble_group_url }}/folders"
+    validate_certs: no
+    method: POST
+    status_code: 201, 409
+    body_format: json
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: "{{ nimble_folder_options_default }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_folder_created
+  until: nimble_folder_created | success

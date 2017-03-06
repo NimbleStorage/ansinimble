@@ -1,0 +1,71 @@
+---
+# These are required if NLT needs to be installed
+nimble_group_options:
+  ip-address: 192.168.59.64
+  username: admin
+
+# Please store password with Ansible Vault
+nimble_group_password: admin
+
+# Default Nimble folder options
+nimble_folder_options_default:
+  description: Folder created by Ansible
+
+nimble_folder_update_options_default:
+  description: "Folder updated by Ansible"
+
+# These are the group facts gathered if no filters are applied
+nimble_group_facts:
+  access_control_records:
+  arrays:
+  folders:
+  initiator_groups:
+  initiators:
+  performance_policies:
+  pools:
+  subnets:
+  volumes:
+
+# How to reach the Nimble group
+nimble_group_http_scheme: https
+nimble_group_http_port: 5392
+nimble_group_api_version: v1
+nimble_group_url: "{{ nimble_group_http_scheme }}://{{ nimble_host_facts.groups.main.group_ip }}:{{ nimble_group_http_port }}/{{ nimble_group_api_version }}"
+
+# This is an optimistic guess, please provide discovery IP in complex setups
+nimble_group_discovery_ip: "{{ nimble_group_facts | json_query('subnets[?allow_iscsi==`true`].discovery_ip | [0]') }}"
+
+# Host locations
+nimble_host_docker_conf_file: /opt/NimbleStorage/etc/docker-driver.conf
+nimble_host_docker_driver_name: Docker-Driver
+nimble_host_iqn_file: /etc/iscsi/initiatorname.iscsi
+nimble_host_device_prefix: "/dev/nimblestorage"
+nimble_linux_toolkit_prefix: /opt/NimbleStorage
+nimble_linux_toolkit_options_default:
+  - "silent-mode"
+  - "accept-eula"
+  - "ncm"
+
+# Default initiator options
+nimble_initiator_group_options_default:
+  name: "{{ inventory_hostname_short }}"
+  description: Created by Ansible for {{ inventory_hostname_short }}
+  access_protocol: "{{ nimble_host_facts.groups.main.protocol }}"
+
+nimble_initiator_options_default:
+  label: "{{ inventory_hostname_short }}:sw-iscsi"
+  access_protocol: "{{ nimble_host_facts.groups.main.protocol }}"
+  iqn: "{{ nimble_host_facts.iqn }}"
+  ip_address: "*"
+
+# Default volume options
+nimble_volume_mount_options: "defaults"
+nimble_volume_mkfs_options: ""
+nimble_volume_size: 1000
+nimble_volume_options_default:
+  description: "Volume created by Ansible"
+
+# NimbleOS HTTP/JSON tunables
+nimble_uri_retries: 6
+nimble_uri_delay: 10
+nimble_silence_payload: True

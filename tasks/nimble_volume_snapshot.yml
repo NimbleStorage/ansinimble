@@ -1,0 +1,48 @@
+---
+- name: Ensure nimble_volume
+  fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
+  when: nimble_volume is undefined
+
+- name: Ensure a snapshot name
+  set_fact:
+    nimble_volume_snapshot: "{{ nimble_volume_snapshot | default(ansible_date_time.iso8601_basic) }}"
+
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      volumes: "fields=name,id&name={{ nimble_volume }}"
+
+- name: Get nimble_volume_id
+  set_fact:
+    nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"
+
+- name: Create snapshot
+  uri:
+    url: "{{ nimble_group_url }}/snapshots"
+    validate_certs: no
+    method: POST
+    status_code: 201,409 # Ok and exists
+    body_format: json
+    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: 
+        vol_id: "{{ nimble_volume_id }}"
+        name: "{{ nimble_volume_snapshot }}"
+    return_content: yes
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_snapshot_created
+  until: nimble_snapshot_created | success
+
+- name: Refresh volumes
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_fact_refresh:
+      volumes:
