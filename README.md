@@ -285,7 +285,7 @@ Uninstalls NLT.
 ---
 - hosts: all
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: nlt, nimble_operation: absent }
+    - { role: NimbleStorage.Ansinimble, nimble_object: nlt, nimble_operation: manage, nimble_linux_toolkit_state: absent }
 ```
 
 
