@@ -11,7 +11,7 @@
   include: nimble_group_facts.yml
   vars:
     nimble_group_facts:
-      volumes: "fields=name,id,serial_number&name={{ nimble_volume }}"
+      volumes: "fields=name,id,serial_number,target_name&name={{ nimble_volume }}"
 
 - name: Determine serial_number
   set_fact:
