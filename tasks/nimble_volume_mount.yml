@@ -48,5 +48,5 @@
     name: "{{ nimble_volume_mountpoint }}"
     state: mounted
     src: LABEL={{ nimble_volume }}
-    opts: "{{ nimble_volume_mount_options }}"
+    opts: "{{ nimble_volume_mount_options }},x-systemd.requires={{ nimble_volume_device_name }}"
     fstype: xfs

@@ -59,7 +59,7 @@ nimble_initiator_options_default:
   ip_address: "*"
 
 # Default volume options
-nimble_volume_mount_options: "defaults"
+nimble_volume_mount_options: "_netdev,auto"
 nimble_volume_mkfs_options: ""
 nimble_volume_size: 1000
 nimble_volume_options_default:
