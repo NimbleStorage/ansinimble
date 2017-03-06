@@ -16,6 +16,25 @@
 
 - name: Discover Targets
   command: ncmadm -e {{ nimble_group_discovery_ip }}
+  when: ansible_os_family == 'RedHat'
+
+- name: Discover Targets
+  open_iscsi: 
+    show_nodes: yes
+    discover: yes
+    portal: "{{ nimble_group_discovery_ip }}"
+  when: ansible_os_family == 'Debian'
+
+- name: Discover LUN
+  open_iscsi:
+    auto_node_startup: True
+    discover: True
+    login: True
+    portal: "{{ nimble_group_discovery_ip }}"
+    target: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
+  when: ansible_os_family == 'Debian'
 
 - name: Get volume serial number
   set_fact:
@@ -26,6 +45,12 @@
 - name: Create device string
   set_fact:
     nimble_volume_device_name: "{{ nimble_host_device_prefix }}/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Create device string
+  set_fact:
+    nimble_volume_device_name: "/dev/disk/by-id/dm-uuid-mpath-2{{ nimble_volume_serial_number }}"
+  when: ansible_os_family == 'Debian'
 
 - name: Wait for device to appear
   wait_for:

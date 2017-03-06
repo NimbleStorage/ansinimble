@@ -31,3 +31,14 @@
 
 - name: Dismantle dm/iSCSI stack
   command: ncmadm --remove {{ nimble_host_device_prefix }}/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}
+  when: ansible_os_family == 'RedHat'
+
+- name: Disconnect LUN
+  open_iscsi:
+    login: no
+    target: "{{ nimble_volume_target }}"
+  when: ansible_os_family == 'Debian'
+
+- name: Reload multipath
+  command: multipath -r
+  when: ansible_os_family == 'Debian'

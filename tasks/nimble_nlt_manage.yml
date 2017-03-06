@@ -30,12 +30,12 @@
   - name: RPM-based
     set_fact:
       nimble_host_flavor: yum
-    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+    when: ansible_os_family == 'RedHat'
   
   - name: deb-based
     set_fact:
       nimble_host_flavor: apt
-    when: ansible_distribution == 'Ubuntu'
+    when: ansible_os_family == 'Debian'
 
   - fail: msg="Unsupported distribution {{ ansible_distribution }}"
     when: nimble_host_flavor is undefined
