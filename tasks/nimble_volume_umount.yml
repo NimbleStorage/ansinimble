@@ -13,11 +13,19 @@
     nimble_group_facts:
       volumes: "fields=name,id,serial_number&name={{ nimble_volume }}"
 
-- name: Determine serial_numbler
+- name: Determine serial_number
   set_fact:
     nimble_volume_serial_number: "{{ nimble_group_facts | json_query(local_query) }}"
   vars:
     local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
+  when: ansible_os_family == 'RedHat'
+
+- name: Determine target
+  set_fact:
+    nimble_volume_target: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
+  when: ansible_os_family == 'Debian'
 
 - name: Unmount volume
   mount:
