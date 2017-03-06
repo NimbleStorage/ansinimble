@@ -1,9 +1,10 @@
 # NimbleStorage.Ansinimble
-Manages software and products from Nimble Storage
+Manages software and products from Nimble Storage. This is BETA software.
 
 ## Requirements
 This role assumes the latest Nimble Linux Toolkit (NLT) is installed on the host being managed by Ansible. The latest version of NLT may be obtained from [InfoSight](https://infosight.nimblestorage.com) (Nimble customers and partners only).
 
+* Requires a Nimble iSCSI array with NimbleOS 3.3+
 * Requires Ansible 2.2+ with the jmespath Python package installed
 
 ## Role Variables
