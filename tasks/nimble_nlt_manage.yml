@@ -27,23 +27,6 @@
     with_items: "{{ nimble_linux_toolkit_options }}"
     when: nimble_linux_toolkit_options is defined
 
-  - name: Upload package
-    copy:
-      src: "{{ nimble_linux_toolkit_bundle }}"
-      dest: /tmp/nlt
-
-  - name: Set fact for bundle
-    set_fact:
-      nimble_linux_toolkit_bundle: /tmp/nlt
-
-  - name: Verify package
-    stat:
-      path: "{{ nimble_linux_toolkit_bundle }}"
-    register: nimble_linux_toolkit_file
-
-  - fail: msg="Unable to find {{ nimble_linux_toolkit_bundle }}"
-    when: not nimble_linux_toolkit_file.stat.exists
-
   - name: RPM-based
     set_fact:
       nimble_host_flavor: yum
