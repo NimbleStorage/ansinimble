@@ -55,7 +55,7 @@
     register: nimble_nlt_installed
 
   - name: Keep uninstaller
-    shell: mv {{ lookup('env', 'PWD') }}/nlt_uninstall {{ nimble_linux_toolkit_prefix | quote }}/tmp
+    shell: mv nlt_uninstall {{ nimble_linux_toolkit_prefix | quote }}/tmp
     when: nimble_nlt_installed.changed
 
   when: nimble_linux_toolkit_bundle is defined and (nimble_linux_toolkit_state in ['present', 'running'])
