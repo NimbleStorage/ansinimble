@@ -1,12 +1,3 @@
 ---
-- name: Ensure object operation exists
-  stat:
-    path: ../tasks/nimble_{{ nimble_object }}_{{ nimble_operation }}.yml
-  register: nimble_object_operation
-
-- name: Fail with message
-  fail: msg="Unable to find object operation, please read the docs."
-  when: nimble_object_operation.stat.exists == False
-
 - include: nimble_{{ nimble_object }}_{{ nimble_operation }}.yml
   become: yes
