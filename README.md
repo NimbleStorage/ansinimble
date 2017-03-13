@@ -28,8 +28,8 @@ nimble_folder_options_default:
 nimble_folder_update_options_default:
   description: "Folder updated by Ansible"
 
-# These are the group facts gathered if no filters are applied
-nimble_group_facts:
+# These are the group facts gathered if no filters are applied with nimble_group_facts
+nimble_group_facts_default:
   access_control_records:
   arrays:
   folders:
@@ -73,7 +73,7 @@ nimble_initiator_options_default:
   ip_address: "*"
 
 # Default volume options
-nimble_volume_mount_options: "defaults"
+nimble_volume_mount_options: "_netdev,auto"
 nimble_volume_mkfs_options: ""
 nimble_volume_size: 1000
 nimble_volume_options_default:
@@ -246,6 +246,7 @@ ok: [smokey] => {
         ]
     }
 }
+**Note:** Calling group facts with nimble_group_facts multiple times in the same play will have undesired effects. If a certain fact(s) need to be refreshed mid-play, use nimble_group_fact_refresh with the keys needed to be refreshed.
 ```
 
 Please see variables section for more info.

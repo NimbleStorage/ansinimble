@@ -14,8 +14,8 @@ nimble_folder_options_default:
 nimble_folder_update_options_default:
   description: "Folder updated by Ansible"
 
-# These are the group facts gathered if no filters are applied
-nimble_group_facts:
+# These are the group facts gathered if no filters are applied with nimble_group_facts
+nimble_group_facts_default:
   access_control_records:
   arrays:
   folders:
