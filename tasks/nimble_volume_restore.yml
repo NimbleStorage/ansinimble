@@ -16,12 +16,12 @@
 - name: Figure out volume query (NimbleOS >=4)
   set_fact:
     nimble_volume_fields: "fields=name,id,last_snap&name={{ nimble_volume }}"
-  when: "{{ nimble_group_version | version_compare('4', '>=') }}"
+  when: nimble_group_version | version_compare('4', '>=')
 
 - name: Figure out volume query (NimbleOS < 4)
   set_fact:
     nimble_volume_fields: "fields=name,id&name={{ nimble_volume }}"
-  when: "{{ nimble_group_version | version_compare('4', '<') }}"
+  when: nimble_group_version | version_compare('4', '<')
 
 - name: Refresh group facts
   include: nimble_group_facts.yml
@@ -40,7 +40,7 @@
     nimble_volume_snapshot_id: "{{ nimble_group_facts | json_query(local_query) }}"
   vars:
     local_query: "volumes[?name=='{{ nimble_volume }}'].last_snap.snap_id | [0]"
-  when: nimble_volume_snapshot is undefined and "{{ nimble_group_version | version_compare('4', '>=') }}"
+  when: nimble_volume_snapshot is undefined and nimble_group_version | version_compare('4', '>=')
 
 - block:
   - name: Query for snapshots on nimble_volume
@@ -68,9 +68,9 @@
       nimble_volume_snapshot_id: "{{ nimble_volume_snapshots.json | json_query(local_query) }}"
     vars:
       local_query: "data[?vol_id=='{{ nimble_volume_id }}'].id | [0]"
-    when: nimble_volume_snapshot is undefined and "{{ nimble_group_version | version_compare('4', '<') }}"
+    when: nimble_volume_snapshot is undefined and nimble_group_version | version_compare('4', '<')
 
-  when: nimble_volume_snapshot is defined or {{ nimble_group_version | version_compare('4', '<') }}
+  when: nimble_volume_snapshot is defined or nimble_group_version | version_compare('4', '<')
 
 - name: Restore volume
   uri:

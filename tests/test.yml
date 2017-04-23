@@ -8,6 +8,8 @@
     nimble_volume_folder: "{{ inventory_hostname_short }}-fldr"
     nimble_folder: "{{ inventory_hostname_short }}-fldr"
     nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
+    nimble_initiator_group_options:
+      description: "This is a description of my initiator group"
   roles:
     - { role: NimbleStorage.Ansinimble, nimble_operation: create, nimble_object: folder } 
     - { role: NimbleStorage.Ansinimble, nimble_operation: create, nimble_object: volume } 

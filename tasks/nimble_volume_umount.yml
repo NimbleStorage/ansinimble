@@ -37,16 +37,44 @@
     name: "{{ nimble_volume_mountpoint }}"
     state: absent
 
-- name: Dismantle dm/iSCSI stack
-  command: ncmadm --remove {{ nimble_host_device_prefix }}/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}
+- block:
+  - name: Create device string
+    set_fact:
+      nimble_volume_device_name: "{{ nimble_host_device_prefix }}/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"
+
+  - name: Dismantle dm/iSCSI stack
+    command: ncmadm --remove {{ nimble_volume_device_name }}
+
+  - name: Wait for device to disappear
+    wait_for:
+      path: "{{ nimble_volume_device_name }}"
+      state: absent
+      timeout: "{{ nimble_device_delay }}"
+    register: nimble_volume_device_removal
+    ignore_errors: True
+
+  - name: Force dismantling of dm/iSCSI stack
+    command: ncmadm --force --remove {{ nimble_volume_device_name }}
+    when: nimble_volume_device_removal|failed
+
   when: ansible_os_family == 'RedHat'
 
-- name: Disconnect LUN
-  open_iscsi:
-    login: no
-    target: "{{ nimble_volume_target }}"
+- block:
+  - name: Create device string
+    set_fact:
+      nimble_volume_device_name: "/dev/disk/by-id/dm-uuid-mpath-2{{ nimble_volume_serial_number }}"
+
+  - name: Disconnect LUN
+    open_iscsi:
+      login: no
+      target: "{{ nimble_volume_target }}"
+
+  - name: Reload multipath
+    command: multipath -r
   when: ansible_os_family == 'Debian'
 
-- name: Reload multipath
-  command: multipath -r
-  when: ansible_os_family == 'Debian'
+- name: Wait for device to disappear
+  wait_for:
+    path: "{{ nimble_volume_device_name }}"
+    state: absent
+    timeout: "{{ nimble_device_delay }}"

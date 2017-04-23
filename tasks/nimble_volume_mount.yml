@@ -16,6 +16,7 @@
 
 - name: Discover Targets
   command: ncmadm -e {{ nimble_group_discovery_ip }}
+  register: nimble_discover_targets
   when: ansible_os_family == 'RedHat'
 
 - name: Discover Targets
@@ -55,7 +56,7 @@
 - name: Wait for device to appear
   wait_for:
     path: "{{ nimble_volume_device_name }}"
-    timeout: 30
+    timeout: "{{ nimble_device_delay }}"
 
 - name: Create filesystem
   filesystem: 
@@ -75,3 +76,7 @@
     src: LABEL={{ nimble_volume }}
     opts: "{{ nimble_volume_mount_options }},x-systemd.requires={{ nimble_volume_device_name }}"
     fstype: xfs
+  retries: "{{ nimble_device_retries }}"
+  delay: "{{ nimble_device_delay }}"
+  register: nimble_volume_mounted
+  until: nimble_volume_mounted | success

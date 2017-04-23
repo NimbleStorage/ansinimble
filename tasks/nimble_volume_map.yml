@@ -22,7 +22,6 @@
   with_dict: "{{ nimble_initiator_group_options }}"
   when: nimble_initiator_group_options is defined
 
-
 - name: Create Initiator Group
   uri:
     url: "{{ nimble_group_url }}/initiator_groups"
@@ -51,18 +50,19 @@
 - name: Overlay newly created initiator_group ID
   set_fact:
     nimble_initiator_group_id: "{{ nimble_initiator_group.json.data.id }}"
-  when: nimble_initiator_group.json.data.id is defined
+  when: nimble_initiator_group.json is defined
 
 - name: Find previously created initator_group ID
   set_fact:
     nimble_initiator_group_id: "{{ nimble_group_facts | json_query(local_query) }}"
   vars:
     local_query: "initiator_groups[?name==`{{ inventory_hostname_short }}`].id | [0]"
-  when: nimble_initiator_group.json.data.id is undefined
+  when: nimble_initiator_group.json is undefined
 
 - name: Merge nimble_initiator_group_id
   set_fact:
     nimble_initiator_options_default: "{{ nimble_initiator_options_default | combine( { 'initiator_group_id': nimble_initiator_group_id } ) }}"
+  when: nimble_initiator_group_id is defined
 
 - name: Create Initiator
   uri:
@@ -119,7 +119,7 @@
        initiator_group_id: "{{ nimble_initiator_group_id }}"
        vol_id: "{{ nimble_volume_id }}"
     return_content: yes
-  when: nimble_group_facts | json_query(local_query) == [] and nimble_volume_id != ''
+  when: nimble_group_facts | json_query(local_query) == [] and nimble_volume_id != '' and nimble_initiator_group_id is defined
   vars:
     local_query: "access_control_records[?initiator_group_id=='{{ nimble_initiator_group_id }}' && vol_id=='{{ nimble_volume_id }}'].id"
   retries: "{{ nimble_uri_retries }}"

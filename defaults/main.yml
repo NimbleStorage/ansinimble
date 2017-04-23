@@ -39,7 +39,7 @@ nimble_group_discovery_ip: "{{ nimble_group_facts | json_query('subnets[?allow_i
 nimble_host_docker_conf_file: /opt/NimbleStorage/etc/docker-driver.conf
 nimble_host_docker_driver_name: Docker-Driver
 nimble_host_iqn_file: /etc/iscsi/initiatorname.iscsi
-nimble_host_device_prefix: "/dev/nimblestorage"
+nimble_host_device_prefix: /dev/nimblestorage
 nimble_linux_toolkit_prefix: /opt/NimbleStorage
 nimble_linux_toolkit_options_default:
   - "silent-mode"
@@ -64,6 +64,10 @@ nimble_volume_mkfs_options: ""
 nimble_volume_size: 1000
 nimble_volume_options_default:
   description: "Volume created by Ansible"
+
+# Device retries
+nimble_device_retries: 3
+nimble_device_delay: 10
 
 # NimbleOS HTTP/JSON tunables
 nimble_uri_retries: 6
