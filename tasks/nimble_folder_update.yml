@@ -34,7 +34,8 @@
     body_format: json
     body:
       data: "{{ nimble_folder_update_options_default }}"
-    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_folder_updated

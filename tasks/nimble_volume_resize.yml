@@ -36,7 +36,8 @@
       data:
         id: "{{ nimble_volume_id }}"
         size: "{{ nimble_volume_size }}"
-    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_resized

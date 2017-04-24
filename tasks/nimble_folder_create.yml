@@ -36,7 +36,8 @@
     method: POST
     status_code: 201, 409
     body_format: json
-    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
     body:
       data: "{{ nimble_folder_options_default }}"
   retries: "{{ nimble_uri_retries }}"

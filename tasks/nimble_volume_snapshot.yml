@@ -30,7 +30,8 @@
     method: POST
     status_code: 201,409 # Ok and exists
     body_format: json
-    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
     body:
       data: 
         vol_id: "{{ nimble_volume_id }}"

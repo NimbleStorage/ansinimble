@@ -49,7 +49,8 @@
       validate_certs: no
       method: GET
       status_code: 200
-      HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+      headers:
+        X-Auth-Token: "{{ nimble_group_token }}"
       return_content: yes
     register: nimble_volume_snapshots
     retries: "{{ nimble_uri_retries }}"
@@ -83,7 +84,8 @@
       data:
         id: "{{ nimble_volume_id }}"
         base_snap_id: "{{ nimble_volume_snapshot_id }}"
-    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_restored

@@ -59,7 +59,8 @@
     method: GET
     status_code: 200
     body_format: json
-    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
     return_content: yes
   with_dict: "{{ nimble_group_objects }}"
   register: nimble_group_data

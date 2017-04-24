@@ -60,7 +60,8 @@
       validate_certs: no
       method: GET
       status_code: 200
-      HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+      headers:
+        X-Auth-Token: "{{ nimble_group_token }}"
       return_content: yes
     register: nimble_volume_snapshots
     retries: "{{ nimble_uri_retries }}"
@@ -95,7 +96,8 @@
       validate_certs: no
       method: GET
       status_code: 200
-      HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+      headers:
+        X-Auth-Token: "{{ nimble_group_token }}"
       return_content: yes
     register: nimble_volume_snapshots
     retries: "{{ nimble_uri_retries }}"
@@ -149,7 +151,8 @@
     method: POST
     status_code: 201
     body_format: json
-    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
     body:
       data: "{{ nimble_volume_options_default }}"
     return_content: yes

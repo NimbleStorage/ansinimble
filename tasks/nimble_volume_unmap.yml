@@ -26,7 +26,8 @@
     validate_certs: no
     method: DELETE
     status_code: 200
-    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
   when: nimble_volume_acr is defined and nimble_volume_acr != ''
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
@@ -50,7 +51,8 @@
       data:
         id: "{{ nimble_volume_id }}"
         online: False
-    HEADER_X-Auth-Token: "{{ nimble_group_token }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_offline
