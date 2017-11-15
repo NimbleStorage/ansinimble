@@ -1,3 +1,8 @@
 ---
+- include: cloud_{{ cloud_object }}_{{ cloud_operation }}.yml
+  become: yes
+  when: cloud_object is defined and cloud_operation is defined
+
 - include: nimble_{{ nimble_object }}_{{ nimble_operation }}.yml
   become: yes
+  when: nimble_object is defined and nimble_operation is defined

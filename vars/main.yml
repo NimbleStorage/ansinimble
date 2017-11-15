@@ -1,2 +1,3 @@
 ---
 nimble_group_facts_local: {}
+cloud_portal_facts_local: {}

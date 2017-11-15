@@ -1,0 +1,83 @@
+---
+- name: Ensure Cloud Portal credentials
+  fail: msg="Missing variables cloud_portal_password or cloud_portal_username"
+  when: cloud_portal_password is undefined or cloud_portal_username is undefined
+
+- block:
+  - fail: msg="Need to collect host facts"
+    when: cloud_host_facts is undefined and cloud_host_verified is undefined
+
+  rescue:
+  - name: Host facts
+    include: cloud_host_facts.yml
+
+- name: API token
+  uri:
+    url: "{{ cloud_portal_url }}/auth/login"
+    validate_certs: yes
+    method: POST
+    status_code: 200
+    body_format: json
+    body:
+      email: "{{ cloud_portal_username }}"
+      password: "{{ cloud_portal_password }}"
+    return_content: yes
+  no_log: "{{ cloud_silence_payload }}"
+  register: cloud_portal_token
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  until: cloud_portal_token | success
+
+- name: Store portal token and username
+  set_fact:
+    cloud_portal_token: "{{ cloud_portal_username }}:{{ cloud_portal_token.json.token }}"
+
+- name: Store authorization
+  set_fact:
+    cloud_portal_authz: "{{ cloud_portal_token | b64encode }}"
+
+- name: Use defaults
+  set_fact:
+    cloud_portal_facts: "{{ cloud_portal_facts_default }}"
+  when: cloud_portal_facts is undefined
+
+- name: Build portal facts
+  set_fact:
+    cloud_portal_objects: "{{ cloud_portal_facts }}"
+  when: cloud_portal_fact_refresh is undefined
+
+- name: Partial portal facts refresh
+  set_fact:
+    cloud_portal_objects: "{{ cloud_portal_fact_refresh }}"
+  when: cloud_portal_fact_refresh is defined
+
+#- name: Append cloud detail
+#  set_fact:
+#    cloud_portal_objects: "{{ cloud_portal_objects | combine( { 'arrays': 'fields=version,name,serial' } ) }}"
+
+- name: Retrieve group objects
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/{{ item.key }}?{{ item.value | default('') }}"
+    validate_certs: no
+    method: GET
+    status_code: 200
+    body_format: json
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    return_content: yes
+  with_dict: "{{ cloud_portal_objects }}"
+  register: cloud_portal_data
+  no_log: "{{ cloud_silence_payload }}"
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  until: cloud_portal_data | success
+
+- name: Combine portal facts
+  set_fact: 
+    cloud_portal_facts_local: "{{ cloud_portal_facts_local | combine( { item.item.key: item.json.data } ) }}"
+  with_items: "{{ cloud_portal_data.results }}"
+  no_log: "{{ cloud_silence_payload }}"
+
+- name: Set portal facts
+  set_fact:
+    cloud_portal_facts: "{{ cloud_portal_facts_local }}"

@@ -267,7 +267,7 @@ This role depends on the Nimble Linux Toolkit, please use a supported host OS by
 ## Example Playbooks
 Here are some example uses of this role. These are cut and paste from [examples](examples)
 
-### sample_install.yml
+### nimble/sample_install.yml
 Installs NLT.
 ```
 ---
@@ -280,7 +280,7 @@ Installs NLT.
     - { role: NimbleStorage.Ansinimble, nimble_object: nlt, nimble_operation: manage, nimble_linux_toolkit_state: running }
 ```
 
-### sample_uninstall.yml
+### nimble/sample_uninstall.yml
 Uninstalls NLT.
 ```
 ---
@@ -290,7 +290,7 @@ Uninstalls NLT.
 ```
 
 
-### sample_debug.yml
+### nimble/sample_debug.yml
 Croaks out all host and group facts
 ```
 ---
@@ -302,7 +302,7 @@ Croaks out all host and group facts
     - debug: var=nimble_host_facts
 ```
 
-### sample_group_fact.yml
+### nimble/sample_group_fact.yml
 Lightweight debugging.
 ```
 ---
@@ -313,7 +313,7 @@ Lightweight debugging.
     - debug: var=nimble_group_facts
 ```
 
-### sample_provision.yml
+### nimble/sample_provision.yml
 Provisions and mounts a new volume.
 ```
 ---
@@ -328,7 +328,7 @@ Provisions and mounts a new volume.
     - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: mount }
 ```
 
-### sample_snapshot.yml
+### nimble/sample_snapshot.yml
 ```
 ---
 
@@ -339,7 +339,7 @@ Provisions and mounts a new volume.
   roles:
     - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: snapshot }
 ```
-### sample_restore.yml
+### nimble/sample_restore.yml
 ```
 ---
 
@@ -356,7 +356,7 @@ Provisions and mounts a new volume.
 ```
 
 
-### sample_resize.yml
+### nimble/sample_resize.yml
 ```
 ---
 
@@ -368,7 +368,7 @@ Provisions and mounts a new volume.
     - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: resize }
 ```
 
-### sample_decommision.yml
+### nimble/sample_decommision.yml
 Unmounts and deletes a volume.
 ```
 ---
@@ -387,7 +387,7 @@ Unmounts and deletes a volume.
 Always secure your `nimble_group_password` with Ansible Vault to prevent eavesdropping. 
 
 ## Contributing
-Please feel free to submit pull requests. Include a test in [tests/test.yml](tests/test.yml) if including new functionality. Tests are run manually before merge.
+Please feel free to submit pull requests. Include a test in [tests/nimble/test.yml](tests/nimble/test.yml) for local Nimble arrays and [tests/cloud/cloud.yml](tests/cloud/test.yml) if including new functionality. Tests are run manually before merge.
  
 ## License
 Apache 2.0, please see [LICENSE](LICENSE)

@@ -1,0 +1,3 @@
+---
+- debug:
+    msg: "====> MARK: {{ local_test }}"

@@ -1,0 +1,24 @@
+---
+- include: cloud_volume_id.yml
+  vars:
+    local_volume: "{{ cloud_volume }}"
+
+- block: 
+  - uri:
+      url: "{{ cloud_portal_api_endpoint }}/cloud_volumes/{{ cloud_volume_id }}"
+      validate_certs: yes
+      method: GET
+      status_code: 200
+      body_format: json
+      headers:
+        Authorization: "Basic {{ cloud_portal_authz }}"
+      return_content: yes
+    register: cloud_volume_attr_fetch
+    retries: "{{ cloud_uri_retries }}"
+    delay: "{{ cloud_uri_delay }}"
+    until: cloud_volume_attr_fetch | success
+
+  - set_fact:
+      cloud_volume_attr: "{{ cloud_volume_attr_fetch.json.data.attributes }}"
+
+  when: cloud_volume_id is defined

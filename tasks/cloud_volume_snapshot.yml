@@ -1,0 +1,39 @@
+---
+- name: Ensure cloud_volume
+  fail:
+    msg: "Missing variable cloud_volume, please provide a volume name in cloud_volume"
+  when: cloud_volume is undefined
+
+- name: Host facts
+  include: cloud_host_facts.yml
+  when: cloud_host_facts is undefined
+
+- name: Refresh portal facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      cloud_volumes:
+
+- name: Get cloud_volume_id
+  include: cloud_volume_id.yml
+  vars:
+    local_volume: "{{ cloud_volume }}"
+
+- name: Create snapshot
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/cloud_volumes/{{ cloud_volume_id }}/snapshots"
+    validate_certs: yes
+    method: POST
+    status_code: 200
+    body_format: json
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    body: 
+      data:
+        name: "{{ cloud_volume_snapshot | default(ansible_date_time.iso8601_basic) }}"
+        description: "{{ cloud_volume_snapshot_description | default('Created by Ansible') }}"
+    return_content: yes
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  register: cloud_snapshot_created
+  until: cloud_snapshot_created | success

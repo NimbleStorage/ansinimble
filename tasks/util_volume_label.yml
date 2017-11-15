@@ -1,0 +1,7 @@
+---
+- name: Generate volume label
+  shell: "echo -n {{ util_volume_label }}| cksum | awk '{ print $1 }'"
+  register: util_volume_label_generated
+
+- set_fact:
+    util_volume_label: "{{ util_volume_label_generated.stdout }}"

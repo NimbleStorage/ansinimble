@@ -1,0 +1,5 @@
+---
+- set_fact:
+    cloud_volume_id: "{{ cloud_portal_facts | json_query(local_query) }}"
+  vars:
+    local_query: "cloud_volumes[?attributes.name=='{{ local_volume }}'].id | [0]"

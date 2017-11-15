@@ -1,0 +1,47 @@
+---
+- name: Ensure play variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_volume
+    - cloud_volume_options
+
+- name: Host facts
+  include: cloud_host_facts.yml
+  when: cloud_host_facts is undefined
+
+- name: Refresh group facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      cloud_volumes: "filters=name={{ cloud_volume }}"
+
+- name: Retrieve Cloud Volume attributes
+  include: cloud_volume_attr.yml
+  vars:
+    local_volume: "{{ cloud_volume }}"
+
+- name: Update Cloud Volume
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/cloud_volumes/{{ cloud_volume_id }}"
+    validate_certs: yes
+    method: PATCH
+    status_code: 200,204
+    body_format: json
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    body:
+      data: "{{ cloud_volume_options }}"
+    return_content: yes
+  when: cloud_volume_id != ''
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  register: cloud_volume_updated
+  until: cloud_volume_updated | success
+
+- name: Refresh volumes
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_fact_refresh:
+      cloud_volumes:

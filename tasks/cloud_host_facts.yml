@@ -1,0 +1,17 @@
+---
+- block:
+  - fail: msg="Need to collect host facts"
+    when: cloud_host_facts is undefined
+  
+  rescue:
+  - name: Probe my IQN
+    command: awk -F = '{ if ($1 == "InitiatorName") print $2 }' {{ cloud_host_iqn_file | quote }}
+    register: cloud_host_iqn
+
+  - name: Set facts
+    set_fact:
+      cloud_host_facts: '{
+        "iqn": "{{ cloud_host_iqn.stdout }}"
+      }'
+      cloud_host_iqn_file: "{{ cloud_host_iqn_file }}"
+    register: cloud_host_verified

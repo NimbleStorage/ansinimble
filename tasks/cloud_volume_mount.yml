@@ -1,0 +1,84 @@
+---
+- name: Ensure variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_volume
+    - cloud_volume_mountpoint
+
+- name: Host facts
+  include: cloud_host_facts.yml
+  when: cloud_host_facts is undefined
+
+- name: Refresh group facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      cloud_volumes:
+      session:
+
+- name: Get Cloud Volume Attritbutes
+  include: cloud_volume_attr.yml
+
+- name: Connect Cloud Volume
+  command: ncvol --connect --discovery-ip {{ cloud_volume_attr.discovery_ip }} \
+           --target-iqn {{ cloud_volume_attr.target_name }} \
+           --chap-user {{ cloud_portal_facts.session.attributes.chap_user }} \
+           --chap-secret {{ cloud_portal_facts.session.attributes.chap_secret }}
+  register: cloud_volume_mount
+  failed_when: not cloud_volume_mount.stdout | search('done|Volume is already connected to host|')
+
+- name: Create device string
+  set_fact:
+    cloud_volume_device_name: "{{ cloud_host_device_prefix }}/{{ cloud_volume }}-2{{ cloud_volume_attr.sn }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Create device string
+  set_fact:
+    cloud_volume_device_name: "/dev/disk/by-id/dm-uuid-mpath-2{{ cloud_volume_attr.sn }}"
+  when: ansible_os_family == 'Debian'
+
+- name: Wait for device to appear
+  wait_for:
+    path: "{{ cloud_volume_device_name }}"
+    timeout: "{{ cloud_device_delay }}"
+
+- name: Create filesystem label
+  include: util_volume_label.yml
+  vars:
+    util_volume_label: "{{ cloud_volume }}"
+
+- name: Create filesystem
+  filesystem: 
+    dev: "{{ cloud_volume_device_name }}"
+    fstype: xfs
+    opts: -L {{ util_volume_label }} {{ cloud_volume_mkfs_options }}
+  register: cloud_filesystem_created
+
+- name: Check if this is a mountpoint
+  command: mountpoint -q {{ cloud_volume_mountpoint }}
+  register: cloud_volume_mountpoint_stat
+  failed_when: False
+  changed_when: False
+
+- block:
+  - name: Try ensure filesystem metadata allows re-writing a new label (clone)
+    command: xfs_repair -L {{ cloud_volume_device_name | quote }}
+
+  - name: Update label if this is an existing filesystem (clone)
+    shell: xfs_admin -L {{ util_volume_label | quote }} -U {{ ansible_date_time.iso8601_micro | to_uuid }} {{ cloud_volume_device_name | quote }}
+  when: cloud_filesystem_created.changed == False and cloud_volume_mountpoint_stat.rc != 0
+
+- name: Mount volume
+  mount:
+    name: "{{ cloud_volume_mountpoint }}"
+    state: mounted
+    src: LABEL={{ util_volume_label }}
+    opts: "{{ cloud_volume_mount_options }},x-systemd.requires={{ cloud_volume_device_name }}"
+    fstype: xfs
+  retries: "{{ cloud_device_retries }}"
+  delay: "{{ cloud_device_delay }}"
+  register: cloud_volume_mounted
+  until: cloud_volume_mounted | success
+  when: cloud_volume_mountpoint_stat.rc != 0

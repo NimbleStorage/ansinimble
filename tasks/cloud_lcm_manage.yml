@@ -1,0 +1,66 @@
+---
+- name: Inspect LCM
+  stat:
+    path: "{{ cloud_lcm_prefix }}"
+  register: cloud_lcm_installed 
+
+- name: Verify state
+  fail: msg="Please specify state in cloud_lcm_state as either absent, present"
+  when: cloud_lcm_state not in ['absent', 'present'] or cloud_lcm_state is undefined
+
+- name: Verify package params
+  fail: msg="Please specify Linux Connection Manager URL in cloud_lcm_installer"
+  when: cloud_lcm_installer is undefined and cloud_lcm_state in ['present'] and not cloud_lcm_installed.stat.exists
+
+- block:
+  - name: RPM-based
+    set_fact:
+      nimble_host_flavor: yum
+    when: ansible_os_family == 'RedHat'
+  
+  - name: deb-based
+    set_fact:
+      nimble_host_flavor: apt
+    when: ansible_os_family == 'Debian'
+
+  - fail: msg="Unsupported distribution {{ ansible_distribution }}"
+    when: nimble_host_flavor is undefined
+
+  - include_vars: "{{ nimble_host_flavor }}.yml"
+
+  - name: Install prerequisite packages
+    package: name={{ item }} state=present
+    retries: 10
+    delay: 30
+    until: result|success
+    register: result
+    with_items: "{{ nimble_host_packages }}"
+
+  - name: Download Linux Connection Manager
+    get_url:
+      url: "{{ cloud_lcm_installer }}"
+      dest: /tmp/lcm_installer
+      mode: 0700
+
+  - name: Install/upgrade
+    command: ./lcm_installer
+    args:
+      chdir: /tmp
+      creates: "{{ cloud_lcm_prefix }}"
+    register: cloud_lcm_installed
+
+  - name: Keep uninstaller
+    command: mv ncv_uninstall {{ cloud_lcm_prefix | quote }}/tmp
+    args:
+      chdir: /tmp
+    when: cloud_lcm_installed.changed
+
+  - file:
+      path: "{{ cloud_lcm_prefix }}/tmp"
+      mode: 0700
+
+  when: cloud_lcm_installer is defined and (cloud_lcm_state in ['present'])
+
+- name: Uninstall
+  command: "{{ cloud_lcm_prefix | quote }}/tmp/ncv_uninstall"
+  when: cloud_lcm_state == 'absent'

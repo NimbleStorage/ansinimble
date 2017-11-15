@@ -1,0 +1,42 @@
+---
+- name: Ensure variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_volume
+    - cloud_host_ip
+
+- name: Host facts
+  include: cloud_host_facts.yml
+  when: cloud_host_facts is undefined
+
+- name: Refresh portal facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      cloud_volumes:
+
+- name: Retrieve cloud_volume_id
+  include: cloud_volume_id.yml
+  vars:
+    local_volume: "{{ cloud_volume }}"
+
+- name: Attach Cloud Volume
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/cloud_volumes/{{ cloud_volume_id }}/attach"
+    validate_certs: yes
+    method: POST
+    status_code: 200
+    body_format: json
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    body: 
+      data: 
+        initiator_ip: "{{ cloud_host_ip }}"
+    return_content: yes
+  when: cloud_volume_id != ''
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  register: cloud_volume_map
+  until: cloud_volume_map | success

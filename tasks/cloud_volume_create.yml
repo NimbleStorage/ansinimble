@@ -1,0 +1,147 @@
+---
+- name: Host facts
+  include: cloud_host_facts.yml
+  when: cloud_host_facts is undefined
+
+- name: Refresh portal facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      regions:
+      cloud_volumes:
+
+- block:
+  - name: Ensure play variables are sane
+    fail: 
+      msg: "Missing variable {{ item }}"
+    when: vars[item] is undefined
+    with_items:
+      - cloud_volume
+      - cloud_volume_options
+      - cloud_volume_region
+      - cloud_volume_provider
+
+  - name: Ensure mandatory options
+    fail: 
+      msg: "Missing required option {{ item }}"
+    when: cloud_volume_options[item] is undefined
+    with_items: "{{ cloud_volume_mandatory_options }}"
+
+  - name: Merge options
+    set_fact: 
+      cloud_volume_options_default: "{{ cloud_volume_options_default | combine( { item.key: item.value } ) }}"
+    with_dict: "{{ cloud_volume_options }}"
+
+  - name: Overlay name and size into volume options
+    set_fact:
+      cloud_volume_options_default: "{{ cloud_volume_options_default | combine( { 'name': cloud_volume, 'size': cloud_volume_size } ) }}"
+
+  when: cloud_volume_from is undefined
+
+- block:
+  - name: Ensure play variables are sane (for clones)
+    fail: 
+      msg: "Missing variable {{ item }}"
+    when: vars[item] is undefined
+    with_items:
+      - cloud_volume
+      - cloud_volume_from_options
+      - cloud_volume_region
+      - cloud_volume_provider
+  
+  - name: Get Cloud Volume ID of parent when cloning
+    include: cloud_volume_id.yml
+    vars:
+      local_volume: "{{ cloud_volume_from }}"
+
+  - name: Merge options
+    set_fact: 
+      cloud_volume_from_default: "{{ cloud_volume_from_default | combine( { item.key: item.value } ) }}"
+    with_dict: "{{ cloud_volume_from_options }}"
+  
+  - name: Query for snapshots on cloud_volume_from
+    uri:
+      url: "{{ cloud_portal_api_endpoint }}/cloud_volumes/{{ cloud_volume_id }}/snapshots"
+      validate_certs: yes
+      method: GET
+      status_code: 200
+      headers:
+        Authorization: "Basic {{ cloud_portal_authz }}"
+      return_content: yes
+    register: cloud_volume_snapshots
+    retries: "{{ cloud_uri_retries }}"
+    delay: "{{ cloud_uri_delay }}"
+    until: cloud_volume_snapshots | success
+
+  when: cloud_volume_from is defined
+
+- name: Retrieve snapshot id (named snapshot)
+  set_fact:
+    cloud_volume_snapshot_id: "{{ cloud_volume_snapshots.json | json_query(local_query) }}"
+  vars:
+    local_query: "data[?attributes.name=='{{ cloud_volume_snapshot }}'].id | [0]"
+  when: cloud_volume_snapshot is defined and cloud_volume_from is defined
+
+- name: Retrieve last snapshot id (last snapshot)
+  set_fact:
+    cloud_volume_snapshot_id: "{{ cloud_volume_snapshots.json | json_query(local_query) }}"
+  vars:
+    local_query: "data[0].id"
+  when: cloud_volume_snapshot is undefined and cloud_volume_from is defined
+
+- name: Overlay clone volume options
+  set_fact:
+    cloud_volume_from_default: "{{ cloud_volume_from_default | combine( { 'name': cloud_volume, 'snapshot_ref': cloud_volume_snapshot_id } ) }}"
+  when: cloud_volume_from is defined
+
+- name: Lookup region
+  set_fact:
+    cloud_volume_options_default: "{{ cloud_volume_options_default | combine( { 'region_id': item.value } ) }}"
+    cloud_volume_from_default: "{{ cloud_volume_from_default | combine( { 'region_id': item.value } ) }}"
+  with_dict: "{{ cloud_portal_facts | json_query(local_query) }}"
+  vars:
+    local_query: "regions[].{ region_id: id, provider: attributes.provider.name, region: attributes.name}[?region=='{{ cloud_volume_region }}' && provider=='{{ cloud_volume_provider }}'] | {id: [0].region_id}"
+
+- block:
+  - name: Create Cloud Volume
+    uri:
+      url: "{{ cloud_portal_api_endpoint }}/cloud_volumes"
+      validate_certs: yes
+      method: POST
+      status_code: 200
+      body_format: json
+      headers:
+        Authorization: "Basic {{ cloud_portal_authz }}"
+      body: 
+        data: "{{ cloud_volume_options_default }}"
+      return_content: yes
+    register: cloud_volume_created
+    when: cloud_portal_facts | json_query(local_query) == []
+    vars:
+      local_query: "cloud_volumes[?attributes.name=='{{ cloud_volume_options_default.name }}'].attributes.name"
+    retries: "{{ cloud_uri_retries }}"
+    delay: "{{ cloud_uri_delay }}"
+    until: cloud_volume_created | success
+  when: cloud_volume_from is undefined
+
+- block:
+  - name: Create Cloud Volume from Cloud Volume
+    uri:
+      url: "{{ cloud_portal_api_endpoint }}/cloud_volumes/{{ cloud_volume_id }}/clone"
+      validate_certs: yes
+      method: POST
+      status_code: 200
+      body_format: json
+      headers:
+        Authorization: "Basic {{ cloud_portal_authz }}"
+      body: 
+        data: "{{ cloud_volume_from_default }}"
+      return_content: yes
+    register: cloud_volume_created
+    when: cloud_portal_facts | json_query(local_query) == []
+    vars:
+      local_query: "cloud_volumes[?attributes.name=='{{ cloud_volume_from_default.name }}'].attributes.name"
+    retries: "{{ cloud_uri_retries }}"
+    delay: "{{ cloud_uri_delay }}"
+    until: cloud_volume_created | success
+  when: cloud_volume_from is defined

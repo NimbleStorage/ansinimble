@@ -1,0 +1,74 @@
+---
+- name: Ensure play variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_volume
+
+- name: Host facts
+  include: cloud_host_facts.yml
+  when: cloud_host_facts is undefined
+
+- name: Refresh portal facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      regions:
+      cloud_volumes:
+
+- name: Get Cloud Volume ID
+  include: cloud_volume_id.yml
+  vars:
+    local_volume: "{{ cloud_volume }}"
+
+- name: Query for snapshots on Cloud Volume
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/cloud_volumes/{{ cloud_volume_id }}/snapshots"
+    validate_certs: yes
+    method: GET
+    status_code: 200
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    return_content: yes
+  register: cloud_volume_snapshots
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  until: cloud_volume_snapshots | success
+
+- name: Retrieve snapshot id (named snapshot)
+  set_fact:
+    cloud_volume_snapshot_id: "{{ cloud_volume_snapshots.json | json_query(local_query) }}"
+  vars:
+    local_query: "data[?attributes.name=='{{ cloud_volume_snapshot }}'].id | [0]"
+  when: cloud_volume_snapshot is defined
+
+- name: Retrieve last snapshot id (last snapshot)
+  set_fact:
+    cloud_volume_snapshot_id: "{{ cloud_volume_snapshots.json | json_query(local_query) }}"
+  vars:
+    local_query: "data[0].id"
+  when: cloud_volume_snapshot is undefined
+
+- name: No shapshot ID
+  fail:
+    msg: "No snapshot to restore from, either named snapshot in cloud_volume_snapshot doesn't exist or there's no shapshots"
+  when: cloud_volume_snapshot_id == ""
+
+- name: Restore Cloud Volume
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/cloud_volumes/{{ cloud_volume_id }}/restore"
+    validate_certs: yes
+    method: POST
+    status_code: 200
+    body_format: json
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    body: 
+      data: 
+        snapshot_ref: "{{ cloud_volume_snapshot_id }}"
+    return_content: yes
+  register: cloud_volume_restored
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  until: cloud_volume_restored | success

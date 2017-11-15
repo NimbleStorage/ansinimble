@@ -1,0 +1,53 @@
+---
+- name: Ensure variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_volume
+    - cloud_volume_mountpoint
+
+- name: Host facts
+  include: cloud_host_facts.yml
+  when: cloud_host_facts is undefined
+
+- name: Refresh group facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      cloud_volumes:
+      session:
+
+- name: Get Cloud Volume Attritbutes
+  include: cloud_volume_attr.yml
+
+- name: Create device string
+  set_fact:
+    cloud_volume_device_name: "{{ cloud_host_device_prefix }}/{{ cloud_volume }}-2{{ cloud_volume_attr.sn }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Create device string
+  set_fact:
+    cloud_volume_device_name: "/dev/disk/by-id/dm-uuid-mpath-2{{ cloud_volume_attr.sn }}"
+  when: ansible_os_family == 'Debian'
+
+- name: Unmount volume
+  mount:
+    name: "{{ cloud_volume_mountpoint }}"
+    state: unmounted
+
+- name: Wipe fstab
+  mount:
+    name: "{{ cloud_volume_mountpoint }}"
+    state: absent
+
+- name: Disconnect Cloud Volume
+  command: ncvol --disconnect --target-iqn {{ cloud_volume_attr.target_name }} 
+  register: cloud_volume_umount
+  failed_when: not cloud_volume_umount.stdout | search("The target is not connected to the host|done")
+
+- name: Wait for device to disappear
+  wait_for:
+    path: "{{ cloud_volume_device_name }}"
+    state: absent
+    timeout: "{{ cloud_device_delay }}"

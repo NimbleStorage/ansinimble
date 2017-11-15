@@ -73,3 +73,56 @@ nimble_device_delay: 10
 nimble_uri_retries: 6
 nimble_uri_delay: 10
 nimble_silence_payload: True
+
+# Cloud Volumes
+cloud_lcm_installer: https://ncv.cloud.nimblestorage.com/tools/ncv_installer_1.0.0.16
+cloud_lcm_prefix: /opt/NimbleStorage
+cloud_host_iqn_file: /etc/iscsi/initiatorname.iscsi
+
+# Cloud Portal
+cloud_portal_http_scheme: https
+cloud_portal_http_port: 443
+cloud_portal_http_host: clouldvolumes.hpe.com
+cloud_portal_api_version: v2
+cloud_portal_url: "{{ cloud_portal_http_scheme }}://{{ cloud_portal_http_host }}:{{ cloud_portal_http_port }}"
+cloud_portal_api_endpoint: "{{ cloud_portal_url }}/api/{{ cloud_portal_api_version }}"
+
+# HTTP/JSON tunables
+cloud_uri_retries: 12 
+cloud_uri_delay: 10
+cloud_silence_payload: True
+
+# Default Cloud Portal facts
+cloud_portal_facts_default:
+  cloud_volumes:
+  regions:
+  session:
+  initiators:
+  interfaces:
+  onprem_replication_partners:
+  replication_partnerships:
+  replication_stores:
+  providers:
+
+# Default Cloud Volume options
+cloud_volume_mount_options: "_netdev,auto"
+cloud_volume_mkfs_options: ""
+cloud_volume_size: 10000
+cloud_volume_from_default: {}
+cloud_volume_resize_body: {}
+cloud_volume_options_default:
+  volume_type: PF
+  encryption: False
+  schedule: none
+  retention: 0
+  perf_policy: "Windows File Server"
+  iops: 1000
+
+cloud_volume_mandatory_options:
+  - existing_cloud_subnet
+  - private_cloud 
+
+# Cloud host defaults
+cloud_host_device_prefix: /dev/nimblestorage
+cloud_device_retries: 3
+cloud_device_delay: 10
