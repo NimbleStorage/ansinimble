@@ -1,7 +1,7 @@
 ---
 - hosts: all
   roles:
-    - { role: NimbleStorage.AnsinimbleDev,
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: lcm,
         cloud_operation: manage,
         cloud_lcm_state: absent
