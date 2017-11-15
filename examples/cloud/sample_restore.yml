@@ -1,0 +1,28 @@
+---
+# Restore a Cloud Volume, specifies parametes in extra variables.
+# $ ansible-playbook -i ec2.py -l tag_cloudhost -e cloud_volume=mycloudvol1 -e cloud_volume_snapshot=mysnap1 sample_restore.yml
+
+- hosts: all
+  vars:
+    cloud_host_ip: "{{ ansible_default_ipv4.address }}"
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: volume,
+        cloud_operation: umount
+      }
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: volume,
+        cloud_operation: unmap,
+      }
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: volume,
+        cloud_operation: restore
+      }
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: volume,
+        cloud_operation: map,
+      }
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: volume,
+        cloud_operation: mount
+      }

@@ -1,5 +1,4 @@
 ---
-
 # Provide nimble_volume and nimble_volume_size as extra vars, i.e:
 # $ ansible-playbook -e limit -e nimble_volume=myvol1 -e nimble_volume_size=2000 sample_resize.yml
 

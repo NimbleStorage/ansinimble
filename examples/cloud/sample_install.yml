@@ -1,0 +1,8 @@
+---
+- hosts: all
+  roles:
+    - { role: NimbleStorage.AnsinimbleDev,
+        cloud_object: lcm,
+        cloud_operation: manage,
+        cloud_lcm_state: present
+      }

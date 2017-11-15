@@ -1,5 +1,4 @@
 ---
-
 # Provide nimble_volume and nimble_volume_mountpoint as extra vars, i.e:
 # $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_volume_mountpoint=/mnt/myvol1 sample_provision.yml
 

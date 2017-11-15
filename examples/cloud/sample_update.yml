@@ -1,0 +1,14 @@
+---
+# Sets an IOPS boundary and makes a Cloud Volume accessible from multiple initators, uses cloud_volume from -e
+# $ ansible-playbook -i ec2.py -l tag_cloudhost -e cloud_volume=mycloudvol1 sample_update.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: volume,
+        cloud_operation: update,
+        cloud_volume_options: {
+          iops: 1500,
+          multi_initiator: True
+        }
+      }

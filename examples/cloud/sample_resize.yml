@@ -1,0 +1,11 @@
+---
+# Resizes a Cloud Volume, specify parameters as extra variables.
+# $ ansible-playbook -i ec2.py -l tag_cloudhost -e cloud_volume=mycloudvol1 -e cloud_volume_size=30000 sample_resize.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.AnsinimbleDev, 
+        cloud_object: volume,
+        cloud_operation: resize,
+        cloud_volume_mountpoint: "/mnt/{{ cloud_volume }}"
+      }

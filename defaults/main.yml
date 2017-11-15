@@ -75,6 +75,12 @@ nimble_uri_delay: 10
 nimble_silence_payload: True
 
 # Cloud Volumes
+cloud_portal_http_host: cloudvolumes.hpe.com
+cloud_portal_username: user@yourdomain.com
+
+# Please protect your password with Ansible Vault
+cloud_portal_password: cloudystuff
+
 cloud_lcm_installer: https://ncv.cloud.nimblestorage.com/tools/ncv_installer_1.0.0.16
 cloud_lcm_prefix: /opt/NimbleStorage
 cloud_host_iqn_file: /etc/iscsi/initiatorname.iscsi

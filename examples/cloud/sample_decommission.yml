@@ -1,0 +1,21 @@
+---
+# Fully decommisions a Cloud Volume. Define volume in cloud_volume.
+# $ ansible-playbook -i ec2.py -l tag_cloudhost -e cloud_volume=mycloudvol1 sample_decommission.yml
+
+- hosts: all
+  vars:
+    cloud_host_ip: "{{ ansible_default_ipv4.address }}"
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: volume,
+        cloud_operation: umount,
+        cloud_volume_mountpoint: "/mnt/{{ cloud_volume }}"
+      }
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: volume,
+        cloud_operation: unmap
+      }
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: volume,
+        cloud_operation: delete
+      }
