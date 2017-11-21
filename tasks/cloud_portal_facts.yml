@@ -3,13 +3,9 @@
   fail: msg="Missing variables cloud_portal_password or cloud_portal_username"
   when: cloud_portal_password is undefined or cloud_portal_username is undefined
 
-- block:
-  - fail: msg="Need to collect host facts"
-    when: cloud_host_facts is undefined and cloud_host_verified is undefined
-
-  rescue:
-  - name: Host facts
-    include: cloud_host_facts.yml
+- name: Host facts
+  include: cloud_host_facts.yml
+  when: cloud_host_facts is undefined and cloud_host_verified is undefined
 
 - name: API token
   uri:
@@ -51,11 +47,7 @@
     cloud_portal_objects: "{{ cloud_portal_fact_refresh }}"
   when: cloud_portal_fact_refresh is defined
 
-#- name: Append cloud detail
-#  set_fact:
-#    cloud_portal_objects: "{{ cloud_portal_objects | combine( { 'arrays': 'fields=version,name,serial' } ) }}"
-
-- name: Retrieve group objects
+- name: Retrieve portal objects
   uri:
     url: "{{ cloud_portal_api_endpoint }}/{{ item.key }}?{{ item.value | default('') }}"
     validate_certs: no

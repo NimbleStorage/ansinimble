@@ -11,14 +11,14 @@
   include: cloud_host_facts.yml
   when: cloud_host_facts is undefined
 
-- name: Refresh group facts
+- name: Refresh portal facts
   include: cloud_portal_facts.yml
   vars:
     cloud_portal_facts:
       cloud_volumes:
       session:
 
-- name: Get Cloud Volume Attritbutes
+- name: Get Cloud Volume Attributes
   include: cloud_volume_attr.yml
 
 - name: Connect Cloud Volume

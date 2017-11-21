@@ -88,13 +88,12 @@ cloud_host_iqn_file: /etc/iscsi/initiatorname.iscsi
 # Cloud Portal
 cloud_portal_http_scheme: https
 cloud_portal_http_port: 443
-cloud_portal_http_host: clouldvolumes.hpe.com
 cloud_portal_api_version: v2
 cloud_portal_url: "{{ cloud_portal_http_scheme }}://{{ cloud_portal_http_host }}:{{ cloud_portal_http_port }}"
 cloud_portal_api_endpoint: "{{ cloud_portal_url }}/api/{{ cloud_portal_api_version }}"
 
 # HTTP/JSON tunables
-cloud_uri_retries: 12 
+cloud_uri_retries: 24 
 cloud_uri_delay: 10
 cloud_silence_payload: True
 

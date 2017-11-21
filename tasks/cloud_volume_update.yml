@@ -11,7 +11,7 @@
   include: cloud_host_facts.yml
   when: cloud_host_facts is undefined
 
-- name: Refresh group facts
+- name: Refresh portal facts
   include: cloud_portal_facts.yml
   vars:
     cloud_portal_facts:
