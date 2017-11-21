@@ -5,11 +5,13 @@
   register: cloud_lcm_installed 
 
 - name: Verify state
-  fail: msg="Please specify state in cloud_lcm_state as either absent, present"
+  fail:
+    msg: "Please specify state in cloud_lcm_state as either absent, present"
   when: cloud_lcm_state not in ['absent', 'present'] or cloud_lcm_state is undefined
 
 - name: Verify package params
-  fail: msg="Please specify Linux Connection Manager URL in cloud_lcm_installer"
+  fail: 
+    msg: "Please specify Linux Connection Manager URL in cloud_lcm_installer"
   when: cloud_lcm_installer is undefined and cloud_lcm_state in ['present'] and not cloud_lcm_installed.stat.exists
 
 - block:
@@ -23,7 +25,8 @@
       nimble_host_flavor: apt
     when: ansible_os_family == 'Debian'
 
-  - fail: msg="Unsupported distribution {{ ansible_distribution }}"
+  - fail:
+      msg: "Unsupported distribution {{ ansible_distribution }}"
     when: nimble_host_flavor is undefined
 
   - include_vars: "{{ nimble_host_flavor }}.yml"

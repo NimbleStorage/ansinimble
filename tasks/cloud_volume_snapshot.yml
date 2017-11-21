@@ -1,8 +1,10 @@
 ---
-- name: Ensure cloud_volume
-  fail:
-    msg: "Missing variable cloud_volume, please provide a volume name in cloud_volume"
-  when: cloud_volume is undefined
+- name: Ensure play variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_volume
 
 - name: Host facts
   include: cloud_host_facts.yml

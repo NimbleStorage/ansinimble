@@ -1,8 +1,4 @@
 ---
-- name: Ensure Cloud Portal credentials
-  fail: msg="Missing variables cloud_portal_password or cloud_portal_username"
-  when: cloud_portal_password is undefined or cloud_portal_username is undefined
-
 - name: Host facts
   include: cloud_host_facts.yml
   when: cloud_host_facts is undefined and cloud_host_verified is undefined
@@ -15,8 +11,8 @@
     status_code: 200
     body_format: json
     body:
-      email: "{{ cloud_portal_username }}"
-      password: "{{ cloud_portal_password }}"
+      access_key: "{{ cloud_portal_access_key }}"
+      access_secret: "{{ cloud_portal_access_secret }}"
     return_content: yes
   no_log: "{{ cloud_silence_payload }}"
   register: cloud_portal_token
@@ -24,9 +20,9 @@
   delay: "{{ cloud_uri_delay }}"
   until: cloud_portal_token | success
 
-- name: Store portal token and username
+- name: Store portal token 
   set_fact:
-    cloud_portal_token: "{{ cloud_portal_username }}:{{ cloud_portal_token.json.token }}"
+    cloud_portal_token: "{{ cloud_portal_access_key }}:{{ cloud_portal_token.json.token }}"
 
 - name: Store authorization
   set_fact:
@@ -50,7 +46,7 @@
 - name: Retrieve portal objects
   uri:
     url: "{{ cloud_portal_api_endpoint }}/{{ item.key }}?{{ item.value | default('') }}"
-    validate_certs: no
+    validate_certs: yes
     method: GET
     status_code: 200
     body_format: json

@@ -1,5 +1,5 @@
 ---
-- name: Ensure variables are sane
+- name: Ensure play variables are sane
   fail: 
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined

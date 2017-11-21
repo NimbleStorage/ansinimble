@@ -76,10 +76,10 @@ nimble_silence_payload: True
 
 # Cloud Volumes
 cloud_portal_http_host: cloudvolumes.hpe.com
-cloud_portal_username: user@yourdomain.com
 
-# Please protect your password with Ansible Vault
-cloud_portal_password: cloudystuff
+# Please protect your credentials with Ansible Vault
+cloud_portal_access_key: nimble
+cloud_portal_secret_key: nimblestorage
 
 cloud_lcm_installer: https://ncv.cloud.nimblestorage.com/tools/ncv_installer_1.0.0.16
 cloud_lcm_prefix: /opt/NimbleStorage
