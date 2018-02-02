@@ -1,0 +1,72 @@
+---
+- name: Ensure called correctly
+  fail:
+    msg: "Not included from correct source"
+  when: nimble_partnership_direction is undefined
+
+- name: Break free from NLT
+  set_fact:
+    nimble_group_facts:
+      replication_partners:
+    nimble_group_verified: True
+    nimble_host_facts:
+      groups:
+        main:
+          user: "{{ nimble_local_partnership[nimble_partnership_direction].username }}"
+          group_ip: "{{ nimble_local_partnership[nimble_partnership_direction].source }}"
+    nimble_group_password: "{{ nimble_local_partnership[nimble_partnership_direction].password }}"
+
+- name: Establish group facts
+  include: nimble_group_facts.yml
+
+- name: Create payload
+  set_fact:
+    nimble_replication_partner_payload: "{{ nimble_local_partnership[nimble_partnership_direction] }}"
+- set_fact:
+    nimble_replication_partner_payload: "{{ nimble_replication_partner_payload | combine( { 'secret': nimble_local_partnership.secret }) }}"
+- set_fact: 
+    nimble_replication_partner_data: {}
+- set_fact:
+    nimble_replication_partner_data: "{{ nimble_replication_partner_data | combine( { item.key: item.value } ) }}"
+  when: item.key is not in [ "username", "password", "source" ]
+  with_dict: "{{ nimble_replication_partner_payload }}"
+  no_log: True
+
+- name: Lookup partner
+  set_fact:
+    nimble_partner_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "replication_partners[?name=='{{ nimble_replication_partner_data.name }}'].id | [0]"
+
+- name: Creating partner on {{ nimble_partnership_direction }}
+  uri:
+    url: "{{ nimble_group_url }}/replication_partners"
+    validate_certs: no
+    method: POST
+    status_code: 201
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: "{{ nimble_replication_partner_data }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_partner_created
+  until: nimble_partner_created | success
+  when: nimble_partner_id == ""
+
+- name: Test partnership
+  uri:
+    url: "{{ nimble_group_url }}/replication_partners/{{ nimble_partner_id }}/actions/test"
+    validate_certs: no
+    method: POST
+    status_code: 200
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+    body: "{}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_partner_tested
+  until: nimble_partner_tested | success
+  when: nimble_partner_id != ""

@@ -1,6 +1,6 @@
 ---
 # Hello World
-- hosts: smokers
+- hosts: smokey
   vars:
     nimble_volume: "{{ inventory_hostname_short }}-vol"
     nimble_volume_pool: default
@@ -11,14 +11,15 @@
     nimble_initiator_group_options:
       description: "This is a description of my initiator group"
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_operation: create, nimble_object: folder } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: create, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: map, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: mount, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: snapshot, nimble_object: volume } 
+    - { role: debug_marker, local_test: "First pass" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: folder } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: snapshot, nimble_object: volume } 
 
 # Update folder and a known snap
-- hosts: smokers
+- hosts: smokey
   vars:
     nimble_folder: "{{ inventory_hostname_short }}-fldr"
     nimble_folder_update_options:
@@ -26,40 +27,43 @@
     nimble_volume: "{{ inventory_hostname_short }}-vol"
     nimble_volume_snapshot: "{{ inventory_hostname_short }}-snap"
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_operation: update, nimble_object: folder } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: snapshot, nimble_object: volume } 
+    - { role: debug_marker, local_test: "Update folders and create a snapshot" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: update, nimble_object: folder } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: snapshot, nimble_object: volume } 
 
 # Create a clone from last snapshot
-- hosts: smokers
+- hosts: smokey
   vars:
     nimble_volume_from: "{{ inventory_hostname_short }}-vol"
     nimble_volume: "{{ inventory_hostname_short }}-cln"
     nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-cln"
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_operation: create, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: map, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: mount, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: umount, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: unmap, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: delete, nimble_object: volume } 
+    - { role: debug_marker, local_test: "Create clone from last snapshot" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: volume } 
 
 # Create a clone from a known snapshot
-- hosts: smokers
+- hosts: smokey
   vars:
     nimble_volume_from: "{{ inventory_hostname_short }}-vol"
     nimble_volume: "{{ inventory_hostname_short }}-cln"
     nimble_volume_snapshot: "{{ inventory_hostname_short }}-snap"
     nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-cln"
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_operation: create, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: map, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: mount, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: umount, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: unmap, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: delete, nimble_object: volume } 
+    - { role: debug_marker, local_test: "Create clone from known snapshot" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: volume } 
 
 # Touch a file
-- hosts: smokers
+- hosts: smokey
   become: yes
   vars:
     nimble_volume: "{{ inventory_hostname_short }}-vol"
@@ -70,26 +74,28 @@
         state: touch
 
 # Unmap/unmount
-- hosts: smokers
+- hosts: smokey
   vars:
     nimble_volume: "{{ inventory_hostname_short }}-vol"
     nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_operation: umount, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: unmap, nimble_object: volume } 
+    - { role: debug_marker, local_test: "Unmap/unmount" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
 
 # Restore from last snapshot
-- hosts: smokers
+- hosts: smokey
   vars:
     nimble_volume: "{{ inventory_hostname_short }}-vol"
     nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
   become: yes
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_operation: restore, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: map, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: mount, nimble_object: volume } 
+    - { role: debug_marker, local_test: "Restore volume" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: restore, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
 
-- hosts: smokers
+- hosts: smokey
   vars: 
     nimble_volume: "{{ inventory_hostname_short }}-vol"
   tasks:
@@ -104,29 +110,103 @@
       when: nimble_file.stat.exists
 
 # Prep restore from a known snapshot
-- hosts: smokers
+- hosts: smokey
   vars:
     nimble_volume: "{{ inventory_hostname_short }}-vol"
     nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
   become: yes
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_operation: umount, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: unmap, nimble_object: volume } 
+    - { role: debug_marker, local_test: "Unmap/unmount #2" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
 
 # Restore from known snapshot
-- hosts: smokers
+- hosts: smokey
   vars:
     nimble_volume_snapshot: "{{ inventory_hostname_short }}-snap"
     nimble_volume: "{{ inventory_hostname_short }}-vol"
     nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
   become: yes
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_operation: restore, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: map, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: mount, nimble_object: volume } 
+    - { role: debug_marker, local_test: "Restore from known snapshot" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: restore, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
+
+# Data protection
+- hosts: smokey
+  become: yes
+  vars:
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+  roles:
+    - { role: debug_marker,
+        local_test: "Data protection"
+      }
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: partner,
+        nimble_object: replication,
+      }
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: create,
+        nimble_object: volcoll,
+        nimble_volume_collection: "{{ inventory_hostname_short }}-vol-manual",
+        nimble_protection_template: "Retain-30Daily"
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: protect,
+        nimble_object: volume,
+        nimble_volume_collection: "{{ inventory_hostname_short }}-vol-manual"
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: unprotect,
+        nimble_object: volume
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: prune,
+        nimble_object: volcoll
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: protect,
+        nimble_object: volume,
+        nimble_protection_template: "Retain-30Daily"
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: unprotect,
+        nimble_object: volume
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: prune,
+        nimble_object: volcoll
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: create,
+        nimble_object: prottmpl,
+        nimble_protection_template: MyTestTemplate,
+        nimble_protection_schedules: {
+          myotherschedule: {
+            downstream_partner_id: "{{ nimble_partnerships.test.upstream.name }}",
+            num_retain_replica: 32,
+            description: "Create a snapshot daily during weekdays at 1am and retain 16 locally and 32 remotely",
+            period_unit: "days",
+            days: "monday,tuesday,wednesday,thursday,friday",
+            at_time: 3600,
+            num_retain: 16
+          }
+        }
+      }
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: delete,
+        nimble_object: prottmpl,
+        nimble_protection_template: MyTestTemplate
+      }
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: divorce,
+        nimble_object: replication,
+        nimble_partner: "{{ nimble_partnerships.test.upstream.name }}"
+      }
 
 # Resize and delete
-- hosts: smokers
+- hosts: smokey
   vars:
     nimble_folder: "{{ inventory_hostname_short }}-fldr"
     nimble_volume: "{{ inventory_hostname_short }}-vol"
@@ -134,15 +214,38 @@
     nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-vol"
   become: yes
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_operation: resize, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: umount, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: unmap, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: delete, nimble_object: volume } 
-    - { role: NimbleStorage.Ansinimble, nimble_operation: delete, nimble_object: folder } 
+    - { role: debug_marker, local_test: "Resize and delete" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: resize, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: folder } 
+  tags:
+    - wipe
 
-- hosts: smokers
+- hosts: smokey
+  become: yes
+  tasks:
+    - command: nltadm --group --remove --ip-address {{ nimble_group_options['ip-address'] }}
+    - command: nltadm --group --add --ip-address {{ nimble_partnerships.test.upstream.hostname }} --username {{ nimble_partnerships.test.downstream.username }} --password {{ nimble_partnerships.test.downstream.password }}
+    - command: nltadm --group --verify --ip-address {{ lookup('dig', nimble_partnerships.test.upstream.hostname) }}
+
+- hosts: smokey
+  become: yes
+  roles:
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: divorce,
+        nimble_object: replication,
+        nimble_partner: "{{ nimble_partnerships.test.downstream.name }}",
+        nimble_host_facts_force: True
+      }
+    
+- hosts: smokey
   become: yes
   vars:
     nimble_linux_toolkit_state: absent
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_operation: manage, nimble_object: nlt } 
+    - { role: debug_marker, local_test: "Uninstall NLT" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: manage, nimble_object: nlt } 
+  tags:
+    - uninstall

@@ -7,12 +7,47 @@ nimble_group_options:
 # Please store password with Ansible Vault
 nimble_group_password: admin
 
+# Credentials to HPE Cloud Volumes for partnering purposes
+nimble_cloud_username: you@yourorg.com
+nimble_cloud_password: MyPassword123
+
 # Default Nimble folder options
 nimble_folder_options_default:
-  description: Folder created by Ansible
+  description: "Folder created by Ansible"
 
 nimble_folder_update_options_default:
   description: "Folder updated by Ansible"
+
+# Default volcoll options (when created standalone)
+nimble_volcoll_options_default:
+  description: "Volume Collection created by Ansible"
+
+# Default protection template options
+nimble_prottmpl_options_default:
+  description: "Protection Template created by Ansible"
+
+nimble_protsched_options_default:
+  description: "Protection Schedule created by Ansible"
+  volcoll_or_prottmpl_type: protection_template
+
+# Default partnership options as fallbacks
+nimble_partnership_options_default:
+  upstream:
+    description: "Established by Ansible"
+    subnet_label: mgmt
+  downstream:
+    description: "Established by Ansible"
+    subnet_label: mgmt
+    name: upstream
+    hostname: "{{ nimble_group_options['ip-address'] }}"
+    username: "{{ nimble_group_options.username }}"
+    password: "{{ nimble_group_password }}"
+
+# Default cloud partnership options
+nimble_cloud_partnership_options_default:
+  description: "Established by Ansible"
+  subnet_label: mgmt-data
+  partner_type: tunnel_endpoint
 
 # These are the group facts gathered if no filters are applied with nimble_group_facts
 nimble_group_facts_default:
@@ -25,6 +60,8 @@ nimble_group_facts_default:
   pools:
   subnets:
   volumes:
+  volume_collections:
+  protection_templates:
 
 # How to reach the Nimble group
 nimble_group_http_scheme: https
@@ -115,6 +152,7 @@ cloud_volume_mkfs_options: ""
 cloud_volume_size: 10000
 cloud_volume_from_default: {}
 cloud_volume_resize_body: {}
+
 cloud_volume_options_default:
   volume_type: PF
   encryption: False
@@ -126,6 +164,22 @@ cloud_volume_options_default:
 cloud_volume_mandatory_options:
   - existing_cloud_subnet
   - private_cloud 
+
+cloud_replica_options_default:
+  iops: 1000
+
+cloud_replica_mandatory_options:
+  - existing_cloud_subnet
+  - private_cloud 
+
+cloud_replica_snapshot_index: 0
+
+# Default Replication Store options
+cloud_store_options_default:
+  volume_type: GPF
+cloud_store_size: 1099776
+cloud_store_size_min: 1099776
+cloud_store_size_max: 32985088
 
 # Cloud host defaults
 cloud_host_device_prefix: /dev/nimblestorage

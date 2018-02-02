@@ -1,11 +1,16 @@
-NLT_INSTALLER=/vagrant/nlt_installer_2.1.0.3
-ROLE_SRC=../../ansinimble
-ROLE_DEST=/etc/ansible/roles/NimbleStorage.Ansinimble
+ROLE=NimbleStorage.AnsinimbleTest
+ROLE_SRC=../..
+ROLE_DEST=/etc/ansible/roles/$(ROLE)
 
 all: clean copy tests
+tag: clean copy tags
+install: clean copy bundle
+
+tags:
+	ansible-playbook -t ${ARGS} -l smokers $(ROLE_DEST)/tests/nimble/test.yml
 
 tests:
-	ansible-playbook -i $(ROLE_DEST)/tests/inventory $(ROLE_DEST)/tests/test.yml -e nimble_linux_toolkit_bundle=$(NLT_INSTALLER)
+	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/test.yml 
 
 copy:
 	mkdir -p $(ROLE_DEST)
@@ -14,5 +19,8 @@ copy:
 clean:
 	rm -rf $(ROLE_DEST)	
 
-install:
-	ansible-playbook -i $(ROLE_DEST)/tests/inventory $(ROLE_DEST)/examples/sample_install.yml -e nimble_linux_toolkit_bundle=$(NLT_INSTALLER)
+bundle:
+	ansible-playbook -l smokers $(ROLE_DEST)/examples/nimble/sample_install.yml 
+
+unbundle:
+	ansible-playbook -l smokers $(ROLE_DEST)/examples/nimble/sample_uninstall.yml

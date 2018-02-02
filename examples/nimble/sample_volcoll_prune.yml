@@ -1,0 +1,7 @@
+---
+# Prune volume collections without associated volumes
+# $ ansible-playbook -l limit sample_volcoll_prune.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_object: volcoll, nimble_operation: prune }

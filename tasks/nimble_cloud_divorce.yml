@@ -1,0 +1,80 @@
+---
+- name: Ensure play variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_store
+
+- name: Refresh portal facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      replication_partnerships:
+
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      replication_partners:
+      arrays: 
+
+- name: Find Cloud
+  set_fact: 
+    cloud_partnership_data: "{{ cloud_portal_facts | json_query(local_query) }}"
+  vars:
+    local_query: "replication_partnerships[?attributes.replication_store.name=='{{ cloud_store }}'].{ partner_id: attributes.onprem_replication_partner.id, id: id} |[0]"
+
+- name: Find Partner
+  set_fact: 
+    nimble_partner_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "replication_partners[?name=='{{ cloud_store }}'].id | [0]"
+
+- block:
+    - name: Delete nimble partner
+      uri:
+        url: "{{ nimble_group_url }}/replication_partners/{{ nimble_partner_id }}"
+        validate_certs: no
+        method: DELETE
+        status_code: 200
+        headers:
+          X-Auth-Token: "{{ nimble_group_token }}"
+      retries: "{{ nimble_uri_retries }}"
+      delay: "{{ nimble_uri_delay }}"
+      register: nimble_partner_deleted
+      until: nimble_partner_deleted | success 
+
+    - uri:
+        url: "{{ cloud_portal_api_endpoint }}/replication_partnerships/{{ cloud_partnership_data.id }}"
+        validate_certs: yes
+        method: DELETE
+        status_code: 200, 204
+        body_format: json
+        headers:
+          Authorization: "Basic {{ cloud_portal_authz }}"
+        return_content: yes
+      retries: "{{ cloud_uri_retries }}"
+      delay: "{{ cloud_uri_delay }}"
+      register: cloud_partnership_deleted
+      until: cloud_partnership_deleted | success
+    
+    - uri:
+        url: "{{ cloud_portal_api_endpoint }}/onprem_replication_partners/{{ cloud_partnership_data.partner_id }}"
+        validate_certs: yes
+        method: DELETE
+        status_code: 200, 204
+        body_format: json
+        headers:
+          Authorization: "Basic {{ cloud_portal_authz }}"
+        return_content: yes
+      retries: "{{ cloud_uri_retries }}"
+      delay: "{{ cloud_uri_delay }}"
+      register: cloud_onprem_partner_deleted
+      until: cloud_onprem_partner_deleted | success
+
+  when: cloud_partnership_data != '' or nimble_partner_id != ''

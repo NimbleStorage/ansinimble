@@ -1,0 +1,25 @@
+---
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      volume_collections: "fields=id&volume_count=0"
+
+- name: Delete empty volume collections
+  uri:
+    url: "{{ nimble_group_url }}/volume_collections/{{ item.id }}"
+    validate_certs: no
+    method: DELETE
+    status_code: 200
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_volcoll_deleted
+  until: nimble_volcoll_deleted | success
+  with_items: "{{ nimble_group_facts.volume_collections }}"

@@ -18,7 +18,6 @@
     nimble_volume_serial_number: "{{ nimble_group_facts | json_query(local_query) }}"
   vars:
     local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
-  when: ansible_os_family == 'RedHat'
 
 - name: Determine target
   set_fact:
@@ -44,19 +43,6 @@
 
   - name: Dismantle dm/iSCSI stack
     command: ncmadm --remove {{ nimble_volume_device_name }}
-
-  - name: Wait for device to disappear
-    wait_for:
-      path: "{{ nimble_volume_device_name }}"
-      state: absent
-      timeout: "{{ nimble_device_delay }}"
-    register: nimble_volume_device_removal
-    ignore_errors: True
-
-  - name: Force dismantling of dm/iSCSI stack
-    command: ncmadm --force --remove {{ nimble_volume_device_name }}
-    when: nimble_volume_device_removal|failed
-
   when: ansible_os_family == 'RedHat'
 
 - block:
@@ -78,3 +64,9 @@
     path: "{{ nimble_volume_device_name }}"
     state: absent
     timeout: "{{ nimble_device_delay }}"
+  register: nimble_volume_device_removal
+  ignore_errors: True
+
+- name: Force dismantling of dm/iSCSI stack
+  command: ncmadm --force --remove {{ nimble_volume_device_name }}
+  when: nimble_volume_device_removal|failed

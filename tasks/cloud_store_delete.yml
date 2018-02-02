@@ -1,0 +1,34 @@
+---
+- name: Ensure play variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_store
+
+- name: Refresh portal facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      replication_stores:
+
+- name: Find cloud store id
+  set_fact:
+    cloud_store_id: "{{ cloud_portal_facts | json_query(local_query) }}"
+  vars:
+    local_query: "replication_stores[?attributes.name=='{{ cloud_store }}'].id | [0]"
+
+- name: Delete Replication Store
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/replication_stores/{{ cloud_store_id }}"
+    validate_certs: yes
+    method: DELETE
+    status_code: 204
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    return_content: yes
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  register: cloud_store_deleted
+  until: cloud_store_deleted | success
+  when: cloud_store_id != ''

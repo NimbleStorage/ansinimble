@@ -4,12 +4,8 @@
   when: nimble_group_password is undefined
 
 - block:
-  - fail: msg="Need to collect host facts"
-    when: nimble_host_facts is undefined and nimble_group_verified is undefined
-
-  rescue:
-  - name: Host facts
-    include: nimble_host_facts.yml
+  - include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined and nimble_group_verified is undefined
 
 - name: API token
   uri:
@@ -41,16 +37,22 @@
 - name: Build group facts
   set_fact:
     nimble_group_objects: "{{ nimble_group_facts }}"
-  when: nimble_group_fact_refresh is undefined
+  when: nimble_group_fact_refresh is undefined and nimble_group_facts is defined
 
 - name: Partial group facts refresh
   set_fact:
     nimble_group_objects: "{{ nimble_group_fact_refresh }}"
   when: nimble_group_fact_refresh is defined
 
+- name: Grab entire arrays
+  set_fact:
+    nimble_group_objects: "{{ nimble_group_objects | combine( { 'arrays': '' } ) }}"
+  when: nimble_group_objects.arrays is defined 
+
 - name: Append arrays detail
   set_fact:
     nimble_group_objects: "{{ nimble_group_objects | combine( { 'arrays': 'fields=version,name,serial' } ) }}"
+  when: nimble_group_objects.arrays is undefined 
 
 - name: Retrieve group objects
   uri:

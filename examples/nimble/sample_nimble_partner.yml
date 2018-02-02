@@ -1,0 +1,16 @@
+---
+# Marry two arrays and test the connection
+#
+# Upstream variables defines how to partner the downstream
+# Downstream variables defines how to partner upstream
+#
+# The nimble_partnerships var describes partnerships and should be protected with Ansible vault, please see defaults.yml of role for example
+# 
+# $ ansible-playbook -l limit -e nimble_partner=mypartnership sample_nimble_partner.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: replication,
+        nimble_operation: partner
+      }

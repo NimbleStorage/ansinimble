@@ -3,10 +3,14 @@
   tasks:
     - set_fact: 
         local_uuid: "{{ (inventory_hostname + ansible_date_time.iso8601_micro) | to_uuid | regex_replace('-','')}}"
+      tags:
+        - local
+
+    - set_fact: 
         local_provider: "Amazon AWS"
         local_region: "us-west-1"
-        local_cloud: "{{ ec2_vpc_id }}"
         local_subnet: "172.31.0.0/16"
+        local_cloud: "{{ ec2_vpc_id }}"
 
     - set_fact:
         cloud_host_ip: "{{ ansible_default_ipv4.address }}"
@@ -18,6 +22,19 @@
         cloud_volume_from_options:
           private_cloud: "{{ local_cloud }}"
           existing_cloud_subnet: "{{ local_subnet }}"
+
+# Cheap shots
+- hosts: "{{ local_smokers }}"
+  vars:
+    cloud_store: "{{ local_uuid }}-store"
+    cloud_store_size: 1099776
+    cloud_store_region: "us-test"
+  roles:
+    - { role: "{{ local_role }}",
+        cloud_operation: create,
+        cloud_object: store } 
+  tags:
+    - local
 
 # Hello World
 - hosts: "{{ local_smokers }}"

@@ -1,0 +1,56 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_protection_template
+
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Gather volcolls
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      protection_templates:
+      protection_schedules:
+      replication_partners:
+
+- name: Merge options
+  set_fact: 
+    nimble_prottmpl_options_default: "{{ nimble_prottmpl_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ nimble_prottmpl_options }}"
+  when: nimble_prottmpl_options is defined
+
+- set_fact: 
+    nimble_prottmpl_options_default: "{{ nimble_prottmpl_options_default | combine( { 'name': nimble_protection_template } ) }}"
+
+- name: Create protection template
+  uri:
+    url: "{{ nimble_group_url }}/protection_templates"
+    validate_certs: no
+    method: POST
+    status_code: 201
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: "{{ nimble_prottmpl_options_default }}"
+    return_content: true
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_prottmpl_created
+  until: nimble_prottmpl_created | success
+
+- block: 
+  - name: Process schedules
+    include: nimble_util_add_schedule.yml
+    vars:
+      nimble_protection_schedule: "{{ nimble_protection_schedules[nimble_protection_schedule_name] }}"
+      nimble_protection_template_id: "{{ nimble_prottmpl_created.json.data.id }}"
+    with_items: "{{ nimble_protection_schedules | default('') }}"
+    loop_control:
+      loop_var: nimble_protection_schedule_name
+  when: nimble_prottmpl_created.json.data.id is defined and nimble_protection_schedules is defined

@@ -1,3 +1,4 @@
 ---
 nimble_group_facts_local: {}
+nimble_volume_protect_local: {}
 cloud_portal_facts_local: {}

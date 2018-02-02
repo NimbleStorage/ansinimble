@@ -1,0 +1,105 @@
+---
+- name: Host facts
+  include: cloud_host_facts.yml
+  when: cloud_host_facts is undefined
+
+- name: Refresh portal facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      cloud_volumes:
+      regions:
+      replica_volumes:
+
+- name: Ensure play variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_volume
+    - cloud_replica
+    - cloud_replica_options
+    - cloud_replica_region
+    - cloud_replica_provider
+
+- name: Ensure mandatory options
+  fail: 
+    msg: "Missing required option {{ item }}"
+  when: cloud_replica_options[item] is undefined
+  with_items: "{{ cloud_replica_mandatory_options }}"
+
+- name: Merge options
+  set_fact: 
+    cloud_replica_options_default: "{{ cloud_replica_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ cloud_replica_options }}"
+
+- name: Overlay name into volume options
+  set_fact:
+    cloud_replica_options_default: "{{ cloud_replica_options_default | combine( { 'name': cloud_volume } ) }}"
+
+- name: Query replica volume
+  set_fact:
+    cloud_replica_data: "{{ cloud_portal_facts | json_query(local_query) }}"
+  vars:
+    local_query: "replica_volumes[?attributes.name=='{{ cloud_replica }}'].{replica_id: id, store_id: attributes.replication_store.id } | [0]"
+
+- fail:
+    msg: "Cloud replica not found ({{ cloud_replica }})"
+  when: cloud_replica_data.replica_id is undefined 
+
+- name: Query for snapshots on cloud_replica
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/replication_stores/{{ cloud_replica_data.store_id }}/replica_volumes/{{ cloud_replica_data.replica_id }}/snapshots"
+    validate_certs: yes
+    method: GET
+    status_code: 200
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    return_content: yes
+  register: cloud_replica_snapshots
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  until: cloud_replica_snapshots | success
+
+- set_fact:
+    cloud_replica_snapshot_id: "{{ cloud_replica_snapshots.json.data[cloud_replica_snapshot_index].id }}"
+  when: cloud_replica_snapshots.json.data.0 is defined
+
+- fail: 
+    msg: "No snapshots found on replica ({{ cloud_replica }})"
+  when: cloud_replica_snapshot_id is undefined
+
+- name: Overlay snapshot
+  set_fact:
+    cloud_replica_options_default: "{{ cloud_replica_options_default | combine( { 'snapshot_ref': cloud_replica_snapshot_id } ) }}"
+
+- name: Lookup region
+  set_fact:
+    cloud_replica_options_default: "{{ cloud_replica_options_default | combine( { 'region_id': item.value } ) }}"
+  with_dict: "{{ cloud_portal_facts | json_query(local_query) }}"
+  vars:
+    local_query: "regions[].{ region_id: id, provider: attributes.provider.name, region: attributes.name}[?region=='{{ cloud_replica_region }}' && provider=='{{ cloud_replica_provider }}'] | {id: [0].region_id}"
+
+- fail:
+    msg: "Unknown region ({{ cloud_replica_region }})"
+  when: cloud_replica_options_default.region_id <= 0
+
+- name: Create Cloud Volume from Replica
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/replication_stores/{{ cloud_replica_data.store_id }}/replica_volumes/{{ cloud_replica_data.replica_id }}/clone"
+    validate_certs: yes
+    method: POST
+    status_code: 200
+    body_format: json
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    body: 
+      data: "{{ cloud_replica_options_default }}"
+    return_content: yes
+  register: cloud_volume_created
+  when: cloud_portal_facts | json_query(local_query) == []
+  vars:
+    local_query: "cloud_volumes[?attributes.name=='{{ cloud_replica_options_default.name }}'].attributes.name"
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  until: cloud_volume_created | success
