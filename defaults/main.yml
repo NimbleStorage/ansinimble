@@ -74,6 +74,37 @@ nimble_uri_retries: 6
 nimble_uri_delay: 10
 nimble_silence_payload: True
 
+# NimbleOS setup from scratch
+nimble_setup_arrays:
+  example:                                        # This is the serial number of the new array
+    group_name: group_name                        # Name of the group.
+    name: array_name                              # Name of the array.
+    domainname: domain_name                       # DNS domain name of this system.
+    dnsserver: server                             # IP address of the DNS server.
+    ntpserver: server                             # Hostname or IP address of NTP server.
+    timezone: zone                                # Time zone that the array is in.
+    mgmt_ipaddr: ipaddr                           # Management IP address.
+    subnet_addr: network/netmask                  # Subnet on NIC.
+    default_gateway: ipaddr                       # Default gateway IP address.
+    subnets:                                      # Subnets to configure
+      - label: label                              # Subnet Label on NIC.
+        subnet_addr: network/netmask              # Subnet on NIC.
+        subnet_type: subnet_type                  # Type of subnet -- data, management, or data
+                                                  # and management.
+        subnet_mtu: mtu                           # Size of MTU - standard, jumbo, other.
+        data_ipaddr: ipaddr                       # Data IP address setting.
+        discovery_ipaddrs:
+          - ipaddr                                # Discovery IP address setting.
+          - ipaddr                                # Discovery IP address setting.
+    support_ipaddrs:
+      - ipaddr                                    # Support IP address setting node A.
+      - ipaddr                                    # Support IP address setting node B.
+    iscsi_automatic_connection_method: "[yes|no]" # Redirect connections from the specified
+                                                  # iSCSI target IP appropriately.
+    iscsi_connection_rebalancing: "[yes|no]"      # Rebalance iSCSI connections by periodically
+                                                  # breaking existing connections that are
+                                                  # out-of-balance.
+
 # Cloud Volumes
 cloud_portal_http_host: cloudvolumes.hpe.com
 

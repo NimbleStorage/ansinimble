@@ -1,0 +1,38 @@
+---
+# avahi-browse _http._tcp -rpkt |grep serial=VM-006388 | awk '-F;' '{print $8}'
+# add host to inventory
+# delegate raw to host
+- name: Find array
+  shell: >
+    avahi-browse _http._tcp -rpkt | grep serial={{ nimble_array_serial }} | 
+    awk '-F;' '{ if ($2 == "{{ nimble_array_discovery_interface | default(ansible_default_ipv4.interface)}}" && $1 == "=") print $8 }'
+  register: nimble_array_mdns
+
+- fail:
+    msg: "Could not find IP address for {{ nimble_array_serial }} using 'avahi-browse _http._tcp -rpkt' on {{ inventory_hostname }}" 
+  when: nimble_array_mdns.stdout|ipaddr == false
+
+- name: Add to inventory
+  add_host:
+    name: "{{ nimble_array_serial }}"
+    ansible_ssh_host: "{{ nimble_array_mdns.stdout }}"
+    ansible_ssh_pass: admin
+    ansible_user: admin
+
+- name: Setup Array
+  set_fact:
+    nibmle_array_setup_scripts: 
+      - "{{ lookup('template', 'nibmle_array_setup_s0.j2') }}"
+
+- raw: "{{ item }}"
+  delegate_to: "{{ nimble_array_serial }}"
+  with_items: "{{ nibmle_array_setup_scripts }}"
+  register: nimble_array_setup_error
+  ignore_errors: True
+
+- block: 
+  - debug:
+      var: nimble_array_setup_error
+  - fail:
+      msg: Failed to setup array {{ nimble_array_serial }}, maybe it has already been setup?
+  when: nimble_array_setup_error.failed is defined and nimble_array_setup_error.failed == True
