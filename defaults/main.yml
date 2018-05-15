@@ -74,6 +74,63 @@ nimble_uri_retries: 6
 nimble_uri_delay: 10
 nimble_silence_payload: True
 
+# NimbleOS setup from scratch
+nimble_array_config:
+  XX-000000:                                 # This is the serial number of the new array
+    group_name: group-sjc-tme000-va          # Name of the group.
+    name: sjc-tme000-va                      # Name of the array.
+    domainname: vlab.nimblestorage.com       # DNS domain name of this system.
+    ntpserver: time.nimblestorage.com        # Hostname or IP address of NTP server.
+    timezone: America/Los_Angeles            # Time zone that the array is in.
+    mgmt_ipaddr: 10.18.173.174               # Management IP address.
+    default_gateway: 10.18.160.1             # Default gateway IP address.
+
+    dnsservers:                              # IP addresses of the DNS servers.
+      - 10.18.5.4
+      - 10.12.255.254
+
+    iscsi_automatic_connection_method: "yes" # Redirect connections from the specified
+                                             # iSCSI target IP appropriately.
+
+    iscsi_connection_rebalancing: "yes"      # Rebalance iSCSI connections by periodically
+                                             # breaking existing connections that are
+                                             # out-of-balance.
+
+    subnets:                                 # Subnets to configure (In NIC order)
+      - label: mgmt-data                     # Subnet Label on NIC.
+        subnet_addr: 10.18.173.174/19        # Subnet on NIC.
+        subnet_type: management              # Type of subnet -- data, management, or data
+                                             # and management
+        subnet_mtu: 1500                     # Size of MTU - standard, jumbo, other.
+
+      - label: mgmt-data                     # Subnet Label on NIC.
+        subnet_addr: 10.18.173.174/19        # Subnet on NIC.
+        subnet_type: management              # Type of subnet -- data, management, or data
+                                             # and management
+        subnet_mtu: 1500                     # Size of MTU - standard, jumbo, other.
+
+      - label: data1                         # Subnet Label on NIC.
+        data_ipaddr: 172.16.237.135          # Data IP address setting.
+        subnet_addr: 172.16.237.135/19       # Subnet on NIC.
+        subnet_type: data                    # Type of subnet -- data, management, or data
+                                             # and management
+        subnet_mtu: 1500                     # Size of MTU - standard, jumbo, other.
+
+      - label: data2                         # Subnet Label on NIC.
+        data_ipaddr: 172.16.45.159           # Data IP address setting.
+        subnet_addr: 172.16.45.159/19        # Subnet on NIC.
+        subnet_type: data                    # Type of subnet -- data, management, or data
+                                             # and management
+        subnet_mtu: 1500                     # Size of MTU - standard, jumbo, other.
+
+    discovery_ipaddrs:                       # Discovery IP address setting.
+      - 172.16.237.136
+      - 172.16.45.160
+
+    support_ipaddrs:
+      - 10.18.173.175                        # Support IP address setting node A.
+      - 10.18.173.176                        # Support IP address setting node B.
+
 # Cloud Volumes
 cloud_portal_http_host: cloudvolumes.hpe.com
 
