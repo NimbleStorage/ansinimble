@@ -21,14 +21,16 @@
 
 - name: Setup Array
   set_fact:
-    nibmle_array_setup_scripts: 
-      - "{{ lookup('template', 'nibmle_array_setup_s0.j2') }}"
+    nimble_array_setup_scripts:
+      - "{{ lookup('template', 'nimble_array_setup_s0.j2') }}"
+      - "{{ lookup('template', 'nimble_array_setup_s1.j2') }}"
 
 - raw: "{{ item }}"
   delegate_to: "{{ nimble_array_serial }}"
-  with_items: "{{ nibmle_array_setup_scripts }}"
+  with_items: "{{ nimble_array_setup_scripts }}"
   register: nimble_array_setup_error
   ignore_errors: True
+  become: no
 
 - block: 
   - debug:
@@ -36,3 +38,5 @@
   - fail:
       msg: Failed to setup array {{ nimble_array_serial }}, maybe it has already been setup?
   when: nimble_array_setup_error.failed is defined and nimble_array_setup_error.failed == True
+
+- debug: var=nimble_array_setup_error
