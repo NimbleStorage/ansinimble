@@ -1,0 +1,10 @@
+---
+# Hello Cloud
+- hosts: smokey
+  vars:
+    cloud_store: "{{ inventory_hostname_short }}-store"
+    cloud_store_region: "us-test"
+  roles:
+  - { role: NimbleStorage.AnsinimbleTest, nimble_operation: partner, nimble_object: cloud }
+  - { role: NimbleStorage.AnsinimbleTest, nimble_operation: divorce, nimble_object: cloud }
+  - { role: NimbleStorage.AnsinimbleTest, cloud_operation: delete, cloud_object: store }

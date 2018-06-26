@@ -1,0 +1,12 @@
+---
+# Clones a Replica Volume, specifies parametes in extra variables. Clones from latest (0) snapshot by default
+# $ ansible-playbook -i ec2.py -l tag_cloudhost -e cloud_volume=mycloudvol1 -e cloud_replica=myreplicavol1 -e cloud_replica_snapshot_index=16 sample_replica_clone.yml
+
+- hosts: all
+  vars:
+    cloud_host_ip: "{{ ansible_default_ipv4.address }}"
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: replica,
+        cloud_operation: clone
+      }

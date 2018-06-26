@@ -1,0 +1,47 @@
+---
+- name: Ensure play variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_store
+
+- set_fact:
+    cloud_store_options_default: "{{ {} | combine( { 'limit_size': cloud_store_size | int } ) }}"
+
+- fail:
+    msg: "cloud_store_size out of range {{ cloud_store_size_min }}MiB - {{ cloud_store_size_max }}MiB"
+  when: cloud_store_options_default.limit_size < cloud_store_size_min or cloud_store_options_default.limit_size > cloud_store_size_max
+
+- name: Refresh portal facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      replication_stores:
+
+- name: Find cloud store id
+  set_fact:
+    cloud_store_id: "{{ cloud_portal_facts | json_query(local_query) }}"
+  vars:
+    local_query: "replication_stores[?attributes.name=='{{ cloud_store }}'].id | [0]"
+  
+- fail:
+    msg: "Cloud store ({{ cloud_store }}) not found."
+  when: cloud_store_id == ''
+
+- name: Update Replication Store
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/replication_stores/{{ cloud_store_id }}"
+    validate_certs: yes
+    method: PATCH
+    status_code: 200
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    return_content: yes
+    body_format: json
+    body:
+      data: "{{ cloud_store_options_default }}"
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  register: cloud_store_resized
+  until: cloud_store_resized | success

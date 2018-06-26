@@ -1,0 +1,6 @@
+---
+- name: Get nimble_volume_id
+  set_fact:
+    nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"

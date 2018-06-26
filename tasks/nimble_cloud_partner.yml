@@ -1,0 +1,177 @@
+---
+- name: Ensure play variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_store
+    - cloud_store_region
+
+- fail:
+    msg: "cloud_store_size out of range {{ cloud_store_size_min }}MiB - {{ cloud_store_size_max }}MiB"
+  when: cloud_store_size < cloud_store_size_min or cloud_store_size > cloud_store_size_max
+
+- name: Refresh portal facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      cv_regions: "filters=name={{ cloud_store_region }}"
+      replication_stores:
+
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      groups:
+      arrays: "role=leader"
+
+- name: Ensure compatibility
+  fail:
+    msg: "Need NimbleOS >= 4.5"
+  when: nimble_group_version | version_compare('4.5', '<')
+
+- name: Merge options
+  set_fact:
+    cloud_store_options_default: "{{ cloud_store_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ cloud_store_options }}"
+  when: cloud_store_options is defined
+
+- name: Determine existing cloud_store
+  set_fact:
+    # https://github.com/ansible/ansible/issues/27299#issuecomment-331068246
+    cloud_store_query: "{{ cloud_portal_facts | to_json | from_json | json_query(local_query) }}"
+  vars:
+    local_query: "replication_stores[?attributes.name=='{{ cloud_store }}'].{ integer: id } | [0]" 
+
+- block:
+    - name: Ensure region is Replication Store capable
+      set_fact:
+        # https://github.com/ansible/ansible/issues/27299#issuecomment-331068246
+        cloud_volume_region_id: "{{ cloud_portal_facts | to_json | from_json | json_query(local_query) }}"
+      vars:
+        local_query: "cv_regions[*].[attributes.name=='{{ cloud_store_region }}' && attributes.capabilities[?contains(to_string(@), `Replication`)==`true`] && id][]|{integer: [0]}"
+
+    - fail:
+        msg: "Selected region is not replication capable."
+      when: cloud_volume_region_id == [] or cloud_volume_region_id.integer == None
+
+    - name: Overlay name, region and size into replication store options
+      set_fact:
+        cloud_store_options_default: "{{ cloud_store_options_default | combine( { 'name': cloud_store, 'limit_size': cloud_store_size, 'cv_region_id': cloud_volume_region_id.integer } ) }}"
+
+    - name: Create Replication Store
+      uri:
+        url: "{{ cloud_portal_api_endpoint }}/replication_stores"
+        validate_certs: yes
+        method: POST
+        status_code: 200
+        body_format: json
+        headers:
+          Authorization: "Basic {{ cloud_portal_authz }}"
+        body: 
+          data: "{{ cloud_store_options_default }}"
+        return_content: yes
+      retries: "{{ cloud_uri_retries }}"
+      delay: "{{ cloud_uri_delay }}"
+      register: cloud_store_created
+      until: cloud_store_created | success
+  when: cloud_store_query == ''
+
+- name: Create Replication Partner
+  set_fact:
+    cloud_onprem_partner:
+      name: "{{ nimble_group_facts.groups.0.name }}"
+      group_uid: "{{ nimble_group_facts.groups.0.id[2:18] | int(nimble_group_facts.groups.0.id, 16) }}"
+      keys: "ssh-{{ nimble_group_facts.arrays.0.public_key.key_type }} {{ nimble_group_facts.arrays.0.public_key.key }} {{ nimble_group_facts.arrays.0.public_key.key_name }}"
+
+- uri:
+    url: "{{ cloud_portal_api_endpoint }}/onprem_replication_partners"
+    validate_certs: yes
+    method: POST
+    status_code: 200
+    body_format: json
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    body: 
+      data: "{{ cloud_onprem_partner }}"
+    return_content: yes
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  register: cloud_onprem_partner_created
+  until: cloud_onprem_partner_created | success
+
+- name: Create Replication Partnership
+  set_fact:
+    cloud_repl_partnership: "{{ {} | combine({ 'replication_store_id': cloud_store_created.json.data.id, 'onprem_replication_partner_id': cloud_onprem_partner_created.json.data.id }) }}"
+  when: cloud_store_created.skipped is undefined
+
+- set_fact:
+    cloud_repl_partnership: "{{ {} | combine({ 'replication_store_id': cloud_store_query.integer, 'onprem_replication_partner_id': cloud_onprem_partner_created.json.data.id }) }}"
+  when: cloud_store_query.integer is defined
+
+- uri:
+    url: "{{ cloud_portal_api_endpoint }}/replication_partnerships"
+    validate_certs: yes
+    method: POST
+    status_code: 200
+    body_format: json
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    body: 
+      data: "{{ cloud_repl_partnership }}"
+    return_content: yes
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  register: cloud_repl_partnership_created
+  until: cloud_repl_partnership_created | success
+
+- name: Create Local Partner
+  set_fact:
+    nimble_cloud_partnership_options_default: "{{ nimble_cloud_partnership_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ nimble_cloud_partnership_options }}"
+  when: nimble_cloud_partnership_options is defined
+
+- set_fact:
+    nimble_cloud_partnership_options_default: "{{ nimble_cloud_partnership_options_default | combine( { 
+      'name': cloud_store,
+      'alias': cloud_repl_partnership_created.json.data.attributes.alias,
+      'secret': cloud_repl_partnership_created.json.data.attributes.shared_secret,
+      'hostname': cloud_repl_partnership_created.json.data.attributes.replication_ip,
+      'proxy_hostname': cloud_repl_partnership_created.json.data.attributes.proxy_external_ip,
+      'proxy_user': cloud_repl_partnership_created.json.data.attributes.proxy_user,
+      'port_range_start': cloud_repl_partnership_created.json.data.attributes.starting_port 
+      } ) }}"
+
+- uri:
+    url: "{{ nimble_group_url }}/replication_partners"
+    validate_certs: no
+    method: POST
+    status_code: 201
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: "{{ nimble_cloud_partnership_options_default }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_cloud_partner_created
+  until: nimble_cloud_partner_created | success
+
+- name: Test partnership
+  uri:
+    url: "{{ nimble_group_url }}/replication_partners/{{ nimble_cloud_partner_created.json.data.id }}/actions/test"
+    validate_certs: no
+    method: POST
+    status_code: 200
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+    body: "{}"
+  retries: "{{ nimble_uri_retries * 3 }}"
+  delay: "{{ nimble_uri_delay * 3 }}"
+  register: nimble_partner_tested
+  until: nimble_partner_tested | success

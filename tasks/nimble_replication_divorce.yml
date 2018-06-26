@@ -1,0 +1,40 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_partner
+
+- name: Host facts
+  include: nimble_host_facts.yml
+
+- name: Gather volcolls and protection templates
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      replication_partners:
+
+- name: Lookup partner
+  set_fact:
+    nimble_partner_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "replication_partners[?name=='{{ nimble_partner }}'].id | [0]"
+- fail:
+    msg: "Partner not found: {{ nimble_partner }}"
+  when: nimble_partner_id == ""
+
+- name: Divorce partner
+  uri:
+    url: "{{ nimble_group_url }}/replication_partners/{{ nimble_partner_id }}"
+    validate_certs: no
+    method: DELETE
+    status_code: 200,404
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay * 3 }}"
+  register: nimble_partner_deleted
+  until: nimble_partner_deleted | success
+  when: nimble_partner_id != ""

@@ -1,0 +1,70 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_partner
+
+- fail:
+    msg: "The '{{ nimble_partner }}' partnership needs to be defined in nimble_partnerships, please see documentation."
+  when: nimble_partnerships[nimble_partner] is undefined
+  ignore_errors: true
+
+- name: Build partnership
+  set_fact:
+    nimble_partnerships: "{{ {} | combine( { nimble_partner: { 'upstream': '', 'downstream': '' } } ) }}" 
+  when: nimble_partnerships is undefined
+
+- set_fact:
+    nimble_local_partnership: {} 
+    nimble_local_partnership_upstream:
+      name: "{{ nimble_partnerships[nimble_partner].upstream.name | default(nimble_partner) }}"
+      hostname: "{{ nimble_partnerships[nimble_partner].upstream.hostname | default(nimble_partner) }}"
+      subnet_label: "{{ nimble_partnerships[nimble_partner].upstream.subnet_label | default(nimble_partnership_options_default.upstream.subnet_label) }}"
+      username: "{{ nimble_group_options.username }}"
+      password: "{{ nimble_group_password }}"
+      source: "{{ nimble_partnerships[nimble_partner].downstream.hostname | default(nimble_partnership_options_default.downstream.hostname) }}"
+    nimble_local_partnership_downstream:
+      name: "{{ nimble_partnerships[nimble_partner].downstream.name | default(nimble_partnership_options_default.downstream.name) }}"
+      hostname: "{{ nimble_partnerships[nimble_partner].downstream.hostname | default(nimble_partnership_options_default.downstream.hostname) }}"
+      subnet_label: "{{ nimble_partnerships[nimble_partner].downstream.subnet_label | default(nimble_partnership_options_default.downstream.subnet_label) }}"
+      username: "{{ nimble_partnerships[nimble_partner].downstream.username | default(nimble_partnership_options_default.downstream.username) }}"
+      password: "{{ nimble_partnerships[nimble_partner].downstream.password | default(nimble_partnership_options_default.downstream.password) }}"
+      source: "{{ nimble_partnerships[nimble_partner].upstream.hostname | default(nimble_partnership_options_default.upstream.hostname) }}"
+
+- name: Pad arbitrary fields
+  set_fact:
+    nimble_local_partnership_upstream: "{{ nimble_local_partnership_upstream | combine( { item.key: item.value } ) }}"
+  when: nimble_local_partnership_upstream[item.key] is undefined
+  with_dict: "{{ nimble_partnerships[nimble_partner].upstream}}"
+  no_log: True
+- set_fact:
+    nimble_local_partnership_downstream: "{{ nimble_local_partnership_downstream | combine( { item.key: item.value } ) }}"
+  when: nimble_local_partnership_downstream[item.key] is undefined
+  with_dict: "{{ nimble_partnerships[nimble_partner].downstream }}"
+  no_log: True
+- set_fact:
+    nimble_local_partnership: "{{ nimble_local_partnership | combine( { 'upstream': nimble_local_partnership_upstream, 'downstream': nimble_local_partnership_downstream, 'secret': nimble_partnerships[nimble_partner].secret | default('{{ 99999999999999999999 | random | to_uuid }}') } ) }}"
+  no_log: True
+
+- name: Create partnerships
+  include: nimble_util_replication_partnership.yml
+  loop_control:
+    loop_var: nimble_partnership_direction
+  with_items:
+    - downstream
+    - upstream
+
+- name: Test partnerships
+  include: nimble_util_replication_partnership.yml
+  loop_control:
+    loop_var: nimble_partnership_direction
+  with_items:
+    - downstream
+    - upstream
+
+- name: Refresh host facts
+  include: nimble_host_facts.yml
+  vars:
+    nimble_host_facts_force: True

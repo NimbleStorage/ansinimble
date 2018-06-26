@@ -7,6 +7,14 @@ EC2TAG=tag_smokers
 
 all: cleaner copy prepare tests
 test: clean copy tests
+localtag: clean copy local
+
+local:
+	ansible-playbook ${ROLE_DEST}/tests/cloud/test.yml \
+	-l ${EC2TAG} \
+	-e local_smokers=${EC2TAG} \
+	-t local \
+	-e local_role=${ROLE}
 
 tests:
 	ansible-playbook -i ${EC2TMP} ${ROLE_DEST}/tests/cloud/test.yml \

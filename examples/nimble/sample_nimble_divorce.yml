@@ -1,0 +1,11 @@
+---
+# Divorce an array from another
+#
+# $ ansible-playbook -l limit -e nimble_partner=mypartner sample_nimble_divorce.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: replication,
+        nimble_operation: divorce
+      }

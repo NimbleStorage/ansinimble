@@ -1,21 +1,15 @@
 ---
-- block:
-  - name: Ensure NLT is running
-    service:
-      name: nlt
-      state: started
-      enabled: yes
+- name: Ensure NLT is running
+  service:
+    name: nlt
+  register: nimble_nlt_state
 
-  rescue:
-    - include: nimble_nlt_manage.yml
-      vars:
-        nimble_linux_toolkit_state: running
+- include: nimble_nlt_manage.yml
+  vars:
+    nimble_linux_toolkit_state: running
+  when: nimble_nlt_state.status.SubState != 'running'
 
 - block:
-  - fail: msg="Need to collect host facts"
-    when: nimble_host_facts is undefined
-  
-  rescue:
   - name: NLT group info
     shell: >
       nltadm --group --list | tail -1 | awk '{ print 
@@ -64,3 +58,4 @@
     command: nltadm --group --verify --ip-address {{ nimble_host_facts.groups.main.group_ip | quote }} 
     register: nimble_group_verified 
     failed_when: "'Successfully' not in nimble_group_verified.stdout" 
+  when: nimble_host_facts is undefined or nimble_host_facts_force is defined

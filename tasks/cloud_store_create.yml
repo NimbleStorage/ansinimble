@@ -1,0 +1,51 @@
+---
+- name: Ensure play variables are sane
+  fail: 
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - cloud_store
+    - cloud_store_region
+- fail:
+    msg: "cloud_store_size out of range {{ cloud_store_size_min }}MiB - {{ cloud_store_size_max }}MiB"
+  when: cloud_store_size < cloud_store_size_min or cloud_store_size > cloud_store_size_max
+
+- name: Refresh portal facts
+  include: cloud_portal_facts.yml
+  vars:
+    cloud_portal_facts:
+      cv_regions: "filters=name={{ cloud_store_region }}"
+
+- name: Merge options
+  set_fact:
+    cloud_store_options_default: "{{ cloud_store_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ cloud_store_options }}"
+  when: cloud_store_options is defined
+
+- name: Ensure region is Replication Store capable
+  set_fact:
+    # https://github.com/ansible/ansible/issues/27299#issuecomment-331068246
+    cloud_volume_region_id: "{{ cloud_portal_facts | to_json | from_json | json_query(local_query) }}"
+  vars:
+    local_query: "cv_regions[*].[attributes.name=='{{ cloud_store_region }}' && attributes.capabilities[?contains(to_string(@), `Replication`)==`true`] && id][]|{integer: [0]}"
+
+- name: Overlay name, region and size into replication store options
+  set_fact:
+    cloud_store_options_default: "{{ cloud_store_options_default | combine( { 'name': cloud_store, 'limit_size': cloud_store_size, 'cv_region_id': cloud_volume_region_id.integer } ) }}"
+
+- name: Create Replication Store
+  uri:
+    url: "{{ cloud_portal_api_endpoint }}/replication_stores"
+    validate_certs: yes
+    method: POST
+    status_code: 200
+    body_format: json
+    headers:
+      Authorization: "Basic {{ cloud_portal_authz }}"
+    body: 
+      data: "{{ cloud_store_options_default }}"
+    return_content: yes
+  retries: "{{ cloud_uri_retries }}"
+  delay: "{{ cloud_uri_delay }}"
+  register: cloud_store_created
+  until: cloud_store_created | success

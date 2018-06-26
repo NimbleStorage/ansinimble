@@ -58,25 +58,33 @@
     path: "{{ nimble_volume_device_name }}"
     timeout: "{{ nimble_device_delay }}"
 
+- name: Create filesystem label
+  include: util_volume_label.yml
+  vars:
+    util_volume_label: "{{ nimble_volume }}"
+
 - name: Create filesystem
   filesystem: 
     dev: "{{ nimble_volume_device_name }}"
     fstype: xfs
-    opts: -L {{ nimble_volume }} {{ nimble_volume_mkfs_options }}
+    opts: -L {{ util_volume_label }} {{ nimble_volume_mkfs_options }}
   register: nimble_filesystem_created
 
 - name: Update label if this is an existing filesystem (clone)
-  shell: xfs_admin -L {{ nimble_volume | quote }} -U {{ ansible_date_time.iso8601_micro | to_uuid }} {{ nimble_volume_device_name | quote }}
+  shell: xfs_admin -L {{ util_volume_label | quote }} -U {{ ansible_date_time.iso8601_micro | to_uuid }} {{ nimble_volume_device_name | quote }}
   when: nimble_filesystem_created.changed == False
 
 - name: Mount volume
   mount:
     name: "{{ nimble_volume_mountpoint }}"
     state: mounted
-    src: LABEL={{ nimble_volume }}
+    src: LABEL={{ util_volume_label }}
     opts: "{{ nimble_volume_mount_options }},x-systemd.requires={{ nimble_volume_device_name }}"
     fstype: xfs
   retries: "{{ nimble_device_retries }}"
   delay: "{{ nimble_device_delay }}"
   register: nimble_volume_mounted
   until: nimble_volume_mounted | success
+
+- service:
+    daemon-reload: true

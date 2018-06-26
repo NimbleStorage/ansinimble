@@ -17,6 +17,92 @@ Host requirements are less stringent for Cloud Volumes. The Linux Connection Man
 * Requires API access to HPE Cloud Volumes
 * Requires Ansinimble 2.2+ with the jmespath and boto (for EC2) Python package installed on the Ansible host.
 
+# Reference Documentation Tables of Contents 
+
+* [Role Variables](#role-variables)
+* [Usage](#usage)
+ * [Nimble Storage Array Operations](#nimble-storage-array-operations)
+    * [nimble_object nimble_operation](#nimble_object-nimble_operation)
+    * [folder create](#folder-create)
+    * [folder update](#folder-update)
+    * [folder delete](#folder-delete)
+    * [volume create](#volume-create)
+    * [volume map](#volume-map)
+    * [volume mount](#volume-mount)
+    * [volume resize](#volume-resize)
+    * [volume update (not implemented yet)](#volume-update-not-implemented-yet)
+    * [volume snapshot](#volume-snapshot)
+    * [volume umount](#volume-umount)
+    * [volume unmap](#volume-unmap)
+    * [volume restore](#volume-restore)
+    * [volume delete](#volume-delete)
+    * [volume protect](#volume-protect)
+    * [volume unprotect](#volume-unprotect)
+    * [volcoll create](#volcoll-create)
+    * [volcoll prune](#volcoll-prune)
+    * [prottmpl create](#prottmpl-create)
+    * [prottmpl delete](#prottmpl-delete)
+    * [replication partner](#replication-partner)
+    * [replication divorce](#replication-divorce)
+    * [cloud partner](#cloud-partner)
+    * [cloud divorce](#cloud-divorce)
+    * [host facts](#host-facts)
+    * [group facts](#group-facts)
+    * [nlt manage](#nlt-manage)
+ * [Cloud Volume Operations](#cloud-volume-operations)
+    * [cloud_object cloud_operation](#cloud_object-cloud_operation)
+    * [volume create](#volume-create-1)
+    * [volume update](#volume-update)
+    * [volume map](#volume-map-1)
+    * [volume mount](#volume-mount-1)
+    * [volume resize](#volume-resize-1)
+    * [volume snapshot](#volume-snapshot-1)
+    * [volume umount](#volume-umount-1)
+    * [volume unmap](#volume-unmap-1)
+    * [volume restore](#volume-restore-1)
+    * [volume delete](#volume-delete-1)
+    * [portal facts](#portal-facts)
+    * [lcm manage](#lcm-manage)
+    * [array setup](#array-setup)
+    * [password update](#password-update)
+    * [host facts](#host-facts-1)
+ * [Example Playbooks](#example-playbooks)
+ * [Nimble Storage Array Group Examples](#nimble-storage-array-group-examples)
+    * [nimble/sample_install.yml](#nimblesample_installyml)
+    * [nimble/sample_uninstall.yml](#nimblesample_uninstallyml)
+    * [nimble/sample_debug.yml](#nimblesample_debugyml)
+    * [nimble/sample_group_fact.yml](#nimblesample_group_factyml)
+    * [nimble/sample_provision.yml](#nimblesample_provisionyml)
+    * [nimble/sample_snapshot.yml](#nimblesample_snapshotyml)
+    * [nimble/sample_restore.yml](#nimblesample_restoreyml)
+    * [nimble/sample_resize.yml](#nimblesample_resizeyml)
+    * [nimble/sample_decommision.yml](#nimblesample_decommisionyml)
+    * [nimble/sample_array_setup.yml](#nimblesample_array_setupyml)
+    * [nimble/sample_password_change.yml](#nimblesample_password_changeyml)
+    * [nimble/sample_protect.yml](#nimblesample_protectyml)
+    * [nimble/sample_unprotect.yml](#nimblesample_unprotectyml)
+    * [nimble/sample_volcoll_create.ym](#nimblesample_volcoll_createym)
+    * [nimble/sample_volcoll_prune.yml](#nimblesample_volcoll_pruneyml)
+    * [nimble/sample_prottmpl_create.yml](#nimblesample_prottmpl_createyml)
+    * [nimble/sample_prottmpl_delete.yml](#nimblesample_prottmpl_deleteyml)
+    * [nimble/sample_nimble_partner.yml](#nimblesample_nimble_partneryml)
+    * [nimble/sample_nimble_divorce.yml](#nimblesample_nimble_divorceyml)
+    * [nimble/sample_cloud_partner.yml](#nimblesample_cloud_partneryml)
+    * [nimble/sample_cloud_divorce.yml](#nimblesample_cloud_divorceyml)
+    * [nimble/sample_store_create.yml](#nimblesample_store_createyml)
+    * [nimble/sample_store_delete.yml](#nimblesample_store_deleteyml)
+    * [nimble/sample_store_resize.yml](#nimblesample_store_resizeyml)
+ * [Cloud Volume Examples](#cloud-volume-examples)
+    * [cloud/sample_install.yml](#cloudsample_installyml)
+    * [cloud/sample_provision.yml](#cloudsample_provisionyml)
+    * [cloud/sample_resize.yml](#cloudsample_resizeyml)
+    * [cloud/sample_update.yml](#cloudsample_updateyml)
+    * [cloud/sample_snapshot.yml](#cloudsample_snapshotyml)
+    * [cloud/sample_restore.yml](#cloudsample_restoreyml)
+    * [cloud/sample_decommission.yml](#cloudsample_decommissionyml)
+    * [cloud/sample_uninstall.yml](#cloudsample_uninstallyml)
+    * [cloud/sample_debug.yml](#cloudsample_debugyml)
+
 ## Role Variables
 The importance of variables depends on what objects are being managed.
 
@@ -33,10 +119,41 @@ nimble_group_password: admin
 
 # Default Nimble folder options
 nimble_folder_options_default:
-  description: Folder created by Ansible
+  description: "Folder created by Ansible"
 
 nimble_folder_update_options_default:
   description: "Folder updated by Ansible"
+
+# Default volcoll options (when created standalone)
+nimble_volcoll_options_default:
+  description: "Volume Collection created by Ansible"
+
+# Default protection template options
+nimble_prottmpl_options_default:
+  description: "Protection Template created by Ansible"
+
+nimble_protsched_options_default:
+  description: "Protection Schedule created by Ansible"
+  volcoll_or_prottmpl_type: protection_template
+
+# Default partnership options as fallbacks
+nimble_partnership_options_default:
+  upstream:
+    description: "Established by Ansible"
+    subnet_label: mgmt
+  downstream:
+    description: "Established by Ansible"
+    subnet_label: mgmt
+    name: upstream
+    hostname: "{{ nimble_group_options['ip-address'] }}"
+    username: "{{ nimble_group_options.username }}"
+    password: "{{ nimble_group_password }}"
+
+# Default cloud partnership options
+nimble_cloud_partnership_options_default:
+  description: "Established by Ansible"
+  subnet_label: mgmt-data
+  partner_type: tunnel_endpoint
 
 # These are the group facts gathered if no filters are applied with nimble_group_facts
 nimble_group_facts_default:
@@ -49,6 +166,8 @@ nimble_group_facts_default:
   pools:
   subnets:
   volumes:
+  volume_collections:
+  protection_templates:
 
 # How to reach the Nimble group
 nimble_group_http_scheme: https
@@ -99,7 +218,7 @@ nimble_uri_delay: 10
 nimble_silence_payload: True
 
 # NimbleOS setup from scratch
-nimble_setup_config:
+nimble_array_config:
   XX-000000:                                 # This is the serial number of the new array
     group_name: group-sjc-tme000-va          # Name of the group.
     name: sjc-tme000-va                      # Name of the array.
@@ -196,6 +315,7 @@ cloud_volume_mkfs_options: ""
 cloud_volume_size: 10000
 cloud_volume_from_default: {}
 cloud_volume_resize_body: {}
+
 cloud_volume_options_default:
   volume_type: PF
   encryption: False
@@ -207,6 +327,23 @@ cloud_volume_options_default:
 cloud_volume_mandatory_options:
   - existing_cloud_subnet
   - private_cloud 
+
+cloud_replica_options_default:
+  iops: 1000
+
+cloud_replica_mandatory_options:
+  - existing_cloud_subnet
+  - private_cloud 
+
+cloud_replica_snapshot_index: 0
+
+# Default Replication Store options
+cloud_store_options_default:
+  volume_type: GPF
+cloud_store_size: 1099776
+cloud_store_size_min: 1099776
+cloud_store_size_max: 32985088
+cloud_store_region: us-test
 
 # Cloud host defaults
 cloud_host_device_prefix: /dev/nimblestorage
@@ -224,8 +361,13 @@ Each `nimble_object` and `nimble_operation` combo has a set of parameters that c
 Example usage of folder create:
 ```
 - hosts: myhost
+  vars: 
+    nimble_folder: myfolder
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: folder, nimble_operation: create, nimble_folder: myfolder }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: folder, 
+        nimble_operation: create 
+      }
 ```
 
 ### folder create
@@ -251,7 +393,7 @@ nimble_folder: Folder name
 ### volume create
 Create a new volume or clone from a snapshot.
 ```
-nimble_volume: A 12 character volume name (XFS label limitation)
+nimble_volume: An ASCII string (some special characters allowed)
 nimble_volume_from: Create volume from this source volume (name) 
 nimble_volume_snapshot: Use this source snapshot to clone from (uses last snapshot if not specified)
 nimble_volume_options: A dictionary of Nimble volume options (please see the REST documentation)
@@ -321,6 +463,99 @@ nimble_volume_snapshot: Snapshot name to restore to (optional, uses last snapsho
 Permanently deletes a volume. Please umount and unmap first.
 ```
 nimble_volume: Volume name to delete 
+```
+
+### volume protect
+Protects a volume in either a dedicated volume collection with a protection template or an existing volume collection.
+```
+nimble_volume: Volume name to protect
+nimble_protection_template: Name of protection template to create a new volume collection with
+nimble_volume_collection: Existing volume collection to add the volume to
+```
+**Note**: `nimble_protection_template` and `nimble_volume_collection` are mutually exclusive.
+
+### volume unprotect
+Remove the volume collection association from a volume.
+```
+nimble_volume: Volume name to remove volume collection association from
+```
+
+### volcoll create
+Create a new volume collection from a protection template.
+```
+nimble_volume_collection: Name of the volume collection
+nimble_volcoll_options: Key/value of volcoll options (see API documentation on HPE InfoSight)
+```
+
+### volcoll prune
+Prunes the array group of orphaned volume collections. No parameters needed.
+
+### prottmpl create
+Creates a protection schedule with a set of schedules and replica destinations.
+```
+nimble_protection_template: Name of the protection template
+nimble_protection_template_options: Key/value pairs of protection template options (see API documentation on HPE InfoSight)
+nimble_protection_schedules:
+  myschedule:
+    downstream_partner_id: Name of downstream partner (optional)
+    num_retain_replica: Number of snapshots to retain on the replica (optional)
+    description: A human readable description of schedule (optional)
+    period_unit: A human readable unit of periods such as "minutes", "hours", "days" or "weeks"
+    days: A human readable comma separated list of days to take snapshots, example: "saturday,sunday"
+    at_time: Non-negative integer in range [0,86399] which is equivalent to [0:00:00 AM, 23:59:59 PM]
+    until_time: Time of day to stop taking snapshots (same range as above). Only applicable for units < "days".
+    num_retain: Number of snapshots to retain in this schedule
+  myotherschedule:
+    ...
+```
+**Note**: More options are availble, please see the full API documentation on HPE InfoSight.
+
+### prottmpl delete
+Deletes a protection template.
+```
+nimble_protection_template: Name of protection template to delete
+```
+
+### replication partner
+Partner with a downstream array group.
+```
+nimble_partner: Name of partnership to marry, example: mypartnership
+nimble_partnerships:
+  mypartnership:
+    upstream:
+      name: Vanity name of upstream group, example: group-sjc-array869
+      hostname: FQDN of upstream array
+      subnet_label: Label of network to use for replication
+      description: "My upstream array"
+    downstream:
+      name: Vanity name of downstream group, example: group-sjc-array875
+      hostname: FQDN of downstream array
+      subnet_label: Label of network to use for replication
+      username: Username on downstream array
+      password: Password on downstream array
+      description: "My downstream array"
+    secret: Secret to use for pairing (minimum 8 chars)
+```
+
+### replication divorce
+Divorce an array group (may not be referenced by any protection templates)
+```
+nimble_partner: Replication partner name to delete 
+```
+**Note:** Does not use nimble_partnerships data structure or communicates to both ends of the partnership
+
+### cloud partner
+Partner an array group with Cloud Volumes.
+```
+cloud_store: Name of "Replication Store" in cloud volumes to use (will be created with default options if it doesn't exist)
+cloud_store_region: Cloud Volumes region to use
+```
+**Note**: Require Cloud Volumes authentication variables to be set too
+
+### cloud divorce
+Divorces a partnership with Cloud Volumes (may not have any protection templates associated).
+```
+cloud_store: Name of cloud store to divorce from
 ```
 
 ### host facts
@@ -518,7 +753,7 @@ Gathers host facts. Not currently used.
 ## Example Playbooks
 Here are some example uses of this role. These are cut and paste from [examples](examples)
 
-## Nimble Storage arrays
+## Nimble Storage Array Group Examples
 Make sure credentials for NLT and the arrays are accessible in the appropriate variables.
 
 ### nimble/sample_install.yml
@@ -657,6 +892,245 @@ Changes the password of a user.
         nimble_operation: update }
 ```
 **Note:** Changing the password of the that NLT user is currently connected to requires removing and re-adding the group. The NLT dependency for non-host related tasks such as "password update" will be removed in a future version.
+
+### nimble/sample_protect.yml
+Protects a Nimble volume.
+```
+---
+# Provide nimble_volume and nimble_volume_collection OR nimble_protection_template as extra vars, i.e:
+# $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_protection_template=Retain-30 sample_protect.yml
+# $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_volume_collection=myexistingvolcoll sample_protect.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: volume,
+        nimble_operation: protect,
+      }
+```
+
+### nimble/sample_unprotect.yml
+Disassociates a Nimble volume from a volume collection.
+```
+---
+# Provide nimble_volume as extra vars, i.e:
+# $ ansible-playbook -l limit -e nimble_volume=myvol1 sample_unprotect.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: volume,
+        nimble_operation: unprotect
+      }
+```
+
+### nimble/sample_volcoll_create.ym
+Creates a new volume collection.
+```
+---
+# Create volume collection
+# $ ansible-playbook -l limit -e nimble_volume_collection=myvolcoll1 -e nimble_protection_template=myprottmpl1 sample_volcoll_create.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: volcoll,
+        nimble_operation: create
+      }
+```
+
+### nimble/sample_volcoll_prune.yml
+Prunes all empty volume collections.
+```
+---
+# Prune volume collections without associated volumes
+# $ ansible-playbook -l limit sample_volcoll_prune.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_object: volcoll, nimble_operation: prune }
+```
+
+### nimble/sample_prottmpl_create.yml
+Creates a new protection template.
+```
+---
+# Create default protection template 
+# $ ansible-playbook -l limit -e nimble_protection_template=myprottmpl1 sample_prottmpl_create.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: prottmpl,
+        nimble_operation: create
+      }
+  tags:
+    - standalone
+
+# Create protection template with schedules, please see InfoSight REST API docs for full schedule options
+# Note: downstream_partner_id will be translated from a human-readable group name to an id
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: prottmpl,
+        nimble_operation: create,
+        nimble_protection_schedules: {
+          myschedule1: {
+            description: "Create a snapshot hourly and retain 48",
+            period_unit: "hours",
+            period: 1,
+            num_retain: 48
+          },
+          myschedule2: {
+            description: "Create a snapshot every 5 minutes and retain 24",
+            period_unit: "minutes",
+            period: 5,
+            num_retain: 24
+          },
+          myotherschedule: {
+            downstream_partner_id: "group-nva2",
+            num_retain_replica: 32,
+            description: "Create a snapshot daily during weekdays at 1am and retain 16",
+            period_unit: "days",
+            days: "monday,tuesday,wednesday,thursday,friday",
+            at_time: 3600,
+            num_retain: 16
+          }
+        }
+      }
+```
+
+### nimble/sample_prottmpl_delete.yml
+Deletes a proection template.
+```
+---
+# Delete protection template 
+# $ ansible-playbook -l limit -e nimble_protection_template=myprottmpl1 sample_prottmpl_delete.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: prottmpl,
+        nimble_operation: delete
+      }
+```
+
+### nimble/sample_nimble_partner.yml
+Partners with downstream Nimble array.
+```
+---
+# Marry two arrays and test the connection
+#
+# Upstream variables defines how to partner the downstream
+# Downstream variables defines how to partner upstream
+#
+# The nimble_partnerships var describes partnerships and should be protected with Ansible vault. Please find variable descriptions above.
+# 
+# $ ansible-playbook -l limit -e nimble_partner=mypartnership sample_nimble_partner.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: replication,
+        nimble_operation: partner
+      }
+```
+
+### nimble/sample_nimble_divorce.yml
+Divorces (deletes) a replication partnership.
+```
+---
+# Divorce an array from another
+#
+# $ ansible-playbook -l limit -e nimble_partner=mypartner sample_nimble_divorce.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: replication,
+        nimble_operation: divorce
+      }
+```
+
+### nimble/sample_cloud_partner.yml
+Partners a Nimble Storage array group with Cloud Volumes.
+```
+---
+# Establish partnership with HPE Cloud Volumes
+# 
+# $ ansible-playbook -l limit -e cloud_store_region -e cloud_store=MyReplicationStore sample_cloud_partner.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: cloud,
+        nimble_operation: partner
+      }
+```
+
+### nimble/sample_cloud_divorce.yml
+Divorces a Nimble Storage array group from Cloud Volumes (leaves Replication Store intact)
+```
+---
+# Break partnership with HPE Cloud Volumes Replication Store (leaves store intact)
+# 
+# $ ansible-playbook -l limit -e cloud_store=MyReplicationStore sample_cloud_divorce.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: cloud,
+        nimble_operation: divorce
+      }
+```
+
+### nimble/sample_store_create.yml
+Creates a Replication Store in Cloud Volumes.
+```
+---
+# Creates a replication store of given size.
+# Mind that creating Replication Stores does not assume any cloud instances and are done in the context of an arbitray Ansible capable node
+# $ ansible-playbook -l limit -e cloud_store=mycloudstore1 -e cloud_store_size=300000 -e cloud_store_region=us-west1 sample_store_create.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: store,
+        cloud_operation: create
+      }
+```
+
+### nimble/sample_store_delete.yml
+Deletes a Replication Store in Cloud Volumes.
+```
+---
+# Deletes a replication store
+# Mind that deleted Replication Stores does not assume any cloud instances and are done in the context of an arbitrary Ansible capable node
+# $ ansible-playbook -l limit -e cloud_store=mycloudstore1 sample_store_delete.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: store,
+        cloud_operation: delete
+      }
+```
+
+### nimble/sample_store_resize.yml
+Resizes a Replication Store in Cloud Volumes.
+```
+---
+# Resizes a replication store
+# Mind that resizing replication stores does not assume any cloud instances and are done in the context of an arbitrary Ansible capable node
+# $ ansible-playbook -l limit -e cloud_store=mycloudstore1 -e cloud_store_size=20000 sample_store_resize.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: store,
+        cloud_operation: resize
+      }
+```
 
 ## Cloud Volume Examples
 These are some basic examples on how to use this role. Each example assumes credentials variables to HPE Cloud Volumes has been set elsewhere.

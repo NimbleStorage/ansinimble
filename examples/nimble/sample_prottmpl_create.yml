@@ -1,0 +1,46 @@
+---
+# Create default protection template 
+# $ ansible-playbook -l limit -e nimble_protection_template=myprottmpl1 sample_prottmpl_create.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: prottmpl,
+        nimble_operation: create
+      }
+  tags:
+    - standalone
+
+# Create protection template with schedules, please see InfoSight REST API docs for full schedule options
+# Note: downstream_partner_id will be translated from a human-readable group name to an id
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: prottmpl,
+        nimble_operation: create,
+        nimble_protection_schedules: {
+          myschedule1: {
+            description: "Create a snapshot hourly and retain 48",
+            period_unit: "hours",
+            period: 1,
+            num_retain: 48
+          },
+          myschedule2: {
+            description: "Create a snapshot every 5 minutes and retain 24",
+            period_unit: "minutes",
+            period: 5,
+            num_retain: 24
+          },
+          myotherschedule: {
+            downstream_partner_id: "group-nva2",
+            num_retain_replica: 32,
+            description: "Create a snapshot daily during weekdays at 1am and retain 16",
+            period_unit: "days",
+            days: "monday,tuesday,wednesday,thursday,friday",
+            at_time: 3600,
+            num_retain: 16
+          }
+        }
+      }
+  tags:
+    - schedules

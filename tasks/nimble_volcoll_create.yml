@@ -1,0 +1,49 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_volume_collection
+    - nimble_protection_template
+
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Gather volcolls
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      protection_templates: 
+
+- name: Get nimble_prottmpl_id
+  set_fact:
+    nimble_prottmpl_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "protection_templates[?name=='{{ nimble_protection_template }}'].id | [0]"
+
+- name: Merge options
+  set_fact: 
+    nimble_volcoll_options_default: "{{ nimble_volcoll_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ nimble_volcoll_options }}"
+  when: nimble_volcoll_options is defined
+
+- set_fact:
+    nimble_volcoll_options_default: "{{ nimble_volcoll_options_default | combine( { 'name': nimble_volume_collection, 'prottmpl_id': nimble_prottmpl_id } ) }}"
+
+- name: Create volcoll
+  uri:
+    url: "{{ nimble_group_url }}/volume_collections"
+    validate_certs: no
+    method: POST
+    status_code: 201
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: "{{ nimble_volcoll_options_default }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_volcoll_created
+  until: nimble_volcoll_created | success

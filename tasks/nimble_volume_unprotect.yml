@@ -1,0 +1,37 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_volume
+
+- name: Host facts
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      volumes: 
+
+- name: Get nimble_volume_id
+  include: nimble_util_volume_id.yml
+
+- name: Wipe volcoll from volume
+  uri:
+    url: "{{ nimble_group_url }}/volumes/{{ nimble_volume_id }}"
+    validate_certs: no
+    method: PUT
+    status_code: 200
+    body_format: json
+    body:
+      data:
+        volcoll_id: ""
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_volcoll_updated
+  until: nimble_volcoll_updated | success

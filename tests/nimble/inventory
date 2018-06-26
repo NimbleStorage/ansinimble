@@ -1,2 +1,0 @@
-[smokers]
-smokey ansible_connection=local
