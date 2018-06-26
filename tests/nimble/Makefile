@@ -5,6 +5,7 @@ ROLE_DEST=/etc/ansible/roles/$(ROLE)
 all: clean copy tests
 tag: clean copy tags
 install: clean copy bundle
+cloud: clean copy cv
 
 tags:
 	ansible-playbook -t ${ARGS} -l smokers $(ROLE_DEST)/tests/nimble/test.yml
@@ -24,3 +25,5 @@ bundle:
 
 unbundle:
 	ansible-playbook -l smokers $(ROLE_DEST)/examples/nimble/sample_uninstall.yml
+cv:
+	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/cloud.yml 

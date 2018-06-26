@@ -63,3 +63,8 @@
   with_items:
     - downstream
     - upstream
+
+- name: Refresh host facts
+  include: nimble_host_facts.yml
+  vars:
+    nimble_host_facts_force: True

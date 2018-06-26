@@ -140,7 +140,7 @@
     nimble_volume: "{{ inventory_hostname_short }}-vol"
   roles:
     - { role: debug_marker,
-        local_test: "Data protection"
+        local_test: "Data protection (partner)"
       }
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: partner,
@@ -184,7 +184,7 @@
         nimble_protection_template: MyTestTemplate,
         nimble_protection_schedules: {
           myotherschedule: {
-            downstream_partner_id: "{{ nimble_partnerships.test.upstream.name }}",
+            downstream_partner_id: "{{ nimble_partnerships.test.downstream.name }}",
             num_retain_replica: 32,
             description: "Create a snapshot daily during weekdays at 1am and retain 16 locally and 32 remotely",
             period_unit: "days",
@@ -202,7 +202,7 @@
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: divorce,
         nimble_object: replication,
-        nimble_partner: "{{ nimble_partnerships.test.upstream.name }}"
+        nimble_partner: "{{ nimble_partnerships.test.downstream.name }}"
       }
 
 # Resize and delete
@@ -227,8 +227,8 @@
   become: yes
   tasks:
     - command: nltadm --group --remove --ip-address {{ nimble_group_options['ip-address'] }}
-    - command: nltadm --group --add --ip-address {{ nimble_partnerships.test.upstream.hostname }} --username {{ nimble_partnerships.test.downstream.username }} --password {{ nimble_partnerships.test.downstream.password }}
-    - command: nltadm --group --verify --ip-address {{ lookup('dig', nimble_partnerships.test.upstream.hostname) }}
+    - command: nltadm --group --add --ip-address {{ nimble_partnerships.test.downstream.hostname }} --username {{ nimble_partnerships.test.downstream.username }} --password {{ nimble_partnerships.test.downstream.password }}
+    - command: nltadm --group --verify --ip-address {{ lookup('dig', nimble_partnerships.test.downstream.hostname) }}
 
 - hosts: smokey
   become: yes
@@ -236,7 +236,7 @@
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: divorce,
         nimble_object: replication,
-        nimble_partner: "{{ nimble_partnerships.test.downstream.name }}",
+        nimble_partner: "{{ nimble_partnerships.test.upstream.name }}",
         nimble_host_facts_force: True
       }
     

@@ -57,7 +57,7 @@
 
     - fail:
         msg: "Selected region is not replication capable."
-      when: cloud_volume_region_id == []
+      when: cloud_volume_region_id == [] or cloud_volume_region_id.integer == None
 
     - name: Overlay name, region and size into replication store options
       set_fact:

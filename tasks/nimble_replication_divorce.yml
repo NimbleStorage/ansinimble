@@ -29,12 +29,12 @@
     url: "{{ nimble_group_url }}/replication_partners/{{ nimble_partner_id }}"
     validate_certs: no
     method: DELETE
-    status_code: 200
+    status_code: 200,404
     body_format: json
     headers:
       X-Auth-Token: "{{ nimble_group_token }}"
   retries: "{{ nimble_uri_retries }}"
-  delay: "{{ nimble_uri_delay }}"
+  delay: "{{ nimble_uri_delay * 3 }}"
   register: nimble_partner_deleted
   until: nimble_partner_deleted | success
   when: nimble_partner_id != ""

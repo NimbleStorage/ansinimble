@@ -26,15 +26,18 @@
     local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
   when: ansible_os_family == 'Debian'
 
-- name: Unmount volume
-  mount:
-    name: "{{ nimble_volume_mountpoint }}"
-    state: unmounted
-
 - name: Wipe fstab
   mount:
     name: "{{ nimble_volume_mountpoint }}"
     state: absent
+
+- service:
+    daemon-reload: true
+
+- name: Unmount volume
+  mount:
+    name: "{{ nimble_volume_mountpoint }}"
+    state: unmounted
 
 - block:
   - name: Create device string
