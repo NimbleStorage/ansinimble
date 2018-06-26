@@ -3,12 +3,13 @@ Manages software and products from Nimble Storage. This is BETA software.
 
 ## Requirements
 Ansinimble supports two different product lines. HPE Nimble Storage arrays and HPE Cloud Volumes. Requirements vary slightly between products. 
-
 ### Nimble Arrays
 This role assumes the latest Nimble Linux Toolkit (NLT) is installed on the host being managed by Ansible. The latest version of NLT may be obtained from [InfoSight](https://infosight.nimblestorage.com) (Nimble customers and partners only).
 
 * Requires a Nimble iSCSI array with NimbleOS 3.3+
 * Requires Ansible 2.2+ with the jmespath Python package installed
+
+**Note:** Ansible 2.5 is not supported at this time.
 
 ### Cloud Volumes
 Host requirements are less stringent for Cloud Volumes. The Linux Connection Manager found on the Cloud Volumes portal needs to be installed but there is a task that can do that for you.
@@ -19,7 +20,7 @@ Host requirements are less stringent for Cloud Volumes. The Linux Connection Man
 ## Role Variables
 The importance of variables depends on what objects are being managed.
 
-These are the defaults that are broadly applicapable:
+These are the defaults that are broadly applicapable or serving as examples:
 ```
 ---
 # These are required if NLT needs to be installed
@@ -96,6 +97,63 @@ nimble_device_delay: 10
 nimble_uri_retries: 6
 nimble_uri_delay: 10
 nimble_silence_payload: True
+
+# NimbleOS setup from scratch
+nimble_setup_config:
+  XX-000000:                                 # This is the serial number of the new array
+    group_name: group-sjc-tme000-va          # Name of the group.
+    name: sjc-tme000-va                      # Name of the array.
+    domainname: vlab.nimblestorage.com       # DNS domain name of this system.
+    ntpserver: time.nimblestorage.com        # Hostname or IP address of NTP server.
+    timezone: America/Los_Angeles            # Time zone that the array is in.
+    mgmt_ipaddr: 10.18.173.174               # Management IP address.
+    default_gateway: 10.18.160.1             # Default gateway IP address.
+
+    dnsservers:                              # IP addresses of the DNS servers.
+      - 10.18.5.4
+      - 10.12.255.254
+
+    iscsi_automatic_connection_method: "yes" # Redirect connections from the specified
+                                             # iSCSI target IP appropriately.
+
+    iscsi_connection_rebalancing: "yes"      # Rebalance iSCSI connections by periodically
+                                             # breaking existing connections that are
+                                             # out-of-balance.
+
+    subnets:                                 # Subnets to configure (In NIC order)
+      - label: mgmt-data                     # Subnet Label on NIC.
+        subnet_addr: 10.18.173.174/19        # Subnet on NIC.
+        subnet_type: management              # Type of subnet -- data, management, or data
+                                             # and management
+        subnet_mtu: 1500                     # Size of MTU - standard, jumbo, other.
+
+      - label: mgmt-data                     # Subnet Label on NIC.
+        subnet_addr: 10.18.173.174/19        # Subnet on NIC.
+        subnet_type: management              # Type of subnet -- data, management, or data
+                                             # and management
+        subnet_mtu: 1500                     # Size of MTU - standard, jumbo, other.
+
+      - label: data1                         # Subnet Label on NIC.
+        data_ipaddr: 172.16.237.135          # Data IP address setting.
+        subnet_addr: 172.16.237.135/19       # Subnet on NIC.
+        subnet_type: data                    # Type of subnet -- data, management, or data
+                                             # and management
+        subnet_mtu: 1500                     # Size of MTU - standard, jumbo, other.
+
+      - label: data2                         # Subnet Label on NIC.
+        data_ipaddr: 172.16.45.159           # Data IP address setting.
+        subnet_addr: 172.16.45.159/19        # Subnet on NIC.
+        subnet_type: data                    # Type of subnet -- data, management, or data
+                                             # and management
+        subnet_mtu: 1500                     # Size of MTU - standard, jumbo, other.
+
+    discovery_ipaddrs:                       # Discovery IP address setting.
+      - 172.16.237.136
+      - 172.16.45.160
+
+    support_ipaddrs:
+      - 10.18.173.175                        # Support IP address setting node A.
+      - 10.18.173.176                        # Support IP address setting node B.
 
 # Cloud Volumes
 cloud_portal_http_host: cloudvolumes.hpe.com
@@ -437,6 +495,23 @@ cloud_lcm_state: absent or present
 cloud_lcm_installer: Optional URL to installer, will grab whatever is set in default currently otherwise
 ```
 
+### array setup
+Sets up an array from scratch. The Ansible host needs to be configured with ZeroConf in the same network as the arrays that needs to be setup.
+```
+nimble_array_serial: The serial number to setup, i.e AF-123456
+nimble_array_discovery_interface: Interface on the Ansible host that is connected to the ZeroConf network, defaults to the network interface with a default gateway
+nimble_array_config: Advanced YAML structure listing arrays to setup by serial number. Please see defaults/main.yml for an example
+```
+
+### password update
+Sets a new password for a user
+```
+nimble_password_user: Defaults to what's stored in nimble_group_options.username
+nimble_password_new: New password, i.e Password-364
+```
+**Note**: The current password is stored in nimble_group_password
+**Note #2**: It's good practice to store passwords with Ansible Vault
+
 ### host facts
 Gathers host facts. Not currently used.
 
@@ -555,6 +630,33 @@ Unmounts and deletes a volume.
     - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: unmap }
     - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: delete }
 ```
+
+### nimble/sample_array_setup.yml
+Sets up and array from scratch over the network with ZeroConf.
+```
+---
+# Provide nimble_array_serial as an extra variable and store config structure in host_vars/ansible_host
+# $ ansible-playbook -l limit -e nimble_array_serial=XX-123456 sample_array_setup.yml
+- hosts: ansible_host
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: array,
+        nimble_operation: setup }
+```
+
+### nimble/sample_password_change.yml
+Changes the password of a user.
+```
+---
+# Provide nimble_password_new and nimble_password_user as extra vars
+# $ ansible-playbook -l limit -e nimble_password_new=mynewpass-123 -e nimble_password_user=myusername sample_password_change.yml
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: password,
+        nimble_operation: update }
+```
+**Note:** Changing the password of the that NLT user is currently connected to requires removing and re-adding the group. The NLT dependency for non-host related tasks such as "password update" will be removed in a future version.
 
 ## Cloud Volume Examples
 These are some basic examples on how to use this role. Each example assumes credentials variables to HPE Cloud Volumes has been set elsewhere.
@@ -754,4 +856,4 @@ Apache 2.0, please see [LICENSE](LICENSE)
 Please see [VERSION](VERSION)
 
 ## Author Information
-This role is maintained by Michael Mattsson, a Nimble Storage employee, on his spare time. Please use the GitHub issue tracker for any queries related to this role.
+This role is maintained by Michael Mattsson, a HPE Nimble Storage employee, on Nimble Hack Days. Please use the GitHub issue tracker for any queries related to this role.
