@@ -7,10 +7,6 @@ nimble_group_options:
 # Please store password with Ansible Vault
 nimble_group_password: admin
 
-# Credentials to HPE Cloud Volumes for partnering purposes
-nimble_cloud_username: you@yourorg.com
-nimble_cloud_password: MyPassword123
-
 # Default Nimble folder options
 nimble_folder_options_default:
   description: "Folder created by Ansible"
@@ -237,6 +233,7 @@ cloud_store_options_default:
 cloud_store_size: 1099776
 cloud_store_size_min: 1099776
 cloud_store_size_max: 32985088
+cloud_store_region: us-test
 
 # Cloud host defaults
 cloud_host_device_prefix: /dev/nimblestorage
