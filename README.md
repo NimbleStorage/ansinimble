@@ -17,8 +17,7 @@ Host requirements are less stringent for Cloud Volumes. The Linux Connection Man
 * Requires API access to HPE Cloud Volumes
 * Requires Ansinimble 2.2+ with the jmespath and boto (for EC2) Python package installed on the Ansible host.
 
-Reference documentation Tables of Contents 
-==========================================
+# Reference Documentation Tables of Contents 
 
 * [Role Variables](#role-variables)
 * [Usage](#usage)
