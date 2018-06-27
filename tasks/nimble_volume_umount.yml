@@ -31,14 +31,6 @@
     name: "{{ nimble_volume_mountpoint }}"
     state: absent
 
-- service:
-    daemon-reload: true
-
-- name: Unmount volume
-  mount:
-    name: "{{ nimble_volume_mountpoint }}"
-    state: unmounted
-
 - block:
   - name: Create device string
     set_fact:

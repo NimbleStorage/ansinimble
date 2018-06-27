@@ -171,7 +171,7 @@ cloud_portal_http_host: cloudvolumes.hpe.com
 cloud_portal_access_key: nimble
 cloud_portal_secret_key: nimblestorage
 
-cloud_lcm_installer: https://ncv.cloud.nimblestorage.com/tools/ncv_installer_1.0.0.16
+cloud_lcm_installer: https://cloudvolumes.hpe.com/tools/ncv_installer_latest
 cloud_lcm_prefix: /opt/NimbleStorage
 cloud_host_iqn_file: /etc/iscsi/initiatorname.iscsi
 

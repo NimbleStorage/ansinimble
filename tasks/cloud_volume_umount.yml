@@ -31,18 +31,17 @@
     cloud_volume_device_name: "/dev/disk/by-id/dm-uuid-mpath-2{{ cloud_volume_attr.sn }}"
   when: ansible_os_family == 'Debian'
 
-- name: Unmount volume
-  mount:
-    name: "{{ cloud_volume_mountpoint }}"
-    state: unmounted
+- stat:
+    path: "{{ cloud_volume_device_name }}"
+  register: cloud_volume_device_name_path
 
-- name: Wipe fstab
+- name: Wipe fstab and umount
   mount:
     name: "{{ cloud_volume_mountpoint }}"
     state: absent
 
 - name: Disconnect Cloud Volume
-  command: ncvol --disconnect --target-iqn {{ cloud_volume_attr.target_name }} 
+  command: ncvol --disconnect --device '{{ cloud_volume_device_name_path.stat.lnk_source }}'
   register: cloud_volume_umount
   failed_when: not cloud_volume_umount.stdout | search("The target is not connected to the host|done")
 

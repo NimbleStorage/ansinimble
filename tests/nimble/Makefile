@@ -6,6 +6,7 @@ all: clean copy tests
 tag: clean copy tags
 install: clean copy bundle
 cloud: clean copy cv
+compat: clean copy full
 
 tags:
 	ansible-playbook -t ${ARGS} -l smokers $(ROLE_DEST)/tests/nimble/test.yml
@@ -27,3 +28,13 @@ unbundle:
 	ansible-playbook -l smokers $(ROLE_DEST)/examples/nimble/sample_uninstall.yml
 cv:
 	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/cloud.yml 
+full:
+	sudo pip install ansible==2.2.3.0
+	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/test.yml 
+	sudo pip install ansible==2.3.3.0
+	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/test.yml 
+	sudo pip install ansible==2.4.5.0
+	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/test.yml 
+	sudo pip install ansible==2.5.5
+	ansible-playbook -l smokers -b $(ROLE_DEST)/tests/nimble/test.yml 
+	sudo pip install ansible==2.4.5.0

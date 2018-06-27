@@ -7,15 +7,24 @@ Ansinimble supports two different product lines. HPE Nimble Storage arrays and H
 This role assumes the latest Nimble Linux Toolkit (NLT) is installed on the host being managed by Ansible. The latest version of NLT may be obtained from [InfoSight](https://infosight.nimblestorage.com) (Nimble customers and partners only).
 
 * Requires a Nimble iSCSI array with NimbleOS 3.3+
-* Requires Ansible 2.2+ with the jmespath Python package installed
-
-**Note:** Ansible 2.5 is not supported at this time.
+* Requires Ansible 2.2.3+ with the jmespath Python package installed (please see deprecation notes on Ansible 2.5 below)
 
 ### Cloud Volumes
 Host requirements are less stringent for Cloud Volumes. The Linux Connection Manager found on the Cloud Volumes portal needs to be installed but there is a task that can do that for you.
 
 * Requires API access to HPE Cloud Volumes
-* Requires Ansinimble 2.2+ with the jmespath and boto (for EC2) Python package installed on the Ansible host.
+* Requires Ansinimble 2.2.3+ with the jmespath and boto (for EC2) Python package installed on the Ansible host. (please see deprectation notes on Ansible 2.5 below)
+
+## Deprecation notes and tested versions of Ansible
+The following versions of Ansible are currently being tested:
+* 2.2.3.0
+* 2.3.3.0
+* 2.4.5.0
+* 2.5.5
+
+When Ansible 2.9 becomes generally available, the role will be re-written and only support Ansible 2.5+. A number of deprecation warnings will be present when executing under Ansible 2.4 and 2.5, they are harmless. Deprecation warnings may safely be disabled.
+
+**Important:** When executing under Ansible 2.5, `ansible-playbook -b` (become) must be used for the role to work properly. This is due to a change in the `include` statement.
 
 # Reference Documentation Tables of Contents 
 
