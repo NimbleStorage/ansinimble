@@ -3,7 +3,7 @@ allow_duplicates: yes
 galaxy_info:
   author: Michael Mattsson
   description: Role to manage Nimble Storage devices and adjacent technology
-  company: Nimble Storage
+  company: HPE Nimble Storage
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
@@ -18,7 +18,7 @@ galaxy_info:
   # - CC-BY
   license: Apache 2.0
 
-  min_ansible_version: 2.2.1
+  min_ansible_version: 2.2.3.0
 
   # Optionally specify the branch Galaxy will use when accessing the GitHub
   # repo for this role. During role install, if no tags are available,
@@ -143,6 +143,7 @@ galaxy_info:
   #  - vivid
   #  - wily
     - xenial
+    - bionic
   #  - yakkety
   #- name: Debian
   #  versions:

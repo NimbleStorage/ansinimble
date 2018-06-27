@@ -85,6 +85,3 @@
   delay: "{{ nimble_device_delay }}"
   register: nimble_volume_mounted
   until: nimble_volume_mounted | success
-
-- service:
-    daemon-reload: true

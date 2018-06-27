@@ -7,14 +7,7 @@ EC2TAG=tag_smokers
 
 all: cleaner copy prepare tests
 test: clean copy tests
-localtag: clean copy local
-
-local:
-	ansible-playbook ${ROLE_DEST}/tests/cloud/test.yml \
-	-l ${EC2TAG} \
-	-e local_smokers=${EC2TAG} \
-	-t local \
-	-e local_role=${ROLE}
+compat: cleaner copy prepare full
 
 tests:
 	ansible-playbook -i ${EC2TMP} ${ROLE_DEST}/tests/cloud/test.yml \
@@ -36,3 +29,30 @@ cleaner:
 prepare:
 	wget -O ${EC2TMP} ${EC2PY}
 	chmod 755 ${EC2TMP}
+
+full:
+	sudo pip install ansible==2.2.3.0
+	ansible-playbook -i ${EC2TMP} ${ROLE_DEST}/tests/cloud/test.yml \
+	-u ubuntu \
+	-l ${EC2TAG} \
+	-e local_smokers=${EC2TAG} \
+	-e local_role=${ROLE}
+	sudo pip install ansible==2.3.3.0
+	ansible-playbook -i ${EC2TMP} ${ROLE_DEST}/tests/cloud/test.yml \
+	-u ubuntu \
+	-l ${EC2TAG} \
+	-e local_smokers=${EC2TAG} \
+	-e local_role=${ROLE}
+	sudo pip install ansible==2.4.5.0
+	ansible-playbook -i ${EC2TMP} ${ROLE_DEST}/tests/cloud/test.yml \
+	-u ubuntu \
+	-l ${EC2TAG} \
+	-e local_smokers=${EC2TAG} \
+	-e local_role=${ROLE}
+	sudo pip install ansible==2.5.5
+	ansible-playbook -b -i ${EC2TMP} ${ROLE_DEST}/tests/cloud/test.yml \
+	-u ubuntu \
+	-l ${EC2TAG} \
+	-e local_smokers=${EC2TAG} \
+	-e local_role=${ROLE}
+	sudo pip install ansible==2.4.5.0

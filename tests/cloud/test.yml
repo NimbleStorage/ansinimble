@@ -3,8 +3,6 @@
   tasks:
     - set_fact: 
         local_uuid: "{{ (inventory_hostname + ansible_date_time.iso8601_micro) | to_uuid | regex_replace('-','')}}"
-      tags:
-        - local
 
     - set_fact: 
         local_provider: "Amazon AWS"
@@ -33,8 +31,9 @@
     - { role: "{{ local_role }}",
         cloud_operation: create,
         cloud_object: store } 
-  tags:
-    - local
+    - { role: "{{ local_role }}",
+        cloud_operation: delete,
+        cloud_object: store } 
 
 # Hello World
 - hosts: "{{ local_smokers }}"
