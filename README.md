@@ -61,6 +61,9 @@ When Ansible 2.9 becomes generally available, the role will be re-written and on
    * [nlt manage](#nlt-manage)
    * [array setup](#array-setup)
    * [password update](#password-update)
+   * [perfpolicy_create](#perfpolicy-create)
+   * [perfpolicy_update](#perfpolicy-update)
+   * [perfpolicy_delete](#perfpolicy-delete)
 * [Cloud Volume Operations](#cloud-volume-operations)
    * [cloud_object cloud_operation](#cloud_object-cloud_operation)
    * [volume create](#volume-create-1)
@@ -106,6 +109,9 @@ When Ansible 2.9 becomes generally available, the role will be re-written and on
    * [sample_store_create.yml](#sample_store_createyml)
    * [sample_store_delete.yml](#sample_store_deleteyml)
    * [sample_store_resize.yml](#sample_store_resizeyml)
+   * [sample_perfpolicy_create.yml](#sample_perfpolicy_createyml)
+   * [sample_perfpolicy_update.yml](#sample_perfpolicy_updateyml)
+   * [sample_perfpolicy_delete.yml](#sample_perfpolicy_deleteyml)
 * [Cloud Volume Examples](#cloud-volume-examples)
    * [sample_install.yml](#sample_installyml-1)
    * [sample_provision.yml](#sample_provisionyml-1)
@@ -661,6 +667,28 @@ nimble_password_new: New password, i.e Password-364
 **Note**: The current password is stored in `nimble_group_password`
 **Note #2**: It's good practice to store passwords with Ansible Vault
 
+### perfpolicy create
+Creates a new Performance Policy. Supports numerous options, see the API documentation on HPE InfoSight for valid keys in `nimble_perfpolicy_options`.
+```
+nimble_perfpolicy: A Performance Policy name
+nimble_perfpolicy_blocksize: Defaults to 4096
+nimble_perfpolicy_options:
+  key: value
+```
+
+### perfpolicy update
+Updates a Performance Policy. Most fields except block size may be altered post creation, see the API documentation on HPE InfoSight for valid keys in `nimble_perfpolicy_update_options`
+```
+nimble_perfpolicy: Performance Policy name to update
+nimble_perfpolicy_update_options:
+  key: value
+```
+### perfpolicy delete
+Deletes a Performance Policy. 
+```
+nimble_perfpolicy: Performance Policy name to delete
+```
+
 ## Cloud Volume Operations
 Each `cloud_object` and `cloud_operation` combo has a set of parameters that control what resources are being managed.
 
@@ -1177,6 +1205,59 @@ Resizes a Replication Store in Cloud Volumes.
     - { role: NimbleStorage.Ansinimble, 
         cloud_object: store,
         cloud_operation: resize
+      }
+```
+
+### [sample_perfpolicy_create.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_perfpolicy_create.yml)
+Creates a new Performance Policy.
+```
+---
+# Creates a new performance policy with 4K block size, no compressionon or dedupe. See API docs on HPE InfoSight for more valid options.
+# $ ansible-playbook -l limit -e nimble_perfpolicy=myperfpol1 -e nimble_perfpolicy_blocksize=4096 sample_perfpolicy_create.yml
+
+- hosts: all
+  vars:
+    nimble_perfpolicy_options:
+      compress: False
+      dedupe_enabled: False
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: perfpolicy,
+        nimble_operation: create
+      }
+```
+
+### [sample_perfpolicy_update.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_perfpolicy_update.yml)
+Updates a Performance Policy.
+```
+---
+# Updates a performance policy, enables compression and dedupe. See API docs on HPE InfoSight for more valid options.
+# $ ansible-playbook -l limit -e nimble_perfpolicy=myperfpol1 sample_perfpolicy_update.yml
+
+- hosts: all
+  vars:
+    nimble_perfpolicy_update_options:
+      compress: True
+      dedupe_enabled: True
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: perfpolicy,
+        nimble_operation: update
+      }
+```
+
+### [sample_perfpolicy_delete.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_perfpolicy_delete.yml)
+Deletes a Performance Policy.
+```
+---
+# Deletes a performance policy
+# $ ansible-playbook -l limit -e nimble_perfpolicy=myperfpol1 sample_perfpolicy_delete.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: perfpolicy,
+        nimble_operation: delete
       }
 ```
 
