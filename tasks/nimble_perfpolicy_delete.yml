@@ -1,0 +1,37 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_perfpolicy
+
+- name: Ensure group
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts: 
+      performance_policies:
+
+- name: Get nimble_perfpolicy_id
+  set_fact:
+    nimble_perfpolicy_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "performance_policies[?name=='{{ nimble_perfpolicy }}'].id | [0]"
+
+
+- fail:
+    msg: "No Performance Policy named '{{ nimble_perfpolicy }}' found."
+  when: nimble_perfpolicy_id == ""
+
+- name: Delete Performance Policy
+  uri:
+    url: "{{ nimble_group_url }}/performance_policies/{{ nimble_perfpolicy_id }}"
+    validate_certs: no
+    method: DELETE
+    status_code: 200
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_perfpolicy_deleted
+  until: nimble_perfpolicy_deleted | success

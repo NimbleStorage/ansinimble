@@ -1,0 +1,39 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_perfpolicy
+
+- name: Ensure group
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts: {}
+
+- name: Merge options
+  set_fact: 
+    nimble_perfpolicy_options_default: "{{ nimble_perfpolicy_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ nimble_perfpolicy_options }}"
+  when: nimble_perfpolicy_options is defined
+
+- name: Overlay nimble_perfpolicy_blocksize and nimble_perfpolicy
+  set_fact:
+    nimble_perfpolicy_options_default: "{{ nimble_perfpolicy_options_default | 
+        combine( { 'block_size': nimble_perfpolicy_blocksize, 'name': nimble_perfpolicy } ) }}"
+
+- name: Create Performance Policy
+  uri:
+    url: "{{ nimble_group_url }}/performance_policies"
+    validate_certs: no
+    method: POST
+    status_code: 201
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: "{{ nimble_perfpolicy_options_default }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_perfpolicy_created
+  until: nimble_perfpolicy_created | success

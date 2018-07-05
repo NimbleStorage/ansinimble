@@ -1,0 +1,14 @@
+---
+# Creates a new performance policy with 4K block size, no compressionon or dedupe. See API docs on HPE InfoSight for more valid options.
+# $ ansible-playbook -l limit -e nimble_perfpolicy=myperfpol1 -e nimble_perfpolicy_blocksize=4096 sample_perfpolicy_create.yml
+
+- hosts: all
+  vars:
+    nimble_perfpolicy_options:
+      compress: False
+      dedupe_enabled: False
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        nimble_object: perfpolicy,
+        nimble_operation: create
+      }
