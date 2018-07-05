@@ -7,10 +7,6 @@
   set_fact:
     nimble_volume_snapshot: "{{ nimble_volume_snapshot | default(ansible_date_time.iso8601_basic) }}"
 
-- name: Host facts
-  include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined
-
 - name: Refresh group facts
   include: nimble_group_facts.yml
   vars:

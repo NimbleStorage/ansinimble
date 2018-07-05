@@ -48,6 +48,13 @@
     nimble_local_partnership: "{{ nimble_local_partnership | combine( { 'upstream': nimble_local_partnership_upstream, 'downstream': nimble_local_partnership_downstream, 'secret': nimble_partnerships[nimble_partner].secret | default('{{ 99999999999999999999 | random | to_uuid }}') } ) }}"
   no_log: True
 
+- name: Save defaults
+  set_fact:
+    local_nimble_username: "{{ nimble_group_options.username }}"
+    local_nimble_array: "{{ nimble_group_options['ip-address'] }}"
+    local_nimble_password: "{{ nimble_group_password }}"
+  no_log: True
+
 - name: Create partnerships
   include: nimble_util_replication_partnership.yml
   loop_control:
@@ -64,7 +71,10 @@
     - downstream
     - upstream
 
-- name: Refresh host facts
-  include: nimble_host_facts.yml
-  vars:
-    nimble_host_facts_force: True
+- name: Revert to defaults
+  set_fact:
+    nimble_group_options:
+      username: "{{ local_nimble_username }}"
+      ip-address: "{{ local_nimble_array }}"
+    nimble_group_password: "{{ local_nimble_password }}"
+  no_log: True

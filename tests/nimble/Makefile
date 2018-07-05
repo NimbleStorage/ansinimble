@@ -37,4 +37,6 @@ full:
 	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/test.yml 
 	sudo pip install ansible==2.5.5
 	ansible-playbook -l smokers -b $(ROLE_DEST)/tests/nimble/test.yml 
+	sudo pip install ansible==2.6.0
+	ansible-playbook -l smokers -b $(ROLE_DEST)/tests/nimble/test.yml 
 	sudo pip install ansible==2.4.5.0

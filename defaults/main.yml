@@ -63,7 +63,7 @@ nimble_group_facts_default:
 nimble_group_http_scheme: https
 nimble_group_http_port: 5392
 nimble_group_api_version: v1
-nimble_group_url: "{{ nimble_group_http_scheme }}://{{ nimble_host_facts.groups.main.group_ip }}:{{ nimble_group_http_port }}/{{ nimble_group_api_version }}"
+nimble_group_url: "{{ nimble_group_http_scheme }}://{{ nimble_group_options['ip-address'] }}:{{ nimble_group_http_port }}/{{ nimble_group_api_version }}"
 
 # This is an optimistic guess, please provide discovery IP in complex setups
 nimble_group_discovery_ip: "{{ nimble_group_facts | json_query('subnets[?allow_iscsi==`true`].discovery_ip | [0]') }}"

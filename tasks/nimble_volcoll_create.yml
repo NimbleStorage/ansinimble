@@ -7,10 +7,6 @@
     - nimble_volume_collection
     - nimble_protection_template
 
-- name: Host facts
-  include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined
-
 - name: Gather volcolls
   include: nimble_group_facts.yml
   vars:

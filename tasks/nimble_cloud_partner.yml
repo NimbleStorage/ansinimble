@@ -18,10 +18,6 @@
       cv_regions: "filters=name={{ cloud_store_region }}"
       replication_stores:
 
-- name: Host facts
-  include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined
-
 - name: Refresh group facts
   include: nimble_group_facts.yml
   vars:

@@ -3,10 +3,6 @@
   fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
   when: nimble_volume is undefined
 
-- name: Host facts
-  include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined
-
 - name: Need NimbleOS version upfront
   include: nimble_group_facts.yml
   vars:

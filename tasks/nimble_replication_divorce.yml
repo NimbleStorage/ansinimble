@@ -6,9 +6,6 @@
   with_items:
     - nimble_partner
 
-- name: Host facts
-  include: nimble_host_facts.yml
-
 - name: Gather volcolls and protection templates
   include: nimble_group_facts.yml
   vars:

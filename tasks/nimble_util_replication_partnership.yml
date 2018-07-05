@@ -4,16 +4,14 @@
     msg: "Not included from correct source"
   when: nimble_partnership_direction is undefined
 
-- name: Break free from NLT
+- name: Speak to {{ nimble_partnership_direction }}
   set_fact:
     nimble_group_facts:
       replication_partners:
     nimble_group_verified: True
-    nimble_host_facts:
-      groups:
-        main:
-          user: "{{ nimble_local_partnership[nimble_partnership_direction].username }}"
-          group_ip: "{{ nimble_local_partnership[nimble_partnership_direction].source }}"
+    nimble_group_options:
+      username: "{{ nimble_local_partnership[nimble_partnership_direction].username }}"
+      ip-address: "{{ nimble_local_partnership[nimble_partnership_direction].source }}"
     nimble_group_password: "{{ nimble_local_partnership[nimble_partnership_direction].password }}"
 
 - name: Establish group facts
