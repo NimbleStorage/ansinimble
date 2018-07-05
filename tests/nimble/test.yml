@@ -3,10 +3,34 @@
 - hosts: smokey
   vars:
     nimble_volume: "{{ inventory_hostname_short }}-vol-handsfree"
+    nimble_perfpolicy: "{{ inventory_hostname_short }}-perfpol1"
+    nimble_perfpolicy_options:
+      compress: True
+      description: "This is a description of my policy"
+    nimble_perfpolicy_update_options:
+      compress: False
   roles:
     - { role: debug_marker, local_test: "NLT-less operation" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, 
+        nimble_operation: create,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: delete,
+        nimble_object: volume
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: create,
+        nimble_object: perfpolicy
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: update,
+        nimble_object: perfpolicy
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: delete,
+        nimble_object: perfpolicy
+      } 
 
 - hosts: smokey
   vars:

@@ -98,6 +98,14 @@ nimble_volume_size: 1000
 nimble_volume_options_default:
   description: "Volume created by Ansible"
 
+# Default performance policy options
+nimble_perfpolicy_blocksize: 4096
+nimble_perfpolicy_options_default:
+  description: "Performance Policy created by Ansible"
+  app_category: "Other"
+nimble_perfpolicy_update_options_default:
+  description: "Performance Policy updated by Ansible"
+
 # Device retries
 nimble_device_retries: 3
 nimble_device_delay: 10
