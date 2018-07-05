@@ -59,6 +59,8 @@ When Ansible 2.9 becomes generally available, the role will be re-written and on
     * [host facts](#host-facts)
     * [group facts](#group-facts)
     * [nlt manage](#nlt-manage)
+    * [array setup](#array-setup)
+    * [password update](#password-update)
  * [Cloud Volume Operations](#cloud-volume-operations)
     * [cloud_object cloud_operation](#cloud_object-cloud_operation)
     * [volume create](#volume-create-1)
@@ -73,8 +75,6 @@ When Ansible 2.9 becomes generally available, the role will be re-written and on
     * [volume delete](#volume-delete-1)
     * [portal facts](#portal-facts)
     * [lcm manage](#lcm-manage)
-    * [array setup](#array-setup)
-    * [password update](#password-update)
     * [host facts](#host-facts-1)
  * [Example Playbooks](#example-playbooks)
  * [Nimble Storage Array Group Examples](#nimble-storage-array-group-examples)
@@ -639,6 +639,23 @@ nimble_linux_toolkit_bundle: Full path on control node to NLT installer (only re
 nimble_linux_toolkit_options: Additional installer flags (I.e docker or oracle)
 ```
 
+### array setup
+Sets up an array from scratch. The Ansible host needs to be configured with ZeroConf in the same network as the arrays that needs to be setup.
+```
+nimble_array_serial: The serial number to setup, i.e AF-123456
+nimble_array_discovery_interface: Interface on the Ansible host that is connected to the ZeroConf network, defaults to the network interface with a default gateway
+nimble_array_config: Advanced YAML structure listing arrays to setup by serial number. Please see defaults/main.yml for an example
+```
+
+### password update
+Sets a new password for a user
+```
+nimble_password_user: Defaults to what's stored in nimble_group_options.username
+nimble_password_new: New password, i.e Password-364
+```
+**Note**: The current password is stored in `nimble_group_password`
+**Note #2**: It's good practice to store passwords with Ansible Vault
+
 ## Cloud Volume Operations
 Each `cloud_object` and `cloud_operation` combo has a set of parameters that control what resources are being managed.
 
@@ -740,23 +757,6 @@ cloud_lcm_state: absent or present
 cloud_lcm_installer: Optional URL to installer, will grab whatever is set in default currently otherwise
 ```
 
-### array setup
-Sets up an array from scratch. The Ansible host needs to be configured with ZeroConf in the same network as the arrays that needs to be setup.
-```
-nimble_array_serial: The serial number to setup, i.e AF-123456
-nimble_array_discovery_interface: Interface on the Ansible host that is connected to the ZeroConf network, defaults to the network interface with a default gateway
-nimble_array_config: Advanced YAML structure listing arrays to setup by serial number. Please see defaults/main.yml for an example
-```
-
-### password update
-Sets a new password for a user
-```
-nimble_password_user: Defaults to what's stored in nimble_group_options.username
-nimble_password_new: New password, i.e Password-364
-```
-**Note**: The current password is stored in nimble_group_password
-**Note #2**: It's good practice to store passwords with Ansible Vault
-
 ### host facts
 Gathers host facts. Not currently used.
 
@@ -766,7 +766,7 @@ Here are some example uses of this role. These are cut and paste from [examples]
 ## Nimble Storage Array Group Examples
 Make sure credentials for NLT and the arrays are accessible in the appropriate variables.
 
-### nimble/sample_install.yml
+### [sample_install.yml](raw/master/examples/nimble/sample_install.yml)
 Installs NLT.
 ```
 ---
