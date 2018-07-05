@@ -2,6 +2,14 @@
 # Hello World
 - hosts: smokey
   vars:
+    nimble_volume: "{{ inventory_hostname_short }}-vol-handsfree"
+  roles:
+    - { role: debug_marker, local_test: "NLT-less operation" }
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: volume } 
+
+- hosts: smokey
+  vars:
     nimble_volume: "{{ inventory_hostname_short }}-vol"
     nimble_volume_pool: default
     nimble_volume_perfpolicy: "Windows File Server"
@@ -146,6 +154,15 @@
         nimble_operation: partner,
         nimble_object: replication,
       }
+
+- hosts: smokey
+  become: yes
+  vars:
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+  roles:
+    - { role: debug_marker,
+        local_test: "Data protection (juggle)"
+      }
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: create,
         nimble_object: volcoll,
@@ -225,20 +242,19 @@
 
 - hosts: smokey
   become: yes
-  tasks:
-    - command: nltadm --group --remove --ip-address {{ nimble_group_options['ip-address'] }}
-    - command: nltadm --group --add --ip-address {{ nimble_partnerships.test.downstream.hostname }} --username {{ nimble_partnerships.test.downstream.username }} --password {{ nimble_partnerships.test.downstream.password }}
-    - command: nltadm --group --verify --ip-address {{ lookup('dig', nimble_partnerships.test.downstream.hostname) }}
-
-- hosts: smokey
-  become: yes
   roles:
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: divorce,
         nimble_object: replication,
         nimble_partner: "{{ nimble_partnerships.test.upstream.name }}",
-        nimble_host_facts_force: True
+        nimble_group_options: {
+          username: "{{ nimble_partnerships.test.downstream.username }}",
+          ip-address: "{{ nimble_partnerships.test.downstream.hostname }}" 
+        },
+        nimble_group_password: "{{ nimble_partnerships.test.downstream.password }}"
       }
+  tags:
+    - divorce
     
 - hosts: smokey
   become: yes

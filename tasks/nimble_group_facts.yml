@@ -1,12 +1,4 @@
 ---
-- name: Ensure nimble_group_password
-  fail: msg="Missing variable nimble_group_password, please provide the group password in nimble_group_password"
-  when: nimble_group_password is undefined
-
-- block:
-  - include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined and nimble_group_verified is undefined
-
 - name: API token
   uri:
     url: "{{ nimble_group_url }}/tokens"
@@ -16,7 +8,7 @@
     body_format: json
     body:
      data:
-       username: "{{ nimble_host_facts.groups.main.user }}"
+       username: "{{ nimble_group_options.username }}"
        password: "{{ nimble_group_password }}"
     return_content: yes
   no_log: "{{ nimble_silence_payload }}"

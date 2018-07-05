@@ -3,14 +3,6 @@
   fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
   when: nimble_volume is undefined 
 
-- name: Ensure nimble_volume matches XFS label length
-  fail: msg="nimble_volume is not allowed more than 12 characters due to the XFS label limitation"
-  when: nimble_volume | length > 12
-
-- name: Host facts
-  include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined
-
 - name: Need NimbleOS version upfront
   include: nimble_group_facts.yml
   vars:

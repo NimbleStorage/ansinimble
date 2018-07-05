@@ -14,10 +14,6 @@
     msg: "nimble_protection_template and nimble_volume_collection are mutually exclusive"
   when: nimble_protection_template is defined and nimble_volume_collection is defined
 
-- name: Host facts
-  include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined
-
 - name: Gather volcolls and protection templates
   include: nimble_group_facts.yml
   vars:
