@@ -31,6 +31,16 @@
     - { role: "{{ local_role }}",
         cloud_operation: create,
         cloud_object: store } 
+
+- hosts: "{{ local_smokers }}"
+  vars:
+    cloud_store: "{{ local_uuid }}-store"
+    cloud_store_size: 2099776
+    cloud_store_region: "us-test"
+  roles:
+    - { role: "{{ local_role }}",
+        cloud_operation: resize,
+        cloud_object: store } 
     - { role: "{{ local_role }}",
         cloud_operation: delete,
         cloud_object: store } 

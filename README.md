@@ -31,87 +31,92 @@ When Ansible 2.9 becomes generally available, the role will be re-written and on
 
 * [Role Variables](#role-variables)
 * [Usage](#usage)
- * [Nimble Storage Array Operations](#nimble-storage-array-operations)
-    * [nimble_object nimble_operation](#nimble_object-nimble_operation)
-    * [folder create](#folder-create)
-    * [folder update](#folder-update)
-    * [folder delete](#folder-delete)
-    * [volume create](#volume-create)
-    * [volume map](#volume-map)
-    * [volume mount](#volume-mount)
-    * [volume resize](#volume-resize)
-    * [volume update (not implemented yet)](#volume-update-not-implemented-yet)
-    * [volume snapshot](#volume-snapshot)
-    * [volume umount](#volume-umount)
-    * [volume unmap](#volume-unmap)
-    * [volume restore](#volume-restore)
-    * [volume delete](#volume-delete)
-    * [volume protect](#volume-protect)
-    * [volume unprotect](#volume-unprotect)
-    * [volcoll create](#volcoll-create)
-    * [volcoll prune](#volcoll-prune)
-    * [prottmpl create](#prottmpl-create)
-    * [prottmpl delete](#prottmpl-delete)
-    * [replication partner](#replication-partner)
-    * [replication divorce](#replication-divorce)
-    * [cloud partner](#cloud-partner)
-    * [cloud divorce](#cloud-divorce)
-    * [host facts](#host-facts)
-    * [group facts](#group-facts)
-    * [nlt manage](#nlt-manage)
-    * [array setup](#array-setup)
-    * [password update](#password-update)
- * [Cloud Volume Operations](#cloud-volume-operations)
-    * [cloud_object cloud_operation](#cloud_object-cloud_operation)
-    * [volume create](#volume-create-1)
-    * [volume update](#volume-update)
-    * [volume map](#volume-map-1)
-    * [volume mount](#volume-mount-1)
-    * [volume resize](#volume-resize-1)
-    * [volume snapshot](#volume-snapshot-1)
-    * [volume umount](#volume-umount-1)
-    * [volume unmap](#volume-unmap-1)
-    * [volume restore](#volume-restore-1)
-    * [volume delete](#volume-delete-1)
-    * [portal facts](#portal-facts)
-    * [lcm manage](#lcm-manage)
-    * [host facts](#host-facts-1)
- * [Example Playbooks](#example-playbooks)
- * [Nimble Storage Array Group Examples](#nimble-storage-array-group-examples)
-    * [nimble/sample_install.yml](#nimblesample_installyml)
-    * [nimble/sample_uninstall.yml](#nimblesample_uninstallyml)
-    * [nimble/sample_debug.yml](#nimblesample_debugyml)
-    * [nimble/sample_group_fact.yml](#nimblesample_group_factyml)
-    * [nimble/sample_provision.yml](#nimblesample_provisionyml)
-    * [nimble/sample_snapshot.yml](#nimblesample_snapshotyml)
-    * [nimble/sample_restore.yml](#nimblesample_restoreyml)
-    * [nimble/sample_resize.yml](#nimblesample_resizeyml)
-    * [nimble/sample_decommision.yml](#nimblesample_decommisionyml)
-    * [nimble/sample_array_setup.yml](#nimblesample_array_setupyml)
-    * [nimble/sample_password_change.yml](#nimblesample_password_changeyml)
-    * [nimble/sample_protect.yml](#nimblesample_protectyml)
-    * [nimble/sample_unprotect.yml](#nimblesample_unprotectyml)
-    * [nimble/sample_volcoll_create.ym](#nimblesample_volcoll_createym)
-    * [nimble/sample_volcoll_prune.yml](#nimblesample_volcoll_pruneyml)
-    * [nimble/sample_prottmpl_create.yml](#nimblesample_prottmpl_createyml)
-    * [nimble/sample_prottmpl_delete.yml](#nimblesample_prottmpl_deleteyml)
-    * [nimble/sample_nimble_partner.yml](#nimblesample_nimble_partneryml)
-    * [nimble/sample_nimble_divorce.yml](#nimblesample_nimble_divorceyml)
-    * [nimble/sample_cloud_partner.yml](#nimblesample_cloud_partneryml)
-    * [nimble/sample_cloud_divorce.yml](#nimblesample_cloud_divorceyml)
-    * [nimble/sample_store_create.yml](#nimblesample_store_createyml)
-    * [nimble/sample_store_delete.yml](#nimblesample_store_deleteyml)
-    * [nimble/sample_store_resize.yml](#nimblesample_store_resizeyml)
- * [Cloud Volume Examples](#cloud-volume-examples)
-    * [cloud/sample_install.yml](#cloudsample_installyml)
-    * [cloud/sample_provision.yml](#cloudsample_provisionyml)
-    * [cloud/sample_resize.yml](#cloudsample_resizeyml)
-    * [cloud/sample_update.yml](#cloudsample_updateyml)
-    * [cloud/sample_snapshot.yml](#cloudsample_snapshotyml)
-    * [cloud/sample_restore.yml](#cloudsample_restoreyml)
-    * [cloud/sample_decommission.yml](#cloudsample_decommissionyml)
-    * [cloud/sample_uninstall.yml](#cloudsample_uninstallyml)
-    * [cloud/sample_debug.yml](#cloudsample_debugyml)
+* [Nimble Storage Array Operations](#nimble-storage-array-operations)
+   * [nimble_object nimble_operation](#nimble_object-nimble_operation)
+   * [folder create](#folder-create)
+   * [folder update](#folder-update)
+   * [folder delete](#folder-delete)
+   * [volume create](#volume-create)
+   * [volume map](#volume-map)
+   * [volume mount](#volume-mount)
+   * [volume resize](#volume-resize)
+   * [volume update (not implemented yet)](#volume-update-not-implemented-yet)
+   * [volume snapshot](#volume-snapshot)
+   * [volume umount](#volume-umount)
+   * [volume unmap](#volume-unmap)
+   * [volume restore](#volume-restore)
+   * [volume delete](#volume-delete)
+   * [volume protect](#volume-protect)
+   * [volume unprotect](#volume-unprotect)
+   * [volcoll create](#volcoll-create)
+   * [volcoll prune](#volcoll-prune)
+   * [prottmpl create](#prottmpl-create)
+   * [prottmpl delete](#prottmpl-delete)
+   * [replication partner](#replication-partner)
+   * [replication divorce](#replication-divorce)
+   * [cloud partner](#cloud-partner)
+   * [cloud divorce](#cloud-divorce)
+   * [host facts](#host-facts)
+   * [group facts](#group-facts)
+   * [nlt manage](#nlt-manage)
+   * [array setup](#array-setup)
+   * [password update](#password-update)
+* [Cloud Volume Operations](#cloud-volume-operations)
+   * [cloud_object cloud_operation](#cloud_object-cloud_operation)
+   * [volume create](#volume-create-1)
+   * [volume update](#volume-update)
+   * [volume map](#volume-map-1)
+   * [volume mount](#volume-mount-1)
+   * [volume resize](#volume-resize-1)
+   * [volume snapshot](#volume-snapshot-1)
+   * [volume umount](#volume-umount-1)
+   * [volume unmap](#volume-unmap-1)
+   * [volume restore](#volume-restore-1)
+   * [volume delete](#volume-delete-1)
+   * [store create](#store-create)
+   * [store resize](#store-resize)
+   * [store delete](#store-delete)
+   * [replica clone](#replica-clone)
+   * [portal facts](#portal-facts)
+   * [lcm manage](#lcm-manage)
+   * [host facts](#host-facts-1)
+* [Example Playbooks](#example-playbooks)
+* [Nimble Storage Array Group Examples](#nimble-storage-array-group-examples)
+   * [sample_install.yml](#sample_installyml)
+   * [sample_uninstall.yml](#sample_uninstallyml)
+   * [sample_debug.yml](#sample_debugyml)
+   * [sample_group_fact.yml](#sample_group_factyml)
+   * [sample_provision.yml](#sample_provisionyml)
+   * [sample_snapshot.yml](#sample_snapshotyml)
+   * [sample_restore.yml](#sample_restoreyml)
+   * [sample_resize.yml](#sample_resizeyml)
+   * [sample_decommission.yml](#sample_decommissionyml)
+   * [sample_array_setup.yml](#sample_array_setupyml)
+   * [sample_password_change.yml](#sample_password_changeyml)
+   * [sample_protect.yml](#sample_protectyml)
+   * [sample_unprotect.yml](#sample_unprotectyml)
+   * [sample_volcoll_create.yml](#sample_volcoll_createyml)
+   * [sample_volcoll_prune.yml](#sample_volcoll_pruneyml)
+   * [sample_prottmpl_create.yml](#sample_prottmpl_createyml)
+   * [sample_prottmpl_delete.yml](#sample_prottmpl_deleteyml)
+   * [sample_nimble_partner.yml](#sample_nimble_partneryml)
+   * [sample_nimble_divorce.yml](#sample_nimble_divorceyml)
+   * [sample_cloud_partner.yml](#sample_cloud_partneryml)
+   * [sample_cloud_divorce.yml](#sample_cloud_divorceyml)
+   * [sample_store_create.yml](#sample_store_createyml)
+   * [sample_store_delete.yml](#sample_store_deleteyml)
+   * [sample_store_resize.yml](#sample_store_resizeyml)
+* [Cloud Volume Examples](#cloud-volume-examples)
+   * [sample_install.yml](#sample_installyml-1)
+   * [sample_provision.yml](#sample_provisionyml-1)
+   * [sample_resize.yml](#sample_resizeyml-1)
+   * [sample_update.yml](#sample_updateyml)
+   * [sample_snapshot.yml](#sample_snapshotyml-1)
+   * [sample_restore.yml](#sample_restoreyml-1)
+   * [sample_clone_replica.yml](#sample_clone_replicayml)
+   * [sample_decommission.yml](#sample_decommissionyml-1)
+   * [sample_uninstall.yml](#sample_uninstallyml-1)
+   * [sample_debug.yml](#sample_debugyml-1)
 
 ## Role Variables
 The importance of variables depends on what objects are being managed.
@@ -743,6 +748,39 @@ Deletes a Cloud Volume. Needs to be unmounted and unmapped from the host prior.
 cloud_volume: Cloud Volume to delete
 ```
 
+### store create
+Creates a Cloud Volume Replication Store. 
+```
+cloud_store: Replication Store name
+cloud_store_size: Size in MB between 1099776 and 32985088 (defaults to 1099776, ~1TB)
+cloud_store_region: Which region to replicate to
+```
+
+### store resize
+Resizes a Cloud Volume Replication Store.
+```
+cloud_store: Replication Store name
+cloud_store_size: New size between 1099776 and 32985088
+```
+
+### store delete
+Delete a Cloud Volume Replication Store.
+```
+cloud_store: Replication Store name to delete
+```
+
+### replica clone
+Creates a new Cloud Volume from a replicated volume inside a Replication Store.
+```
+cloud_volume: New Cloud Volume name
+cloud_replica: Replica Store volume to clone from
+cloud_replica_provider: Amazon AWS or Microsoft Azure
+cloud_replica_region: Which region to expose your volume, i.e us-west-1
+cloud_replica_options: Below are the mandatory keys
+  private_cloud: VPC or VNET
+  existing_cloud_subnet: Subnet CIDR notation 
+```
+
 ### portal facts
 Scrapes the facts off the Cloud Volume Portal for use with `json_query` filters. Primarily an internal task. Returns a JSON structure in `cloud_portal_facts`
 ```
@@ -766,7 +804,7 @@ Here are some example uses of this role. These are cut and paste from [examples]
 ## Nimble Storage Array Group Examples
 Make sure credentials for NLT and the arrays are accessible in the appropriate variables.
 
-### [sample_install.yml](raw/master/examples/nimble/sample_install.yml)
+### [sample_install.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_install.yml)
 Installs NLT.
 ```
 ---
@@ -778,7 +816,7 @@ Installs NLT.
     - { role: NimbleStorage.Ansinimble, nimble_object: nlt, nimble_operation: manage, nimble_linux_toolkit_state: running }
 ```
 
-### nimble/sample_uninstall.yml
+### [sample_uninstall.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_uninstall.yml)
 Uninstalls NLT.
 ```
 ---
@@ -788,7 +826,7 @@ Uninstalls NLT.
 ```
 
 
-### nimble/sample_debug.yml
+### [sample_debug.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_debug.yml)
 Croaks out all host and group facts
 ```
 ---
@@ -800,7 +838,7 @@ Croaks out all host and group facts
     - debug: var=nimble_host_facts
 ```
 
-### nimble/sample_group_fact.yml
+### [sample_group_fact.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_group_fact.yml)
 Lightweight debugging.
 ```
 ---
@@ -811,7 +849,7 @@ Lightweight debugging.
     - debug: var=nimble_group_facts
 ```
 
-### nimble/sample_provision.yml
+### [sample_provision.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_provision.yml)
 Provisions and mounts a new volume.
 ```
 ---
@@ -825,7 +863,7 @@ Provisions and mounts a new volume.
     - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: mount }
 ```
 
-### nimble/sample_snapshot.yml
+### [sample_snapshot.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_snapshot.yml)
 ```
 ---
 # Provide nimble_volume and nimble_volume_snapshot as extra vars, i.e:
@@ -835,7 +873,7 @@ Provisions and mounts a new volume.
   roles:
     - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: snapshot }
 ```
-### nimble/sample_restore.yml
+### [sample_restore.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_restore.yml)
 ```
 ---
 # Provide nimble_volume, nimble_volume_mountpoint and nimble_volume_snapshot as extra vars, i.e
@@ -851,7 +889,7 @@ Provisions and mounts a new volume.
 ```
 
 
-### nimble/sample_resize.yml
+### [sample_resize.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_resize.yml)
 ```
 ---
 # Provide nimble_volume and nimble_volume_size as extra vars, i.e:
@@ -862,7 +900,7 @@ Provisions and mounts a new volume.
     - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: resize }
 ```
 
-### nimble/sample_decommision.yml
+### [sample_decommission.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_decommission.yml)
 Unmounts and deletes a volume.
 ```
 ---
@@ -876,7 +914,7 @@ Unmounts and deletes a volume.
     - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: delete }
 ```
 
-### nimble/sample_array_setup.yml
+### [sample_array_setup.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_array_setup.yml)
 Sets up and array from scratch over the network with ZeroConf.
 ```
 ---
@@ -889,7 +927,7 @@ Sets up and array from scratch over the network with ZeroConf.
         nimble_operation: setup }
 ```
 
-### nimble/sample_password_change.yml
+### [sample_password_change.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_password_change.yml)
 Changes the password of a user.
 ```
 ---
@@ -903,7 +941,7 @@ Changes the password of a user.
 ```
 **Note:** Changing the password of the that NLT user is currently connected to requires removing and re-adding the group. The NLT dependency for non-host related tasks such as "password update" will be removed in a future version.
 
-### nimble/sample_protect.yml
+### [sample_protect.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_protect.yml)
 Protects a Nimble volume.
 ```
 ---
@@ -919,7 +957,7 @@ Protects a Nimble volume.
       }
 ```
 
-### nimble/sample_unprotect.yml
+### [sample_unprotect.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_unprotect.yml)
 Disassociates a Nimble volume from a volume collection.
 ```
 ---
@@ -934,7 +972,7 @@ Disassociates a Nimble volume from a volume collection.
       }
 ```
 
-### nimble/sample_volcoll_create.ym
+### [sample_volcoll_create.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_volcoll_create.yml)
 Creates a new volume collection.
 ```
 ---
@@ -949,7 +987,7 @@ Creates a new volume collection.
       }
 ```
 
-### nimble/sample_volcoll_prune.yml
+### [sample_volcoll_prune.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_volcoll_prune.yml)
 Prunes all empty volume collections.
 ```
 ---
@@ -961,7 +999,7 @@ Prunes all empty volume collections.
     - { role: NimbleStorage.Ansinimble, nimble_object: volcoll, nimble_operation: prune }
 ```
 
-### nimble/sample_prottmpl_create.yml
+### [sample_prottmpl_create.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_prottmpl_create.yml)
 Creates a new protection template.
 ```
 ---
@@ -1010,7 +1048,7 @@ Creates a new protection template.
       }
 ```
 
-### nimble/sample_prottmpl_delete.yml
+### [sample_prottmpl_delete.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_prottmpl_delete.yml)
 Deletes a proection template.
 ```
 ---
@@ -1025,7 +1063,7 @@ Deletes a proection template.
       }
 ```
 
-### nimble/sample_nimble_partner.yml
+### [sample_nimble_partner.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_nimble_partner.yml)
 Partners with downstream Nimble array.
 ```
 ---
@@ -1046,7 +1084,7 @@ Partners with downstream Nimble array.
       }
 ```
 
-### nimble/sample_nimble_divorce.yml
+### [sample_nimble_divorce.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_nimble_divorce.yml)
 Divorces (deletes) a replication partnership.
 ```
 ---
@@ -1062,7 +1100,7 @@ Divorces (deletes) a replication partnership.
       }
 ```
 
-### nimble/sample_cloud_partner.yml
+### [sample_cloud_partner.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_cloud_partner.yml)
 Partners a Nimble Storage array group with Cloud Volumes.
 ```
 ---
@@ -1078,7 +1116,7 @@ Partners a Nimble Storage array group with Cloud Volumes.
       }
 ```
 
-### nimble/sample_cloud_divorce.yml
+### [sample_cloud_divorce.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_cloud_divorce.yml)
 Divorces a Nimble Storage array group from Cloud Volumes (leaves Replication Store intact)
 ```
 ---
@@ -1094,7 +1132,7 @@ Divorces a Nimble Storage array group from Cloud Volumes (leaves Replication Sto
       }
 ```
 
-### nimble/sample_store_create.yml
+### [sample_store_create.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_store_create.yml)
 Creates a Replication Store in Cloud Volumes.
 ```
 ---
@@ -1110,7 +1148,7 @@ Creates a Replication Store in Cloud Volumes.
       }
 ```
 
-### nimble/sample_store_delete.yml
+### [sample_store_delete.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_store_delete.yml)
 Deletes a Replication Store in Cloud Volumes.
 ```
 ---
@@ -1126,7 +1164,7 @@ Deletes a Replication Store in Cloud Volumes.
       }
 ```
 
-### nimble/sample_store_resize.yml
+### [sample_store_resize.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_store_resize.yml)
 Resizes a Replication Store in Cloud Volumes.
 ```
 ---
@@ -1145,7 +1183,7 @@ Resizes a Replication Store in Cloud Volumes.
 ## Cloud Volume Examples
 These are some basic examples on how to use this role. Each example assumes credentials variables to HPE Cloud Volumes has been set elsewhere.
 
-### cloud/sample_install.yml
+### [sample_install.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/cloud/sample_install.yml)
 Installs Linux Connection Manager
 ```
 ---
@@ -1158,7 +1196,7 @@ Installs Linux Connection Manager
       }
 ```
 
-### cloud/sample_provision.yml
+### [sample_provision.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/cloud/sample_provision.yml)
 Role stack example on how to provision a new Cloud Volume to an EC2 instance.
 ```
 ---
@@ -1188,7 +1226,7 @@ Role stack example on how to provision a new Cloud Volume to an EC2 instance.
       }
 ```
 
-### cloud/sample_resize.yml
+### [sample_resize.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/cloud/sample_resize.yml)
 Resizes a Cloud Volume and the host filesystem.
 ```
 ---
@@ -1204,7 +1242,7 @@ Resizes a Cloud Volume and the host filesystem.
       }
 ```
 
-### cloud/sample_update.yml
+### [sample_update.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/cloud/sample_update.yml)
 Sets a new IOPS limit on a Cloud Volume and enables multi-initiator. Full list of keys in `cloud_volume_options` are available in the Cloud Volumes API documentation.
 ```
 ---
@@ -1223,7 +1261,7 @@ Sets a new IOPS limit on a Cloud Volume and enables multi-initiator. Full list o
       }
 ```
 
-### cloud/sample_snapshot.yml
+### [sample_snapshot.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/cloud/sample_snapshot.yml)
 Snapshots a Cloud Volume with a named snapshot.
 ```
 ---
@@ -1238,7 +1276,7 @@ Snapshots a Cloud Volume with a named snapshot.
       }
 ```
 
-### cloud/sample_restore.yml
+### [sample_restore.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/cloud/sample_restore.yml)
 Restores a Cloud Volume from a named snapshot.
 ```
 ---
@@ -1271,8 +1309,24 @@ Restores a Cloud Volume from a named snapshot.
       }
 ```
 
-### cloud/sample_decommission.yml
-Fully decommisions a Cloud Volume from a host and deletes it.
+### [sample_clone_replica.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/cloud/sample_clone_replica.yml)
+Creates a new Cloud Volume from a replica by cloning a snapshot.
+```
+---
+# Clones a Replica Volume, specifies parametes in extra variables. Clones from latest (0) snapshot by default
+# $ ansible-playbook -i ec2.py -l tag_cloudhost -e cloud_volume=mycloudvol1 -e cloud_replica=myreplicavol1 -e cloud_replica_snapshot_index=16 sample_clone_replica.yml
+- hosts: all
+  vars:
+    cloud_host_ip: "{{ ansible_default_ipv4.address }}"
+  roles:
+    - { role: NimbleStorage.Ansinimble, 
+        cloud_object: replica,
+        cloud_operation: clone
+      }
+```
+
+### [sample_decommission.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/cloud/sample_decommission.yml)
+Fully decommissions a Cloud Volume from a host and deletes it.
 ```
 ---
 # Fully decommisions a Cloud Volume. Define volume in cloud_volume.
@@ -1297,7 +1351,7 @@ Fully decommisions a Cloud Volume from a host and deletes it.
       }
 ```
 
-### cloud/sample_uninstall.yml
+### [sample_uninstall.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/cloud/sample_uninstall.yml)
 Uninstalls the Linux Connection Manager.
 ```
 ---
@@ -1310,7 +1364,7 @@ Uninstalls the Linux Connection Manager.
       }
 ```
 
-### cloud/sample_debug.yml
+### [sample_debug.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/cloud/sample_debug.yml)
 Croaks out all HPE Cloud Volume Portal facts into `cloud_portal_facts`
 ```
 ---
