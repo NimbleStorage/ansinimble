@@ -952,7 +952,8 @@ Sets up and array from scratch over the network with ZeroConf.
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: array,
-        nimble_operation: setup }
+        nimble_operation: setup 
+      }
 ```
 
 ### [sample_password_change.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_password_change.yml)
