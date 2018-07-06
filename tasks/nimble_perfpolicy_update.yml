@@ -1,0 +1,41 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_perfpolicy
+
+- name: Ensure group
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts: 
+      performance_policies:
+
+- name: Get nimble_perfpolicy_id
+  set_fact:
+    nimble_perfpolicy_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "performance_policies[?name=='{{ nimble_perfpolicy }}'].id | [0]"
+
+- name: Merge options
+  set_fact: 
+    nimble_perfpolicy_update_options_default: "{{ nimble_perfpolicy_update_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ nimble_perfpolicy_update_options }}"
+  when: nimble_perfpolicy_update_options is defined
+
+- name: Update Performance Policy
+  uri:
+    url: "{{ nimble_group_url }}/performance_policies/{{ nimble_perfpolicy_id }}"
+    validate_certs: no
+    method: PUT
+    status_code: 200
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: "{{ nimble_perfpolicy_update_options_default }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_perfpolicy_updated
+  until: nimble_perfpolicy_updated | success
