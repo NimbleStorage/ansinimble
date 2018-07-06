@@ -92,4 +92,3 @@
 - name: Uninstall
   command: "{{ nimble_linux_toolkit_prefix | quote }}/tmp/nlt_uninstall --silent-mode"
   when: nimble_linux_toolkit_state == 'absent'
-

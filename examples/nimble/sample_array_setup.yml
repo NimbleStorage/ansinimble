@@ -1,10 +1,9 @@
 ---
 # Provide nimble_array_serial as an extra variable and store config structure in host_vars/ansible_host
 # $ ansible-playbook -l limit -e nimble_array_serial=XX-123456 sample_array_setup.yml
-nimble_array_config:
-```
 - hosts: ansible_host
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: array,
-        nimble_operation: setup }
+        nimble_operation: setup
+      }
