@@ -1,67 +1,12 @@
 ---
-- name: Ensure nimble_volume and nimble_volume_mountpoint
-  fail: msg="Missing variable nimble_volume and nimble_volume_mountpoint, please provide a volume name in nimble_volume and current mountpoint in nimble_volume_mountpoint"
-  when: nimble_volume is undefined and nimble_volume_mountpoint is undefined
-
-- name: Host facts
-  include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined
-
-- name: Refresh group facts
-  include: nimble_group_facts.yml
-  vars:
-    nimble_group_facts:
-      volumes: "fields=name,id,serial_number,target_name&name={{ nimble_volume }}"
-
-- name: Determine serial_number
-  set_fact:
-    nimble_volume_serial_number: "{{ nimble_group_facts | json_query(local_query) }}"
-  vars:
-    local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
-
-- name: Determine target
-  set_fact:
-    nimble_volume_target: "{{ nimble_group_facts | json_query(local_query) }}"
-  vars:
-    local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
-  when: ansible_os_family == 'Debian'
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_volume_mountpoint
 
 - name: Wipe fstab
   mount:
     name: "{{ nimble_volume_mountpoint }}"
     state: absent
-
-- block:
-  - name: Create device string
-    set_fact:
-      nimble_volume_device_name: "{{ nimble_host_device_prefix }}/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"
-
-  - name: Dismantle dm/iSCSI stack
-    command: ncmadm --remove {{ nimble_volume_device_name }}
-  when: ansible_os_family == 'RedHat'
-
-- block:
-  - name: Create device string
-    set_fact:
-      nimble_volume_device_name: "/dev/disk/by-id/dm-uuid-mpath-2{{ nimble_volume_serial_number }}"
-
-  - name: Disconnect LUN
-    open_iscsi:
-      login: no
-      target: "{{ nimble_volume_target }}"
-
-  - name: Reload multipath
-    command: multipath -r
-  when: ansible_os_family == 'Debian'
-
-- name: Wait for device to disappear
-  wait_for:
-    path: "{{ nimble_volume_device_name }}"
-    state: absent
-    timeout: "{{ nimble_device_delay }}"
-  register: nimble_volume_device_removal
-  ignore_errors: True
-
-- name: Force dismantling of dm/iSCSI stack
-  command: ncmadm --force --remove {{ nimble_volume_device_name }}
-  when: nimble_volume_device_removal|failed
