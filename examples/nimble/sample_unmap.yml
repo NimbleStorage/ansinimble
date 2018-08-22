@@ -1,0 +1,11 @@
+---
+# Provide nimble_volume as parameter to unmap a block device from a host and delete the volume
+# $ ansible-playbook -l limit -e nimble_volume=myvol1 sample_unmap.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: unmap }
+    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: delete }
+  tasks:
+    - debug:
+        var: nimble_volume_device_name

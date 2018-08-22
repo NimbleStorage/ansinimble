@@ -1,7 +1,11 @@
 ---
-- name: Ensure nimble_volume and nimble_volume_mountpoint
-  fail: msg="Missing variable nimble_volume and nimble_volume_mountpoint, please provide a volume name in nimble_volume and current mountpoint in nimble_volume_mountpoint"
-  when: nimble_volume is undefined and nimble_volume_mountpoint is undefined
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_volume
+    - nimble_volume_mountpoint
 
 - name: Host facts
   include: nimble_host_facts.yml
@@ -11,31 +15,7 @@
   include: nimble_group_facts.yml
   vars:
     nimble_group_facts:
-      volumes: "fields=name,target_name,id,serial_number&name={{ nimble_volume }}"
-      subnets: "fields=allow_iscsi,discovery_ip"
-
-- name: Discover Targets
-  command: ncmadm -e {{ nimble_group_discovery_ip }}
-  register: nimble_discover_targets
-  when: ansible_os_family == 'RedHat'
-
-- name: Discover Targets
-  open_iscsi: 
-    show_nodes: yes
-    discover: yes
-    portal: "{{ nimble_group_discovery_ip }}"
-  when: ansible_os_family == 'Debian'
-
-- name: Discover LUN
-  open_iscsi:
-    auto_node_startup: True
-    discover: True
-    login: True
-    portal: "{{ nimble_group_discovery_ip }}"
-    target: "{{ nimble_group_facts | json_query(local_query) }}"
-  vars:
-    local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
-  when: ansible_os_family == 'Debian'
+      volumes: "fields=name,id,serial_number&name={{ nimble_volume }}"
 
 - name: Get volume serial number
   set_fact:
@@ -45,18 +25,15 @@
 
 - name: Create device string
   set_fact:
-    nimble_volume_device_name: "{{ nimble_host_device_prefix }}/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"
-  when: ansible_os_family == 'RedHat'
+    nimble_volume_device_name: "/dev/nimblestorage/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"
 
-- name: Create device string
-  set_fact:
-    nimble_volume_device_name: "/dev/disk/by-id/dm-uuid-mpath-2{{ nimble_volume_serial_number }}"
-  when: ansible_os_family == 'Debian'
-
-- name: Wait for device to appear
-  wait_for:
+- name: Ensure device
+  stat:
     path: "{{ nimble_volume_device_name }}"
-    timeout: "{{ nimble_device_delay }}"
+  register: nimble_volume_device_info
+- fail:
+    msg: "{{ nimble_volume_device_name }} does not exist."
+  when: nimble_volume_device_info.stat.exists == False
 
 - name: Create filesystem label
   include: util_volume_label.yml

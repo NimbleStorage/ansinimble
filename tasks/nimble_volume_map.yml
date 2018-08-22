@@ -1,7 +1,10 @@
 ---
-- name: Ensure nimble_volume
-  fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
-  when: nimble_volume is undefined
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_volume
 
 - name: Host facts
   include: nimble_host_facts.yml
@@ -12,9 +15,10 @@
   vars:
     nimble_group_facts:
       initiator_groups: "fields=name,id"
-      volumes: "fields=name,id,access_control_records&name={{ nimble_volume }}"
+      volumes: "fields=name,id,target_name,serial_number,access_control_records&name={{ nimble_volume }}"
       access_control_records: "fields=id,initiator_group_id,vol_id&vol_name={{ nimble_volume }}"
       initiators: "fields=id,label"
+      subnets: "fields=allow_iscsi,discovery_ip"
 
 - name: Merge nimble_initiator_group_options
   set_fact: 
@@ -130,3 +134,22 @@
   delay: "{{ nimble_uri_delay }}"
   register: nimble_acr_created
   until: nimble_acr_created | success
+
+- name: Discover Targets
+  command: ncmadm -e {{ nimble_group_discovery_ip }}
+  register: nimble_discover_targets
+
+- name: Get volume serial number
+  set_fact:
+    nimble_volume_serial_number: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
+
+- name: Create device string
+  set_fact:
+    nimble_volume_device_name: "/dev/nimblestorage/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"
+
+- name: Wait for device to appear
+  wait_for:
+    path: "{{ nimble_volume_device_name }}"
+    timeout: "{{ nimble_device_delay }}"

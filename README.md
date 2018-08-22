@@ -3,6 +3,7 @@ Manages software and products from Nimble Storage. This is BETA software.
 
 ## Requirements
 Ansinimble supports two different product lines. HPE Nimble Storage arrays and HPE Cloud Volumes. Requirements vary slightly between products. 
+
 ### Nimble Arrays
 This role assumes the latest Nimble Linux Toolkit (NLT) is installed on the host being managed by Ansible. The latest version of NLT may be obtained from [InfoSight](https://infosight.nimblestorage.com) (Nimble customers and partners only).
 
@@ -230,8 +231,8 @@ nimble_volume_options_default:
   description: "Volume created by Ansible"
 
 # Device retries
-nimble_device_retries: 3
-nimble_device_delay: 10
+nimble_device_retries: 5
+nimble_device_delay: 24
 
 # NimbleOS HTTP/JSON tunables
 nimble_uri_retries: 6
@@ -294,6 +295,9 @@ nimble_array_config:
     support_ipaddrs:
       - 10.18.173.175                        # Support IP address setting node A.
       - 10.18.173.176                        # Support IP address setting node B.
+
+# Set to 'False' when using multiple initiators dynamically mapping/unmapping the volume
+nimble_volume_unmap_volume_connections: True
 
 # Cloud Volumes
 cloud_portal_http_host: cloudvolumes.hpe.com
