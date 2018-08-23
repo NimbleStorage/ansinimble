@@ -48,8 +48,13 @@
     delay: 30
     until: result|success
     register: result
-    with_items: "{{ nimble_host_packages }}"
+    with_items: "{{ nimble_host_packages[nimble_linux_toolkit_protocol] }}"
 
+  - name: Determine if excluding iSCSI
+    set_fact:
+      nimble_linux_toolkit_options_default: "{{ nimble_linux_toolkit_options_default + [ 'disable-iscsi' ] }}"
+    when: nimble_linux_toolkit_protocol == 'fc'
+  
   - name: Install/upgrade
     script: "{{ nimble_linux_toolkit_bundle }} --{{ nimble_linux_toolkit_options_default | join(' --') }}"
     register: nimble_nlt_installed

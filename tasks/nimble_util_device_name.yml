@@ -1,0 +1,9 @@
+---
+- name: Setting nimble_volume_device_name
+  set_fact:
+    nimble_volume_serial_number: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
+
+- set_fact:
+    nimble_volume_device_name: "/dev/nimblestorage/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"

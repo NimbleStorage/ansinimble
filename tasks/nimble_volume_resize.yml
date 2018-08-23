@@ -1,25 +1,20 @@
 ---
-- name: Ensure nimble_volume and nimble_volume_size
-  fail: msg="Missing variable nimble_volume, nimble_volume_size or nimble_volume_mountpoint. Please provide a volume name in nimble_volume, nimble_volume_size (in MiB) and current mountpoint in nimble_volume_mountpoint"
-  when: nimble_volume is undefined or nimble_volume_size is undefined or nimble_volume_mountpoint is undefined
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_volume
+    - nimble_volume_size
+    - nimble_volume_mountpoint
 
 - name: Refresh group facts
   include: nimble_group_facts.yml
   vars:
     nimble_group_facts:
-      volumes: "fields=name,id,target_name&name={{ nimble_volume }}"
+      volumes: "fields=name,id,serial_number&name={{ nimble_volume }}"
 
-- name: Retrieve nimble_volume_id
-  set_fact:
-    nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
-  vars:
-    local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"
-
-- name: Retrieve nimble_volume_target
-  set_fact:
-    nimble_volume_target: "{{ nimble_group_facts | json_query(local_query) }}"
-  vars:
-    local_query: "volumes[?name=='{{ nimble_volume }}'].target_name | [0]"
+- include: nimble_util_volume_id.yml
 
 - name: Set new volume size
   uri:
@@ -39,15 +34,10 @@
   register: nimble_volume_resized
   until: nimble_volume_resized | success
 
-- name: Rescan target
-  command: iscsiadm -m node -R -T {{ nimble_volume_target | quote }}
+- include: nimble_util_volume_id.yml
 
-- name: Reload devmap
-  command: multipath -r
-
-- name: Reload devmap (again)
-  command: multipath -r
-  when: ansible_os_family == 'Debian'
+- name: Rescan
+  command: ncmadm --resize {{ nimble_volume_device_name }}
 
 - name: Resize nimble_volume
   command: xfs_growfs {{ nimble_volume_mountpoint | quote }}

@@ -7,22 +7,22 @@ Ansinimble supports two different product lines. HPE Nimble Storage arrays and H
 ### Nimble Arrays
 This role assumes the latest Nimble Linux Toolkit (NLT) is installed on the host being managed by Ansible. The latest version of NLT may be obtained from [InfoSight](https://infosight.nimblestorage.com) (Nimble customers and partners only).
 
-* Requires a Nimble iSCSI array with NimbleOS 3.3+
+* Requires an HPE Nimble Storage array with NimbleOS 3.3+
 * Requires Ansible 2.2.3+ with the jmespath Python package installed (please see deprecation notes on Ansible 2.5 below)
 
 ### Cloud Volumes
 Host requirements are less stringent for Cloud Volumes. The Linux Connection Manager found on the Cloud Volumes portal needs to be installed but there is a task that can do that for you.
 
 * Requires API access to HPE Cloud Volumes
-* Requires Ansinimble 2.2.3+ with the jmespath and boto (for EC2 and HPE Cloud Volumes) Python package installed on the Ansible host. (please see deprectation notes on Ansible 2.5 below)
+* Requires Ansible 2.2.3+ with the jmespath and boto (for EC2 and HPE Cloud Volumes) Python package installed on the Ansible host. (please see deprectation notes on Ansible 2.5 below)
 
 ## Deprecation notes and tested versions of Ansible
 The following versions of Ansible are currently being tested:
 * 2.2.3.0
 * 2.3.3.0
-* 2.4.5.0
-* 2.5.5
-* 2.6.0
+* 2.4.6.0
+* 2.5.8
+* 2.6.3
 
 When Ansible 2.9 becomes generally available, the role will be re-written and only support Ansible 2.5+. A number of deprecation warnings will be present when executing with Ansible 2.4 and above, they are harmless. Deprecation warnings may safely be disabled.
 
@@ -210,6 +210,7 @@ nimble_linux_toolkit_options_default:
   - "silent-mode"
   - "accept-eula"
   - "ncm"
+nimble_linux_toolkit_protocol: iscsi
 
 # Default initiator options
 nimble_initiator_group_options_default:
@@ -652,6 +653,7 @@ Manages NLT on a host.
 nimble_linux_toolkit_state: Desired state, absent, present, running or stopped
 nimble_linux_toolkit_bundle: Full path on control node to NLT installer (only required when present or running when not installed)
 nimble_linux_toolkit_options: Additional installer flags (I.e docker or oracle)
+nimble_linux_toolkit_protocol: fc or iscsi, optimizes the install procedure for either protocol. Defaults to iscsi.
 ```
 
 ### array setup
@@ -840,8 +842,8 @@ Make sure credentials for NLT and the arrays are accessible in the appropriate v
 Installs NLT.
 ```
 ---
-# Provide nimble_linux_toolkit_bundle as an extra var to ansible-playbook, i.e:
-# $ ansible-playbook -l limit -e nimble_linux_toolkit_bundle=/tmp/nlt_installer-2.0-0 sample_install.yml
+# Provide nimble_linux_toolkit_bundle and nimble_linux_toolkit_protocol as extra vars to ansible-playbook, i.e:
+# $ ansible-playbook -l limit -e nimble_linux_toolkit_bundle=/tmp/nlt_installer-2.0-0 -e nimble_linux_toolkit_protocol=fc sample_install.yml
 
 - hosts: all
   roles:

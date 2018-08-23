@@ -20,6 +20,9 @@
       }'
     register: nimble_nltadm_group
 
+  - set_fact:
+      nimble_group_info: "{{ nimble_nltadm_group.stdout | from_json }}"
+
   - name: NLT components ({{ nimble_host_docker_driver_name }})
     shell: >
       nltadm --status | fgrep '{{ nimble_host_docker_driver_name | quote }}' | awk '{ print $2 }'
@@ -37,9 +40,46 @@
   - name: Probe my IQN
     command: awk -F = '{ if ($1 == "InitiatorName") print $2 }' {{ nimble_host_iqn_file | quote }}
     register: nimble_host_iqn
+  - name: Probe WWPNs 
+    shell: ls /sys/class/fc_host/host*/port_name || true
+    register: nimble_host_fc_adapters
+
+  - slurp:
+      src: "{{ item }}"
+    register: nimble_host_port_names
+    with_items: "{{ nimble_host_fc_adapters.stdout_lines }}"
+    no_log: True
+
+  - set_fact:
+      nimble_host_wwpns: "{{ nimble_host_wwpns }} + [ '{{ item.content | b64decode | 
+            regex_replace('([a-zA-Z0-9]{2})','\\1:') | 
+            regex_replace('0x:(.*):\n$','\\1')}}' ]"
+    vars:
+      nimble_host_wwpns: []
+    with_items: "{{ nimble_host_port_names.results }}"
+    no_log: True
 
   - name: Set facts
     set_fact:
+      nimble_host_docker_conf_file: "{{ nimble_host_docker_conf_file }}"
+      nimble_host_docker_driver_name: "{{ nimble_host_docker_driver_name }}"
+      nimble_host_iqn_file: "{{ nimble_host_iqn_file }}"
+  
+  - name: Verify group is reachable 
+    command: nltadm --group --verify --ip-address {{ nimble_group_info.group_ip | quote }} 
+    register: nimble_group_verified 
+    failed_when: "'Successfully' not in nimble_group_verified.stdout" 
+
+  - set_fact:
+      nimble_host_protocol: fc
+    when: nimble_group_info.protocol == 'null' or
+          nimble_group_info.protocol == 'fc'
+
+  - set_fact:
+      nimble_host_protocol: iscsi
+    when: nimble_group_info.protocol == 'iscsi'
+
+  - set_fact:
       nimble_host_facts: '{
         "groups": {
           "main": {{ nimble_nltadm_group.stdout | from_json }}
@@ -48,14 +88,7 @@
           "status": "{{ nimble_nltadm_docker.stdout }}",
           "options": {{ nimble_docker_options.stdout | from_json }}
         },
-        "iqn": "{{ nimble_host_iqn.stdout }}"
+        "iqn": "{{ nimble_host_iqn.stdout }}",
+        "wwpns": {{ nimble_host_wwpns | default([]) }}
       }'
-      nimble_host_docker_conf_file: "{{ nimble_host_docker_conf_file }}"
-      nimble_host_docker_driver_name: "{{ nimble_host_docker_driver_name }}"
-      nimble_host_iqn_file: "{{ nimble_host_iqn_file }}"
-
-  - name: Verify group is reachable 
-    command: nltadm --group --verify --ip-address {{ nimble_host_facts.groups.main.group_ip | quote }} 
-    register: nimble_group_verified 
-    failed_when: "'Successfully' not in nimble_group_verified.stdout" 
   when: nimble_host_facts is undefined or nimble_host_facts_force is defined

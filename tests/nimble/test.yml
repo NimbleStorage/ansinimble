@@ -178,6 +178,8 @@
         nimble_operation: partner,
         nimble_object: replication,
       }
+  tags:
+    - nopartner
 
 - hosts: smokey
   become: yes
@@ -245,6 +247,8 @@
         nimble_object: replication,
         nimble_partner: "{{ nimble_partnerships.test.downstream.name }}"
       }
+  tags:
+    - nopartner
 
 # Resize and delete
 - hosts: smokey
@@ -279,6 +283,7 @@
       }
   tags:
     - divorce
+    - nopartner
     
 - hosts: smokey
   become: yes

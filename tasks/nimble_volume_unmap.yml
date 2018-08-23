@@ -18,50 +18,47 @@
       volumes: "fields=name,id,serial_number,target_name&name={{ nimble_volume }}"
       initiator_groups: "fields=id&name={{ inventory_hostname_short }}"
 
-- name: Determine serial_number
-  set_fact:
-    nimble_volume_serial_number: "{{ nimble_group_facts | json_query(local_query) }}"
-  vars:
-    local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
+- block:
 
-- name: Create device string
-  set_fact:
-    nimble_volume_device_name: "/dev/nimblestorage/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"
+  - include: nimble_util_device_name.yml 
 
-- name: Dismantling data path
-  command: ncmadm --remove {{ nimble_volume_device_name }}
-  register: nimble_volume_removed
-  until: nimble_volume_removed.stdout.find('Done') != -1
-  retries: "{{ nimble_device_retries }}"
-  delay: "{{ nimble_device_delay }}"
-
-- name: Dismantling data path (forcefully)
-  command: ncmadm --remove --force {{ nimble_volume_device_name }}
-  args:
-    removes: "{{ nimble_volume_device_name }}"
+  - name: Dismantling data path
+    command: ncmadm --remove {{ nimble_volume_device_name }}
+    register: nimble_volume_removed
+    until: nimble_volume_removed.stdout.find('Done') != -1
+    retries: "{{ nimble_device_retries }}"
+    delay: "{{ nimble_device_delay }}"
   
-- name: Wait for device to disappear
-  wait_for:
-    path: "{{ nimble_volume_device_name }}"
-    state: absent
-    timeout: "{{ nimble_device_delay }}"
+  - name: Dismantling data path (forcefully)
+    command: ncmadm --remove --force {{ nimble_volume_device_name }}
+    args:
+      removes: "{{ nimble_volume_device_name }}"
+    
+  - name: Wait for device to disappear
+    wait_for:
+      path: "{{ nimble_volume_device_name }}"
+      state: absent
+      timeout: "{{ nimble_device_delay * nimble_device_retries }}"
+  when: nimble_host_protocol == 'iscsi' or nimble_host_protocol == 'fc' 
+ 
+- block: 
+  - name: Monitor volume connections
+    set_fact:
+        nimble_volume_id: "{{ nimble_group_facts.volumes[0].id }}"
+  - uri:
+      url: "{{ nimble_group_url }}/volumes/{{ nimble_volume_id }}"
+      validate_certs: no
+      method: GET
+      status_code: 200
+      headers:
+        X-Auth-Token: "{{ nimble_group_token }}"
+    retries: "{{ nimble_device_retries }}"
+    delay: "{{ nimble_device_delay }}"
+    register: nimble_volume_disconnected
+    when: nimble_volume_unmap_volume_connections == True
+    until: nimble_volume_disconnected.json.data.num_connections == 0
+  when: nimble_host_protocol == 'iscsi'
 
-- name: Monitor volume connections
-  set_fact:
-      nimble_volume_id: "{{ nimble_group_facts.volumes[0].id }}"
-- uri:
-    url: "{{ nimble_group_url }}/volumes/{{ nimble_volume_id }}"
-    validate_certs: no
-    method: GET
-    status_code: 200
-    headers:
-      X-Auth-Token: "{{ nimble_group_token }}"
-  retries: "{{ nimble_device_retries }}"
-  delay: "{{ nimble_device_delay }}"
-  register: nimble_volume_disconnected
-  when: nimble_volume_unmap_volume_connections == True
-  until: nimble_volume_disconnected.json.data.num_connections == 0
-  
 - name: Determine ACR ID
   set_fact:
     nimble_volume_acr: "{{ nimble_group_facts | json_query(local_query) }}"
@@ -82,11 +79,7 @@
   register: nimble_acr_deleted
   until: nimble_acr_deleted | success
 
-- name: Get nimble_volume_id
-  set_fact:
-    nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
-  vars:
-    local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"
+- include: nimble_util_volume_id.yml
 
 - name: Offline nimble_volume
   uri:
