@@ -3,6 +3,7 @@ ROLE_SRC=../..
 ROLE_DEST=/etc/ansible/roles/$(ROLE)
 
 all: clean copy tests
+partnerless: clean copy nopartner
 tag: clean copy tags
 install: clean copy bundle
 cloud: clean copy cv
@@ -13,6 +14,9 @@ tags:
 
 tests:
 	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/test.yml 
+
+nopartner:
+	ansible-playbook -l smokers --skip-tags=nopartner $(ROLE_DEST)/tests/nimble/test.yml 
 
 copy:
 	mkdir -p $(ROLE_DEST)
@@ -33,10 +37,10 @@ full:
 	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/test.yml 
 	sudo pip install ansible==2.3.3.0
 	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/test.yml 
-	sudo pip install ansible==2.4.5.0
+	sudo pip install ansible==2.4.6.0
 	ansible-playbook -l smokers $(ROLE_DEST)/tests/nimble/test.yml 
-	sudo pip install ansible==2.5.5
+	sudo pip install ansible==2.5.8
 	ansible-playbook -l smokers -b $(ROLE_DEST)/tests/nimble/test.yml 
-	sudo pip install ansible==2.6.0
+	sudo pip install ansible==2.6.3
 	ansible-playbook -l smokers -b $(ROLE_DEST)/tests/nimble/test.yml 
-	sudo pip install ansible==2.4.5.0
+	sudo pip install ansible==2.4.6.0

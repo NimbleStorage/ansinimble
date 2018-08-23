@@ -17,15 +17,7 @@
     nimble_group_facts:
       volumes: "fields=name,id,serial_number&name={{ nimble_volume }}"
 
-- name: Get volume serial number
-  set_fact:
-    nimble_volume_serial_number: "{{ nimble_group_facts | json_query(local_query) }}"
-  vars:
-    local_query: "volumes[?name=='{{ nimble_volume }}'].serial_number | [0]"
-
-- name: Create device string
-  set_fact:
-    nimble_volume_device_name: "/dev/nimblestorage/{{ nimble_volume }}-2{{ nimble_volume_serial_number }}"
+- include: nimble_util_device_name.yml
 
 - name: Ensure device
   stat:
