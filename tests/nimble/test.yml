@@ -50,6 +50,17 @@
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: snapshot, nimble_object: volume } 
 
+# Touch a file
+- hosts: smokey
+  become: yes
+  vars:
+    nimble_volume: "{{ inventory_hostname_short }}-vol"
+  tasks:
+    - name: Touch a file
+      file:
+        path: "/mnt/{{ inventory_hostname_short }}-vol/myfile-known.txt"
+        state: touch
+
 # Update folder and a known snap
 - hosts: smokey
   vars:
@@ -90,6 +101,25 @@
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: volume } 
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
+
+# Ensure our file is in the clone
+- hosts: smokey
+  tasks:
+    - name: Is the file gone?
+      stat:
+        path: "/mnt/{{ inventory_hostname_short }}-cln/myfile-known.txt"
+      register: nimble_file
+    - debug: var=nimble_file
+    - name: Fail if still there
+      fail:
+        msg: Cloning failed, file does not exist
+      when: nimble_file.stat.exists
+
+# Remove known clone
+- hosts: smokey
+  vars:
+    nimble_volume: "{{ inventory_hostname_short }}-cln"
+    nimble_volume_mountpoint: "/mnt/{{ inventory_hostname_short }}-cln"
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: volume } 
