@@ -1,0 +1,11 @@
+---
+# Provide nimble_volume and nimble_volume_mountpoint as extra vars, i.e:
+# $ ansible-playbook -l limit -e nimble_volume=myvol2 \
+# -e nimble_volume_from=myvol1
+# -e nimble_volume_mountpoint=/mnt/myvol2 sample_clone.yml
+
+- hosts: all
+  roles:
+    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: create }
+    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: map }
+    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: mount }
