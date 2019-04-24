@@ -6,7 +6,7 @@
   with_items:
     - nimble_partner
 
-- name: Gather volcolls and protection templates
+- name: Gather replication partners
   include: nimble_group_facts.yml
   vars:
     nimble_group_facts:

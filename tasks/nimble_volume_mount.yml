@@ -14,6 +14,7 @@
 - name: Refresh group facts
   include: nimble_group_facts.yml
   vars:
+    nimble_delegate_host: 127.0.0.1
     nimble_group_facts:
       volumes: "fields=name,id,serial_number&name={{ nimble_volume }}"
 

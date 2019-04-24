@@ -1,7 +1,14 @@
 ---
-# Provide nimble_linux_toolkit_bundle and nimble_linux_toolkit_protocol as extra vars to ansible-playbook, i.e:
-# $ ansible-playbook -l limit -e nimble_linux_toolkit_bundle=/tmp/nlt_installer-2.0-0 -e nimble_linux_toolkit_protocol=fc sample_install.yml
+# Provide nimble_linux_toolkit_bundle and nimble_linux_toolkit_protocol 
+# as extra vars to ansible-playbook, i.e:
+# $ ansible-playbook -e nimble_linux_toolkit_bundle=/tmp/nlt_installer-2.0-0 \
+# -e nimble_linux_toolkit_protocol=fc \
+# sample_install.yml
 
-- hosts: all
+- hosts: myhost1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: nlt, nimble_operation: manage, nimble_linux_toolkit_state: running }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: nlt,
+        nimble_operation: manage,
+        nimble_linux_toolkit_state: running
+      }

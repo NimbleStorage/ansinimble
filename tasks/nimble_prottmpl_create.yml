@@ -28,7 +28,7 @@
     url: "{{ nimble_group_url }}/protection_templates"
     validate_certs: no
     method: POST
-    status_code: 201
+    status_code: 201, 409
     body_format: json
     headers:
       X-Auth-Token: "{{ nimble_group_token }}"

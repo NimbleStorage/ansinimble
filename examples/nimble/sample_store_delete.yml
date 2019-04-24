@@ -1,7 +1,9 @@
 ---
 # Deletes a replication store
-# Mind that deleted Replication Stores does not assume any cloud instances and are done in the context of an arbitrary Ansible capable node
-# $ ansible-playbook -l limit -e cloud_store=mycloudstore1 sample_store_delete.yml
+# Mind that deleted Replication Stores does not assume any cloud instances
+# Replication stores are deleted in the context of an arbitrary Ansible capable node
+# $ ansible-playbook -e cloud_store=mycloudstore1 \
+# sample_store_delete.yml
 
 - hosts: all
   roles:

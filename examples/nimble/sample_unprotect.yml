@@ -1,8 +1,9 @@
 ---
-# Provide nimble_volume as extra vars, i.e:
-# $ ansible-playbook -l limit -e nimble_volume=myvol1 sample_unprotect.yml
+# Removes a volume from a volume collection
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# sample_unprotect.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: volume,

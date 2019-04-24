@@ -33,8 +33,11 @@
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_resized
   until: nimble_volume_resized | success
+  delegate_to: 127.0.0.1
+  delegate_facts: False
+  connection: local
 
-- include: nimble_util_volume_id.yml
+- include: nimble_util_device_name.yml
 
 - name: Rescan
   command: ncmadm --resize {{ nimble_volume_device_name }}

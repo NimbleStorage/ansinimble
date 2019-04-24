@@ -1,9 +1,12 @@
 ---
 # Resizes a replication store
-# Mind that resizing replication stores does not assume any cloud instances and are done in the context of an arbitrary Ansible capable node
-# $ ansible-playbook -l limit -e cloud_store=mycloudstore1 -e cloud_store_size=20000 sample_store_resize.yml
+# Mind that resizing replication stores does not assume any cloud instances 
+# Replication store is resizedin the context of an arbitrary Ansible capable node
+# $ ansible-playbook -e cloud_store=mycloudstore1 \
+# -e cloud_store_size=20000 
+# sample_store_resize.yml
 
-- hosts: all
+- hosts: localhost
   roles:
     - { role: NimbleStorage.Ansinimble, 
         cloud_object: store,

@@ -1,9 +1,13 @@
 ---
 # Creates a replication store of given size.
-# Mind that creating Replication Stores does not assume any cloud instances and are done in the context of an arbitray Ansible capable node
-# $ ansible-playbook -l limit -e cloud_store=mycloudstore1 -e cloud_store_size=300000 -e cloud_store_region=us-west1 sample_store_create.yml
+# Mind that creating Replication Stores does not assume any cloud instances
+# Replication store is created in the context of an arbitray Ansible capable node
+# $ ansible-playbook -e cloud_store=mycloudstore1 \
+# -e cloud_store_size=300000 \
+# -e cloud_store_region=us-west1 \
+# sample_store_create.yml
 
-- hosts: all
+- hosts: localhost
   roles:
     - { role: NimbleStorage.Ansinimble, 
         cloud_object: store,

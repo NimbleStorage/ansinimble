@@ -17,14 +17,24 @@ Host requirements are less stringent for Cloud Volumes. The Linux Connection Man
 * Requires Ansible 2.2.3+ with the jmespath and boto (for EC2 and HPE Cloud Volumes) Python package installed on the Ansible host. (please see deprectation notes on Ansible 2.5 below)
 
 ## Deprecation notes and tested versions of Ansible
-The following versions of Ansible are currently being tested:
-* 2.2.3.0
+The following versions of Ansible are currently being tested for compatability with Ansinimble:
 * 2.3.3.0
 * 2.4.6.0
-* 2.5.8
-* 2.6.3
+* 2.5.15
+* 2.6.16
+* 2.7.10
+
+Deprecated Ansible versions Ansinimble no longer support:
+* 2.2.3.0
 
 When Ansible 2.9 becomes generally available, the role will be re-written and only support Ansible 2.5+. A number of deprecation warnings will be present when executing with Ansible 2.4 and above, they are harmless. Deprecation warnings may safely be disabled.
+
+## Breaking changes between releases
+Ansinimble is beta software and might introduce breaking changes between versions:
+* Beyond 0.14.0
+  [Issue #27](https://github.com/NimbleStorage/ansinimble/issues/27) breaks stacking of roles as the Ansible Host is now responsible for all REST API interaction with the array. That means that the array need to be a line item in the inventory using `ansible_connection=local`. For example, creating a volume would be a role you'd assign to the array. All examples have been updated to reflect this behaviour.
+
+**Note:** Non-breaking additional features are documented with the [release](https://github.com/NimbleStorage/ansinimble/releases) on GitHub.
 
 **Important:** When executing with Ansible 2.5+, `ansible-playbook -b` (become) must be used for the role to work properly. This is due to a change in the `include` statement.
 
@@ -39,12 +49,14 @@ When Ansible 2.9 becomes generally available, the role will be re-written and on
    * [folder delete](https://github.com/NimbleStorage/ansinimble#folder-delete)
    * [volume create](https://github.com/NimbleStorage/ansinimble#volume-create)
    * [volume map](https://github.com/NimbleStorage/ansinimble#volume-map)
+   * [volume attach](https://github.com/NimbleStorage/ansinimble#volume-attach)
    * [volume mount](https://github.com/NimbleStorage/ansinimble#volume-mount)
    * [volume resize](https://github.com/NimbleStorage/ansinimble#volume-resize)
    * [volume update (not implemented yet)](https://github.com/NimbleStorage/ansinimble#volume-update-not-implemented-yet)
    * [volume snapshot](https://github.com/NimbleStorage/ansinimble#volume-snapshot)
    * [volume umount](https://github.com/NimbleStorage/ansinimble#volume-umount)
    * [volume unmap](https://github.com/NimbleStorage/ansinimble#volume-unmap)
+   * [volume detach](https://github.com/NimbleStorage/ansinimble#volume-detach)
    * [volume restore](https://github.com/NimbleStorage/ansinimble#volume-restore)
    * [volume delete](https://github.com/NimbleStorage/ansinimble#volume-delete)
    * [volume protect](https://github.com/NimbleStorage/ansinimble#volume-protect)
@@ -94,6 +106,10 @@ When Ansible 2.9 becomes generally available, the role will be re-written and on
    * [sample_snapshot.yml](https://github.com/NimbleStorage/ansinimble#sample_snapshotyml)
    * [sample_restore.yml](https://github.com/NimbleStorage/ansinimble#sample_restoreyml)
    * [sample_resize.yml](https://github.com/NimbleStorage/ansinimble#sample_resizeyml)
+   * [sample_map.yml](https://github.com/NimbleStorage/ansinimble#sample_mapyml)
+   * [sample_unmap.yml](https://github.com/NimbleStorage/ansinimble#sample_unmapyml)
+   * [sample_mount.yml](https://github.com/NimbleStorage/ansinimble#sample_mountyml)
+   * [sample_umount.yml](https://github.com/NimbleStorage/ansinimble#sample_umountyml)
    * [sample_decommission.yml](https://github.com/NimbleStorage/ansinimble#sample_decommissionyml)
    * [sample_array_setup.yml](https://github.com/NimbleStorage/ansinimble#sample_array_setupyml)
    * [sample_password_change.yml](https://github.com/NimbleStorage/ansinimble#sample_password_changeyml)
@@ -128,10 +144,10 @@ When Ansible 2.9 becomes generally available, the role will be re-written and on
 ## Role Variables
 The importance of variables depends on what objects are being managed.
 
-These are the defaults that are broadly applicapable or serving as examples:
+These are the offical defaults that are accompanied for each task or used as an example data structure.
 ```
 ---
-# These are required if NLT needs to be installed
+# These are required.
 nimble_group_options:
   ip-address: 192.168.59.64
   username: admin
@@ -162,10 +178,10 @@ nimble_protsched_options_default:
 nimble_partnership_options_default:
   upstream:
     description: "Established by Ansible"
-    subnet_label: mgmt
+    subnet_label: mgmt-data
   downstream:
     description: "Established by Ansible"
-    subnet_label: mgmt
+    subnet_label: mgmt-data
     name: upstream
     hostname: "{{ nimble_group_options['ip-address'] }}"
     username: "{{ nimble_group_options.username }}"
@@ -176,6 +192,25 @@ nimble_cloud_partnership_options_default:
   description: "Established by Ansible"
   subnet_label: mgmt-data
   partner_type: tunnel_endpoint
+
+# Example partnership stanza
+nimble_partnerships:
+  test:
+    secret: "Secret-00"
+    upstream:
+      description: "Established by Ansible"
+      subnet_label: mgmt-data
+      name: "group-downstream-array"
+      hostname: "downstream-array.example.com"
+      username: "admin"
+      password: "password"
+    downstream:
+      description: "Established by Ansible"
+      subnet_label: mgmt-data
+      name:  "group-upstream-array"
+      hostname: "upstream-array.example.com"
+      username: "admin"
+      password: "password"
 
 # These are the group facts gathered if no filters are applied with nimble_group_facts
 nimble_group_facts_default:
@@ -195,7 +230,7 @@ nimble_group_facts_default:
 nimble_group_http_scheme: https
 nimble_group_http_port: 5392
 nimble_group_api_version: v1
-nimble_group_url: "{{ nimble_group_http_scheme }}://{{ nimble_host_facts.groups.main.group_ip }}:{{ nimble_group_http_port }}/{{ nimble_group_api_version }}"
+nimble_group_url: "{{ nimble_group_http_scheme }}://{{ nimble_group_options['ip-address'] }}:{{ nimble_group_http_port }}/{{ nimble_group_api_version }}"
 
 # This is an optimistic guess, please provide discovery IP in complex setups
 nimble_group_discovery_ip: "{{ nimble_group_facts | json_query('subnets[?allow_iscsi==`true`].discovery_ip | [0]') }}"
@@ -212,24 +247,32 @@ nimble_linux_toolkit_options_default:
   - "ncm"
 nimble_linux_toolkit_protocol: iscsi
 
+# Set to True to disable connecting NLT to array
+nimble_linux_toolkit_nogroup: False
+
 # Default initiator options
 nimble_initiator_group_options_default:
-  name: "{{ inventory_hostname_short }}"
-  description: Created by Ansible for {{ inventory_hostname_short }}
-  access_protocol: "{{ nimble_host_facts.groups.main.protocol }}"
+  description: "Created by Ansible"
 
 nimble_initiator_options_default:
-  label: "{{ inventory_hostname_short }}:sw-iscsi"
-  access_protocol: "{{ nimble_host_facts.groups.main.protocol }}"
+  access_protocol: iscsi
   iqn: "{{ nimble_host_facts.iqn }}"
   ip_address: "*"
 
 # Default volume options
-nimble_volume_mount_options: "_netdev,auto"
+nimble_volume_mount_options: "_netdev,auto,nouuid"
 nimble_volume_mkfs_options: ""
 nimble_volume_size: 1000
 nimble_volume_options_default:
   description: "Volume created by Ansible"
+
+# Default performance policy options
+nimble_perfpolicy_blocksize: 4096
+nimble_perfpolicy_options_default:
+  description: "Performance Policy created by Ansible"
+  app_category: "Other"
+nimble_perfpolicy_update_options_default:
+  description: "Performance Policy updated by Ansible"
 
 # Device retries
 nimble_device_retries: 5
@@ -240,7 +283,7 @@ nimble_uri_retries: 6
 nimble_uri_delay: 10
 nimble_silence_payload: True
 
-# NimbleOS setup from scratch
+# NimbleOS setup from scratch example
 nimble_array_config:
   XX-000000:                                 # This is the serial number of the new array
     group_name: group-sjc-tme000-va          # Name of the group.
@@ -307,7 +350,7 @@ cloud_portal_http_host: cloudvolumes.hpe.com
 cloud_portal_access_key: nimble
 cloud_portal_secret_key: nimblestorage
 
-cloud_lcm_installer: https://ncv.cloud.nimblestorage.com/tools/ncv_installer_1.0.0.16
+cloud_lcm_installer: https://cloudvolumes.hpe.com/tools/ncv_installer_latest
 cloud_lcm_prefix: /opt/NimbleStorage
 cloud_host_iqn_file: /etc/iscsi/initiatorname.iscsi
 
@@ -431,7 +474,14 @@ Note that the parameters `perfpolicy_id`, `pool_id` and `folder_id` accepts the 
 Maps a volume to a host on the group.
 ```
 nimble_volume: Volume to map
+nimble_host_name: Host to map to the volume
 nimble_initiator_group_options: Options to apply to the initiator group (uses the node's IQN by default, hence this option is opional)
+```
+
+### volume attach
+Attach a volume to a host 
+```
+nimble_volume: Volume to attach
 ```
 
 ### volume mount
@@ -476,6 +526,11 @@ nimble_volume_mountpoint: Filesystem to umount
 Unmaps and offlines a volume on the Nimble group from an initiator.
 ```
 nimble_volume: Volume to unmap and offline
+```
+### volume detach
+Detaches a volume from a host, will fail if filesystems are still mounted
+```
+nimble_volume: Volume to detach
 ```
 
 ### volume restore
@@ -842,45 +897,70 @@ Make sure credentials for NLT and the arrays are accessible in the appropriate v
 Installs NLT.
 ```
 ---
-# Provide nimble_linux_toolkit_bundle and nimble_linux_toolkit_protocol as extra vars to ansible-playbook, i.e:
-# $ ansible-playbook -l limit -e nimble_linux_toolkit_bundle=/tmp/nlt_installer-2.0-0 -e nimble_linux_toolkit_protocol=fc sample_install.yml
+# Provide nimble_linux_toolkit_bundle and nimble_linux_toolkit_protocol 
+# as extra vars to ansible-playbook, i.e:
+# $ ansible-playbook -e nimble_linux_toolkit_bundle=/tmp/nlt_installer-2.0-0 \
+# -e nimble_linux_toolkit_protocol=fc \
+# sample_install.yml
 
-- hosts: all
+- hosts: myhost1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: nlt, nimble_operation: manage, nimble_linux_toolkit_state: running }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: nlt,
+        nimble_operation: manage,
+        nimble_linux_toolkit_state: running
+      }
 ```
-
 ### [sample_uninstall.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_uninstall.yml)
 Uninstalls NLT.
 ```
+# Removes NLT from a host
+# ansible-playbook sample_uninstall.yml
 ---
-- hosts: all
+- hosts: myhost1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: nlt, nimble_operation: manage, nimble_linux_toolkit_state: absent }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: nlt,
+        nimble_operation: manage,
+        nimble_linux_toolkit_state: absent
+      }
 ```
-
 
 ### [sample_debug.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_debug.yml)
 Croaks out all host and group facts
 ```
 ---
-- hosts: all
+# Fetches all facts from an array into nimble_group_facts
+
+- hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: group, nimble_operation: facts }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: group,
+        nimble_operation: facts 
+      }
   tasks:
-    - debug: var=nimble_group_facts
-    - debug: var=nimble_host_facts
+    - debug: 
+        var: nimble_group_facts
 ```
 
 ### [sample_group_fact.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_group_fact.yml)
 Lightweight debugging.
 ```
 ---
-- hosts: all
+# Fetches all volume facts from an array
+
+- hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: group, nimble_operation: facts, nimble_group_facts: { volumes: 'fields=name,serial_number' } }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: group, 
+        nimble_operation: facts,
+        nimble_group_facts: { 
+          volumes: 'fields=name,serial_number' 
+        }
+      }
   tasks:
-    - debug: var=nimble_group_facts
+    - debug: 
+        var: nimble_group_facts
 ```
 
 ### [sample_provision.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_provision.yml)
@@ -888,38 +968,95 @@ Provisions and mounts a new volume.
 ```
 ---
 # Provide nimble_volume and nimble_volume_mountpoint as extra vars, i.e:
-# $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_volume_mountpoint=/mnt/myvol1 sample_provision.yml
+# $ ansible-playbook -e nimble_volume=myvol1 \
+#   -e nimble_volume_mountpoint=/mnt/myvol1 \
+#   -e nimble_host_name=myhost1
+#   sample_provision.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: create }
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: map }
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: mount }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: create 
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: map 
+      }
+
+- hosts: myhost1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: attach
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: mount 
+      }
 ```
 
 ### [sample_snapshot.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_snapshot.yml)
 ```
 ---
 # Provide nimble_volume and nimble_volume_snapshot as extra vars, i.e:
-# $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_volume_snapshot=mysnap1 sample_snapshot.yml
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_volume_snapshot=mysnap1 \
+# sample_snapshot.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: snapshot }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: snapshot 
+      }
 ```
 ### [sample_restore.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_restore.yml)
 ```
 ---
 # Provide nimble_volume, nimble_volume_mountpoint and nimble_volume_snapshot as extra vars, i.e
-# $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_volume_mountpoint=/mnt/myvol1 -e nimble_volume_snapshot=mysnap1 sample_restore.yml
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_volume_mountpoint=/mnt/myvol1 \
+# -e nimble_volume_snapshot=mysnap1 \
+# -e nimble_host_name=myhost1
+# sample_restore.yml
 
-- hosts: all
+- hosts: myhost1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: umount }
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: unmap }
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: restore }
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: map }
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: mount }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: umount 
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: detach
+      }
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: unmap
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: restore 
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: map 
+      }
+
+- hosts: myhost1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: attach
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: mount
+      }
 ```
 
 
@@ -927,11 +1064,97 @@ Provisions and mounts a new volume.
 ```
 ---
 # Provide nimble_volume and nimble_volume_size as extra vars, i.e:
-# $ ansible-playbook -e limit -e nimble_volume=myvol1 -e nimble_volume_size=2000 sample_resize.yml
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_volume_size=2000 
+# sample_resize.yml
 
-- hosts: all
+- hosts: myhost1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: resize }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: resize 
+      }
+```
+
+### [sample_map.yml]((https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_map.yml)
+Maps a volume on the array to a host.
+```
+---
+# Provide nimble_volume as parameter to map a block device to a host and attach it
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_host_name=myhost1
+# sample_map.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: map
+      }
+
+- hosts: myhost1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: attach
+      }
+```
+
+### [sample_unmap.yml]((https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_unmap.yml)
+Unmaps a volume on the array from a host.
+```
+---
+# Provide nimble_volume as parameter to unmap a block device from a host and detach it
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_host_name=myhost1 \
+# sample_unmap.yml
+
+- hosts: myhost1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: detach
+      }
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: unmap
+      }
+```
+
+### [sample_mount.yml]((https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_mount.yml)
+Mounts a volume that has been mapped to a host (creates a filesystem if there is none) and creates a fstab entry.
+```
+---
+# Provide nimble_volume and nimble_volume_mountpoint as parameter and mount the volume
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_volume_mountpoint=/myvol1
+# sample_mount.yml
+
+- hosts: myhost1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: mount 
+      }
+```
+
+### [sample_umount.yml]((https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_umount.yml)
+Unmounts a filesystem and wipes fstab.
+```
+---
+# Provide nimble_volume as parameter to unmount a volume (will not disconnect it)
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# sample_unmount.yml
+
+- hosts: myhost1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: umount 
+      }
 ```
 
 ### [sample_decommission.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_decommission.yml)
@@ -939,13 +1162,32 @@ Unmounts and deletes a volume.
 ```
 ---
 # Provide nimble_volume and nimble_volume_mountpoint as extra vars, i.e:
-# $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_volume_mountpoint=/mnt/myvol1 sample_decommission.yml
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_volume_mountpoint=/mnt/myvol1 \
+# -e nimble_host_name=myhost1
+# sample_decommission.yml
 
-- hosts: all
+- hosts: myhost1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: umount }
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: unmap }
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: delete }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: umount
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: detach
+      }
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: unmap 
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: delete 
+      }
 ```
 
 ### [sample_array_setup.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_array_setup.yml)
@@ -953,12 +1195,14 @@ Sets up and array from scratch over the network with ZeroConf.
 ```
 ---
 # Provide nimble_array_serial as an extra variable and store config structure in host_vars/ansible_host
-# $ ansible-playbook -l limit -e nimble_array_serial=XX-123456 sample_array_setup.yml
+# $ ansible-playbook -e nimble_array_serial=XX-123456 \
+# sample_array_setup.yml
+
 - hosts: ansible_host
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: array,
-        nimble_operation: setup 
+        nimble_operation: setup
       }
 ```
 
@@ -967,8 +1211,11 @@ Changes the password of a user.
 ```
 ---
 # Provide nimble_password_new and nimble_password_user as extra vars
-# $ ansible-playbook -l limit -e nimble_password_new=mynewpass-123 -e nimble_password_user=myusername sample_password_change.yml
-- hosts: all
+# $ ansible-playbook -e nimble_password_new=mynewpass-123 
+# -e nimble_password_user=myusername 
+# sample_password_change.yml
+
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: password,
@@ -981,10 +1228,14 @@ Protects a Nimble volume.
 ```
 ---
 # Provide nimble_volume and nimble_volume_collection OR nimble_protection_template as extra vars, i.e:
-# $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_protection_template=Retain-30 sample_protect.yml
-# $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_volume_collection=myexistingvolcoll sample_protect.yml
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_protection_template=Retain-30 
+# sample_protect.yml
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_volume_collection=myexistingvolcoll \
+# sample_protect.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: volume,
@@ -996,10 +1247,11 @@ Protects a Nimble volume.
 Disassociates a Nimble volume from a volume collection.
 ```
 ---
-# Provide nimble_volume as extra vars, i.e:
-# $ ansible-playbook -l limit -e nimble_volume=myvol1 sample_unprotect.yml
+# Removes a volume from a volume collection
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# sample_unprotect.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: volume,
@@ -1012,9 +1264,11 @@ Creates a new volume collection.
 ```
 ---
 # Create volume collection
-# $ ansible-playbook -l limit -e nimble_volume_collection=myvolcoll1 -e nimble_protection_template=myprottmpl1 sample_volcoll_create.yml
+# $ ansible-playbook -e nimble_volume_collection=myvolcoll1 \
+# -e nimble_protection_template=myprottmpl1 \
+# sample_volcoll_create.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: volcoll,
@@ -1027,11 +1281,14 @@ Prunes all empty volume collections.
 ```
 ---
 # Prune volume collections without associated volumes
-# $ ansible-playbook -l limit sample_volcoll_prune.yml
+# $ ansible-playbook sample_volcoll_prune.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: volcoll, nimble_operation: prune }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volcoll,
+        nimble_operation: prune
+      }
 ```
 
 ### [sample_prottmpl_create.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_prottmpl_create.yml)
@@ -1039,9 +1296,10 @@ Creates a new protection template.
 ```
 ---
 # Create default protection template 
-# $ ansible-playbook -l limit -e nimble_protection_template=myprottmpl1 sample_prottmpl_create.yml
+# $ ansible-playbook -e nimble_protection_template=myprottmpl1 
+# sample_prottmpl_create.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: prottmpl,
@@ -1050,9 +1308,10 @@ Creates a new protection template.
   tags:
     - standalone
 
-# Create protection template with schedules, please see InfoSight REST API docs for full schedule options
+# Create protection template with schedules
+# Please see InfoSight REST API docs for full schedule options
 # Note: downstream_partner_id will be translated from a human-readable group name to an id
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: prottmpl,
@@ -1081,6 +1340,8 @@ Creates a new protection template.
           }
         }
       }
+  tags:
+    - schedules
 ```
 
 ### [sample_prottmpl_delete.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_prottmpl_delete.yml)
@@ -1088,9 +1349,10 @@ Deletes a proection template.
 ```
 ---
 # Delete protection template 
-# $ ansible-playbook -l limit -e nimble_protection_template=myprottmpl1 sample_prottmpl_delete.yml
+# $ ansible-playbook -e nimble_protection_template=myprottmpl1 \
+# sample_prottmpl_delete.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: prottmpl,
@@ -1107,11 +1369,13 @@ Partners with downstream Nimble array.
 # Upstream variables defines how to partner the downstream
 # Downstream variables defines how to partner upstream
 #
-# The nimble_partnerships var describes partnerships and should be protected with Ansible vault. Please find variable descriptions above.
+# The nimble_partnerships var describes partnerships and should be protected with Ansible vault,
+# please see defaults.yml of role for example
 # 
-# $ ansible-playbook -l limit -e nimble_partner=mypartnership sample_nimble_partner.yml
+# $ ansible-playbook -e nimble_partner=mypartnership \
+# sample_nimble_partner.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: replication,
@@ -1125,9 +1389,10 @@ Divorces (deletes) a replication partnership.
 ---
 # Divorce an array from another
 #
-# $ ansible-playbook -l limit -e nimble_partner=mypartner sample_nimble_divorce.yml
+# $ ansible-playbook -e nimble_partner=mypartner \
+# sample_nimble_divorce.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: replication,
@@ -1140,12 +1405,14 @@ Partners a Nimble Storage array group with Cloud Volumes.
 ```
 ---
 # Establish partnership with HPE Cloud Volumes
-# 
-# $ ansible-playbook -l limit -e cloud_store_region -e cloud_store=MyReplicationStore sample_cloud_partner.yml
+#
+# $ ansible-playbook -e cloud_store_region \
+# -e cloud_store=MyReplicationStore \
+# sample_cloud_partner.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         nimble_object: cloud,
         nimble_operation: partner
       }
@@ -1157,9 +1424,9 @@ Divorces a Nimble Storage array group from Cloud Volumes (leaves Replication Sto
 ---
 # Break partnership with HPE Cloud Volumes Replication Store (leaves store intact)
 # 
-# $ ansible-playbook -l limit -e cloud_store=MyReplicationStore sample_cloud_divorce.yml
+# $ ansible-playbook -e cloud_store=MyReplicationStore sample_cloud_divorce.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: cloud,
@@ -1172,10 +1439,14 @@ Creates a Replication Store in Cloud Volumes.
 ```
 ---
 # Creates a replication store of given size.
-# Mind that creating Replication Stores does not assume any cloud instances and are done in the context of an arbitray Ansible capable node
-# $ ansible-playbook -l limit -e cloud_store=mycloudstore1 -e cloud_store_size=300000 -e cloud_store_region=us-west1 sample_store_create.yml
+# Mind that creating Replication Stores does not assume any cloud instances
+# Replication store is created in the context of an arbitray Ansible capable node
+# $ ansible-playbook -e cloud_store=mycloudstore1 \
+# -e cloud_store_size=300000 \
+# -e cloud_store_region=us-west1 \
+# sample_store_create.yml
 
-- hosts: all
+- hosts: localhost
   roles:
     - { role: NimbleStorage.Ansinimble, 
         cloud_object: store,
@@ -1188,8 +1459,10 @@ Deletes a Replication Store in Cloud Volumes.
 ```
 ---
 # Deletes a replication store
-# Mind that deleted Replication Stores does not assume any cloud instances and are done in the context of an arbitrary Ansible capable node
-# $ ansible-playbook -l limit -e cloud_store=mycloudstore1 sample_store_delete.yml
+# Mind that deleted Replication Stores does not assume any cloud instances
+# Replication stores are deleted in the context of an arbitrary Ansible capable node
+# $ ansible-playbook -e cloud_store=mycloudstore1 \
+# sample_store_delete.yml
 
 - hosts: all
   roles:
@@ -1204,10 +1477,13 @@ Resizes a Replication Store in Cloud Volumes.
 ```
 ---
 # Resizes a replication store
-# Mind that resizing replication stores does not assume any cloud instances and are done in the context of an arbitrary Ansible capable node
-# $ ansible-playbook -l limit -e cloud_store=mycloudstore1 -e cloud_store_size=20000 sample_store_resize.yml
+# Mind that resizing replication stores does not assume any cloud instances 
+# Replication store is resizedin the context of an arbitrary Ansible capable node
+# $ ansible-playbook -e cloud_store=mycloudstore1 \
+# -e cloud_store_size=20000 
+# sample_store_resize.yml
 
-- hosts: all
+- hosts: localhost
   roles:
     - { role: NimbleStorage.Ansinimble, 
         cloud_object: store,
@@ -1219,10 +1495,13 @@ Resizes a Replication Store in Cloud Volumes.
 Creates a new Performance Policy.
 ```
 ---
-# Creates a new performance policy with 4K block size, no compressionon or dedupe. See API docs on HPE InfoSight for more valid options.
-# $ ansible-playbook -l limit -e nimble_perfpolicy=myperfpol1 -e nimble_perfpolicy_blocksize=4096 sample_perfpolicy_create.yml
+# Creates a new performance policy with 4K block size, no compressionon or dedupe. 
+# See API docs on HPE InfoSight for more valid options.
+# $ ansible-playbook -e nimble_perfpolicy=myperfpol1 \
+# -e nimble_perfpolicy_blocksize=4096 \
+# sample_perfpolicy_create.yml
 
-- hosts: all
+- hosts: myarray1
   vars:
     nimble_perfpolicy_options:
       compress: False
@@ -1238,10 +1517,12 @@ Creates a new Performance Policy.
 Updates a Performance Policy.
 ```
 ---
-# Updates a performance policy, enables compression and dedupe. See API docs on HPE InfoSight for more valid options.
-# $ ansible-playbook -l limit -e nimble_perfpolicy=myperfpol1 sample_perfpolicy_update.yml
+# Updates a performance policy, enables compression and dedupe.
+# See API docs on HPE InfoSight for more valid options.
+# $ ansible-playbook -e nimble_perfpolicy=myperfpol1 \
+# sample_perfpolicy_update.yml
 
-- hosts: all
+- hosts: myarray1
   vars:
     nimble_perfpolicy_update_options:
       compress: True
@@ -1258,9 +1539,10 @@ Deletes a Performance Policy.
 ```
 ---
 # Deletes a performance policy
-# $ ansible-playbook -l limit -e nimble_perfpolicy=myperfpol1 sample_perfpolicy_delete.yml
+# $ ansible-playbook -e nimble_perfpolicy=myperfpol1 \
+# sample_perfpolicy_delete.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: perfpolicy,
@@ -1470,7 +1752,7 @@ Croaks out all HPE Cloud Volume Portal facts into `cloud_portal_facts`
 ```
 
 ## Security considerations
-Always secure your `nimble_group_password` with Ansible Vault to prevent eavesdropping. 
+Always secure your `nimble_group_password` and other sensitive variables with Ansible Vault to prevent eavesdropping. 
 
 ## Contributing
 Please feel free to submit pull requests. Include a test in [tests/nimble/test.yml](tests/nimble/test.yml) for local Nimble arrays and [tests/cloud/cloud.yml](tests/cloud/test.yml) if including new functionality. Tests are run manually before merge.

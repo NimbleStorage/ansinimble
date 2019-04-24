@@ -68,6 +68,9 @@
     when: nimble_volume_snapshot is undefined and nimble_group_version | version_compare('4', '<')
 
   when: nimble_volume_snapshot is defined or nimble_group_version | version_compare('4', '<')
+  delegate_to: 127.0.0.1
+  delegate_facts: False
+  connection: local
 
 - name: Restore volume
   uri:
@@ -86,3 +89,6 @@
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_restored
   until: nimble_volume_restored | success
+  delegate_to: 127.0.0.1
+  delegate_facts: False
+  connection: local

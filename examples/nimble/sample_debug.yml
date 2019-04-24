@@ -1,7 +1,12 @@
 ---
-- hosts: all
+# Fetches all facts from an array into nimble_group_facts
+
+- hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: group, nimble_operation: facts }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: group,
+        nimble_operation: facts 
+      }
   tasks:
-    - debug: var=nimble_group_facts
-    - debug: var=nimble_host_facts
+    - debug: 
+        var: nimble_group_facts

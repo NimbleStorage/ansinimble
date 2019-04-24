@@ -1,8 +1,10 @@
 ---
 # Create volume collection
-# $ ansible-playbook -l limit -e nimble_volume_collection=myvolcoll1 -e nimble_protection_template=myprottmpl1 sample_volcoll_create.yml
+# $ ansible-playbook -e nimble_volume_collection=myvolcoll1 \
+# -e nimble_protection_template=myprottmpl1 \
+# sample_volcoll_create.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: volcoll,
