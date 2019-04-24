@@ -1,8 +1,10 @@
 ---
-# Updates a performance policy, enables compression and dedupe. See API docs on HPE InfoSight for more valid options.
-# $ ansible-playbook -l limit -e nimble_perfpolicy=myperfpol1 sample_perfpolicy_update.yml
+# Updates a performance policy, enables compression and dedupe.
+# See API docs on HPE InfoSight for more valid options.
+# $ ansible-playbook -e nimble_perfpolicy=myperfpol1 \
+# sample_perfpolicy_update.yml
 
-- hosts: all
+- hosts: myarray1
   vars:
     nimble_perfpolicy_update_options:
       compress: True

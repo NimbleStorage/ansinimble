@@ -26,9 +26,9 @@
     nimble_replication_partner_data: {}
 - set_fact:
     nimble_replication_partner_data: "{{ nimble_replication_partner_data | combine( { item.key: item.value } ) }}"
-  when: item.key is not in [ "username", "password", "source" ]
+  when: item.key not in [ 'username', 'password', 'source' ]
   with_dict: "{{ nimble_replication_partner_payload }}"
-  no_log: True
+  no_log: False
 
 - name: Lookup partner
   set_fact:

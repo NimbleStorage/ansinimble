@@ -1,5 +1,5 @@
 ---
-# These are required if NLT needs to be installed
+# These are required.
 nimble_group_options:
   ip-address: 192.168.59.64
   username: admin
@@ -30,10 +30,10 @@ nimble_protsched_options_default:
 nimble_partnership_options_default:
   upstream:
     description: "Established by Ansible"
-    subnet_label: mgmt
+    subnet_label: mgmt-data
   downstream:
     description: "Established by Ansible"
-    subnet_label: mgmt
+    subnet_label: mgmt-data
     name: upstream
     hostname: "{{ nimble_group_options['ip-address'] }}"
     username: "{{ nimble_group_options.username }}"
@@ -44,6 +44,25 @@ nimble_cloud_partnership_options_default:
   description: "Established by Ansible"
   subnet_label: mgmt-data
   partner_type: tunnel_endpoint
+
+# Example partnership stanza
+nimble_partnerships:
+  test:
+    secret: "Secret-00"
+    upstream:
+      description: "Established by Ansible"
+      subnet_label: mgmt-data
+      name: "group-downstream-array"
+      hostname: "downstream-array.example.com"
+      username: "admin"
+      password: "password"
+    downstream:
+      description: "Established by Ansible"
+      subnet_label: mgmt-data
+      name:  "group-upstream-array"
+      hostname: "upstream-array.example.com"
+      username: "admin"
+      password: "password"
 
 # These are the group facts gathered if no filters are applied with nimble_group_facts
 nimble_group_facts_default:
@@ -80,13 +99,14 @@ nimble_linux_toolkit_options_default:
   - "ncm"
 nimble_linux_toolkit_protocol: iscsi
 
+# Set to True to disable connecting NLT to array
+nimble_linux_toolkit_nogroup: False
+
 # Default initiator options
 nimble_initiator_group_options_default:
-  name: "{{ inventory_hostname_short }}"
-  description: Created by Ansible for {{ inventory_hostname_short }}
+  description: "Created by Ansible"
 
 nimble_initiator_options_default:
-  label: "{{ inventory_hostname_short }}:sw-iscsi"
   access_protocol: iscsi
   iqn: "{{ nimble_host_facts.iqn }}"
   ip_address: "*"
@@ -115,7 +135,7 @@ nimble_uri_retries: 6
 nimble_uri_delay: 10
 nimble_silence_payload: True
 
-# NimbleOS setup from scratch
+# NimbleOS setup from scratch example
 nimble_array_config:
   XX-000000:                                 # This is the serial number of the new array
     group_name: group-sjc-tme000-va          # Name of the group.

@@ -1,4 +1,10 @@
+# Removes NLT from a host
+# ansible-playbook sample_uninstall.yml
 ---
-- hosts: all
+- hosts: myhost1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: nlt, nimble_operation: manage, nimble_linux_toolkit_state: absent }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: nlt,
+        nimble_operation: manage,
+        nimble_linux_toolkit_state: absent
+      }

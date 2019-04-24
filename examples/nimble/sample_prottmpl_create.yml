@@ -1,8 +1,9 @@
 ---
 # Create default protection template 
-# $ ansible-playbook -l limit -e nimble_protection_template=myprottmpl1 sample_prottmpl_create.yml
+# $ ansible-playbook -e nimble_protection_template=myprottmpl1 
+# sample_prottmpl_create.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: prottmpl,
@@ -11,9 +12,10 @@
   tags:
     - standalone
 
-# Create protection template with schedules, please see InfoSight REST API docs for full schedule options
+# Create protection template with schedules
+# Please see InfoSight REST API docs for full schedule options
 # Note: downstream_partner_id will be translated from a human-readable group name to an id
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: prottmpl,

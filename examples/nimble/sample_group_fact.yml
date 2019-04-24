@@ -1,6 +1,15 @@
 ---
-- hosts: all
+# Fetches all volume facts from an array
+
+- hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: group, nimble_operation: facts, nimble_group_facts: { volumes: 'fields=name,serial_number' } }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: group, 
+        nimble_operation: facts,
+        nimble_group_facts: { 
+          volumes: 'fields=name,serial_number' 
+        }
+      }
   tasks:
-    - debug: var=nimble_group_facts
+    - debug: 
+        var: nimble_group_facts

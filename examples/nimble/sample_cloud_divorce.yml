@@ -1,9 +1,9 @@
 ---
 # Break partnership with HPE Cloud Volumes Replication Store (leaves store intact)
 # 
-# $ ansible-playbook -l limit -e cloud_store=MyReplicationStore sample_cloud_divorce.yml
+# $ ansible-playbook -e cloud_store=MyReplicationStore sample_cloud_divorce.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: cloud,

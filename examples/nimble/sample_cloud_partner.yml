@@ -1,9 +1,11 @@
 ---
 # Establish partnership with HPE Cloud Volumes
 #
-# $ ansible-playbook -l limit -e cloud_store_region -e cloud_store=MyReplicationStore sample_cloud_partner.yml
+# $ ansible-playbook -e cloud_store_region \
+# -e cloud_store=MyReplicationStore \
+# sample_cloud_partner.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: cloud,

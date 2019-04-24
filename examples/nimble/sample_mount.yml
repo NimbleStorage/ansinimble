@@ -1,0 +1,12 @@
+---
+# Provide nimble_volume and nimble_volume_mountpoint as parameter and mount the volume
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_volume_mountpoint=/myvol1
+# sample_mount.yml
+
+- hosts: myhost1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: mount 
+      }

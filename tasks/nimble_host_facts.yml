@@ -3,6 +3,8 @@
   service:
     name: nlt
   register: nimble_nlt_state
+  delegate_to: "{{ nimble_delegate_host | default(ansible_hostname) }}"
+  delegate_facts: "{{ nimble_delegate_facts | default(False) }}"
 
 - include: nimble_nlt_manage.yml
   vars:
@@ -40,6 +42,7 @@
   - name: Probe my IQN
     command: awk -F = '{ if ($1 == "InitiatorName") print $2 }' {{ nimble_host_iqn_file | quote }}
     register: nimble_host_iqn
+
   - name: Probe WWPNs 
     shell: ls /sys/class/fc_host/host*/port_name || true
     register: nimble_host_fc_adapters
@@ -64,11 +67,12 @@
       nimble_host_docker_conf_file: "{{ nimble_host_docker_conf_file }}"
       nimble_host_docker_driver_name: "{{ nimble_host_docker_driver_name }}"
       nimble_host_iqn_file: "{{ nimble_host_iqn_file }}"
-  
-  - name: Verify group is reachable 
-    command: nltadm --group --verify --ip-address {{ nimble_group_info.group_ip | quote }} 
-    register: nimble_group_verified 
-    failed_when: "'Successfully' not in nimble_group_verified.stdout" 
+
+  - name: Verify group is reachable
+    command: nltadm --group --verify --ip-address {{ nimble_group_info.group_ip | quote }}
+    register: nimble_group_verified
+    failed_when: "'Successfully' not in nimble_group_verified.stdout"
+    when: nimble_linux_toolkit_nogroup == False
 
   - set_fact:
       nimble_host_protocol: fc
@@ -78,6 +82,10 @@
   - set_fact:
       nimble_host_protocol: iscsi
     when: nimble_group_info.protocol == 'iscsi'
+
+  - fail:
+      msg: "Can't determine protocol. Use nimble_host_protocol if no group is configured in NLT"
+    when: nimble_host_protocol is undefined
 
   - set_fact:
       nimble_host_facts: '{
@@ -92,3 +100,5 @@
         "wwpns": {{ nimble_host_wwpns | default([]) }}
       }'
   when: nimble_host_facts is undefined or nimble_host_facts_force is defined
+  delegate_to: "{{ nimble_delegate_host | default(ansible_hostname) }}"
+  delegate_facts: "{{ nimble_delegate_facts | default(False) }}"

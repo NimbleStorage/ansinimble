@@ -1,9 +1,28 @@
 ---
 # Provide nimble_volume and nimble_volume_mountpoint as extra vars, i.e:
-# $ ansible-playbook -l limit -e nimble_volume=myvol1 -e nimble_volume_mountpoint=/mnt/myvol1 sample_decommission.yml
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_volume_mountpoint=/mnt/myvol1 \
+# -e nimble_host_name=myhost1
+# sample_decommission.yml
 
-- hosts: all
+- hosts: myhost1
   roles:
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: umount }
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: unmap }
-    - { role: NimbleStorage.Ansinimble, nimble_object: volume, nimble_operation: delete }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: umount
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: detach
+      }
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: unmap 
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: delete 
+      }

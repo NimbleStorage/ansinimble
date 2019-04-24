@@ -1,8 +1,9 @@
 ---
 # Deletes a performance policy
-# $ ansible-playbook -l limit -e nimble_perfpolicy=myperfpol1 sample_perfpolicy_delete.yml
+# $ ansible-playbook -e nimble_perfpolicy=myperfpol1 \
+# sample_perfpolicy_delete.yml
 
-- hosts: all
+- hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble, 
         nimble_object: perfpolicy,
