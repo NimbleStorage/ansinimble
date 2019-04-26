@@ -8,7 +8,7 @@
 
 - name: Host facts
   include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined is undefined
+  when: nimble_host_facts is undefined
 
 - name: Refresh group facts
   include: nimble_group_facts.yml
