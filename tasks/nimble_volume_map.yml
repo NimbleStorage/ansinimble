@@ -8,11 +8,20 @@
     - nimble_host_name
 
 - name: Host facts
-  include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined and nimble_initiator_options is undefined
   vars:
     nimble_delegate_host: "{{ nimble_host_name }}"
     nimble_delegate_host_facts: True
+  include: nimble_host_facts.yml
+  when: nimble_host_facts is undefined and not nimble_static_host_facts 
+
+- name: Lookup static nimble_host_facts
+  set_fact:
+    nimble_host_facts: "{{ hostvars[nimble_host_name]['nimble_host_facts'] | default(omit) }}"
+  when: nimble_host_facts is undefined and nimble_static_host_facts 
+ 
+- fail: 
+    msg: "nimble_host_vars unconfigured or unable to lookup dynamically"
+  when: nimble_host_facts is undefined
 
 - name: Refresh group facts
   include: nimble_group_facts.yml
