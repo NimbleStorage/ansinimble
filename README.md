@@ -235,6 +235,9 @@ nimble_group_url: "{{ nimble_group_http_scheme }}://{{ nimble_group_options['ip-
 # This is an optimistic guess, please provide discovery IP in complex setups
 nimble_group_discovery_ip: "{{ nimble_group_facts | json_query('subnets[?allow_iscsi==`true`].discovery_ip | [0]') }}"
 
+# Set to true to perform static nimble_host_facts from inventory
+nimble_static_host_facts: False
+
 # Host locations
 nimble_host_docker_conf_file: /opt/NimbleStorage/etc/docker-driver.conf
 nimble_host_docker_driver_name: Docker-Driver
@@ -245,9 +248,13 @@ nimble_linux_toolkit_options_default:
   - "silent-mode"
   - "accept-eula"
   - "ncm"
-nimble_linux_toolkit_protocol: iscsi
+nimble_host_protocol: iscsi
+
+# Set to True to disable any NLT interaction
+nimble_linux_toolkit_ignore: False
 
 # Set to True to disable connecting NLT to array
+# Not honored if nimble_linux_toolkit_ignore is True
 nimble_linux_toolkit_nogroup: False
 
 # Default initiator options
@@ -255,7 +262,7 @@ nimble_initiator_group_options_default:
   description: "Created by Ansible"
 
 nimble_initiator_options_default:
-  access_protocol: iscsi
+  access_protocol: "{{ nimble_host_protocol }}"
   iqn: "{{ nimble_host_facts.iqn }}"
   ip_address: "*"
 
@@ -708,7 +715,7 @@ Manages NLT on a host.
 nimble_linux_toolkit_state: Desired state, absent, present, running or stopped
 nimble_linux_toolkit_bundle: Full path on control node to NLT installer (only required when present or running when not installed)
 nimble_linux_toolkit_options: Additional installer flags (I.e docker or oracle)
-nimble_linux_toolkit_protocol: fc or iscsi, optimizes the install procedure for either protocol. Defaults to iscsi.
+nimble_host_protocol: fc or iscsi, optimizes the install procedure for either protocol. Defaults to iscsi.
 ```
 
 ### array setup
@@ -897,10 +904,10 @@ Make sure credentials for NLT and the arrays are accessible in the appropriate v
 Installs NLT.
 ```
 ---
-# Provide nimble_linux_toolkit_bundle and nimble_linux_toolkit_protocol 
+# Provide nimble_linux_toolkit_bundle and nimble_host_protocol
 # as extra vars to ansible-playbook, i.e:
 # $ ansible-playbook -e nimble_linux_toolkit_bundle=/tmp/nlt_installer-2.0-0 \
-# -e nimble_linux_toolkit_protocol=fc \
+# -e nimble_host_protocol=fc \
 # sample_install.yml
 
 - hosts: myhost1

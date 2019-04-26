@@ -1,0 +1,12 @@
+---
+# Fetches all host facts from a host
+
+- hosts: myhost1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: host, 
+        nimble_operation: facts,
+      }
+  tasks:
+    - debug: 
+        var: nimble_host_facts

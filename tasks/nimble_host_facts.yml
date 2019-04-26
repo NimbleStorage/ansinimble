@@ -5,43 +5,22 @@
   register: nimble_nlt_state
   delegate_to: "{{ nimble_delegate_host | default(ansible_hostname) }}"
   delegate_facts: "{{ nimble_delegate_facts | default(False) }}"
+  when: nimble_linux_toolkit_ignore == False
 
 - include: nimble_nlt_manage.yml
   vars:
     nimble_linux_toolkit_state: running
-  when: nimble_nlt_state.status.SubState != 'running'
+  when: nimble_linux_toolkit_ignore == False and nimble_nlt_state.status.SubState != 'running'
 
 - block:
-  - name: NLT group info
-    shell: >
-      nltadm --group --list | tail -1 | awk '{ print 
-      "{\"group_ip\": \"" $1 "\",\n"
-      "\"user\": \"" $2 "\",\n"
-      "\"status\": \"" $7 "\",\n"
-      "\"protocol\": \"" $8 "\"}\n"
-      }'
-    register: nimble_nltadm_group
-
-  - set_fact:
-      nimble_group_info: "{{ nimble_nltadm_group.stdout | from_json }}"
-
-  - name: NLT components ({{ nimble_host_docker_driver_name }})
-    shell: >
-      nltadm --status | fgrep '{{ nimble_host_docker_driver_name | quote }}' | awk '{ print $2 }'
-    register: nimble_nltadm_docker
-
-  - name: "{{ nimble_host_docker_driver_name }} configuration"
-    shell: >
-      grep -v ^# {{ nimble_host_docker_conf_file | quote }} | 
-      awk -F= 'END { printf("\n}\n") }
-      NR == 1 { printf("{\n") }
-      NR > 1 { printf(",\n") }
-      { printf("  \"%s\": \"%s\"", $1, $2) }'
-    register: nimble_docker_options
-
   - name: Probe my IQN
-    command: awk -F = '{ if ($1 == "InitiatorName") print $2 }' {{ nimble_host_iqn_file | quote }}
+    stat:
+      path: "{{ nimble_host_iqn_file }}"
+    register: nimble_host_iqn_file_stat
+
+  - command: awk -F = '{ if ($1 == "InitiatorName") print $2 }' {{ nimble_host_iqn_file | quote }}
     register: nimble_host_iqn
+    when: nimble_host_iqn_file_stat.stat.exists
 
   - name: Probe WWPNs 
     shell: ls /sys/class/fc_host/host*/port_name || true
@@ -62,41 +41,9 @@
     with_items: "{{ nimble_host_port_names.results }}"
     no_log: True
 
-  - name: Set facts
-    set_fact:
-      nimble_host_docker_conf_file: "{{ nimble_host_docker_conf_file }}"
-      nimble_host_docker_driver_name: "{{ nimble_host_docker_driver_name }}"
-      nimble_host_iqn_file: "{{ nimble_host_iqn_file }}"
-
-  - name: Verify group is reachable
-    command: nltadm --group --verify --ip-address {{ nimble_group_info.group_ip | quote }}
-    register: nimble_group_verified
-    failed_when: "'Successfully' not in nimble_group_verified.stdout"
-    when: nimble_linux_toolkit_nogroup == False
-
-  - set_fact:
-      nimble_host_protocol: fc
-    when: nimble_group_info.protocol == 'null' or
-          nimble_group_info.protocol == 'fc'
-
-  - set_fact:
-      nimble_host_protocol: iscsi
-    when: nimble_group_info.protocol == 'iscsi'
-
-  - fail:
-      msg: "Can't determine protocol. Use nimble_host_protocol if no group is configured in NLT"
-    when: nimble_host_protocol is undefined
-
   - set_fact:
       nimble_host_facts: '{
-        "groups": {
-          "main": {{ nimble_nltadm_group.stdout | from_json }}
-        },
-        "docker": {
-          "status": "{{ nimble_nltadm_docker.stdout }}",
-          "options": {{ nimble_docker_options.stdout | from_json }}
-        },
-        "iqn": "{{ nimble_host_iqn.stdout }}",
+        "iqn": "{{ nimble_host_iqn.stdout | default(omit) }}",
         "wwpns": {{ nimble_host_wwpns | default([]) }}
       }'
   when: nimble_host_facts is undefined or nimble_host_facts_force is defined

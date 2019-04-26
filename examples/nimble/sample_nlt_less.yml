@@ -1,0 +1,18 @@
+---
+# Creates and maps a volume to a host, no attach. Set these vars to operate
+# without communicating with the host itself: nimble_host_facts
+# Provide nimble_volume and nimble_host_name as extra vars, i.e:
+# $ ansible-playbook -e nimble_volume=myvol1 \
+#   -e nimble_host_name=myhost1
+#   sample_provision.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: create 
+      }
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: map 
+      }

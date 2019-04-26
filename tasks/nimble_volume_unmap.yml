@@ -54,3 +54,33 @@
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_offline
   until: nimble_volume_offline | success
+
+- name: Refresh initiator_groups
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_fact_refresh:
+      initiator_groups: "fields=id,volume_count,name&name={{ nimble_host_name }}"
+
+- name: Find previously initator_group ID
+  set_fact:
+    nimble_initiator_group_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "initiator_groups[?name=='{{ nimble_host_name }}'].id | [0]"
+
+- name: Delete initiator group if no more volumes remain
+  uri:
+    url: "{{ nimble_group_url }}/initiator_groups/{{ nimble_initiator_group_id }}"
+    validate_certs: no
+    method: DELETE
+    status_code: 200
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+    return_content: yes
+  register: nimble_initiator_group_deleted
+  when: nimble_group_facts | json_query(local_query) == nimble_initiator_group_id
+  vars:
+    local_query: "initiator_groups[?id=='{{ nimble_initiator_group_id }}'].{v: volume_count, id: id}[?v==`0`]|[0].id"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  until: nimble_initiator_group_deleted | success
