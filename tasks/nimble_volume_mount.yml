@@ -20,38 +20,53 @@
 
 - include: nimble_util_device_name.yml
 
-- name: Ensure device
+- name: Ensure device and paths
   stat:
     path: "{{ nimble_volume_device_name }}"
   register: nimble_volume_device_info
+
 - fail:
     msg: "{{ nimble_volume_device_name }} does not exist."
   when: nimble_volume_device_info.stat.exists == False
 
-- name: Create filesystem label
-  include: util_volume_label.yml
-  vars:
-    util_volume_label: "{{ nimble_volume }}"
+- shell: mountpoint -d "{{ nimble_volume_mountpoint }}" || true
+  register: nimble_volume_mountpoint_mm
 
-- name: Create filesystem
-  filesystem: 
-    dev: "{{ nimble_volume_device_name }}"
-    fstype: xfs
-    opts: -L {{ util_volume_label }} {{ nimble_volume_mkfs_options }}
-  register: nimble_filesystem_created
+- shell: mountpoint -x "{{ nimble_volume_device_name }}" || true
+  register: nimble_volume_device_name_mm
 
-- name: Update label if this is an existing filesystem (clone)
-  shell: xfs_admin -L {{ util_volume_label | quote }} -U {{ ansible_date_time.iso8601_micro | to_uuid }} {{ nimble_volume_device_name | quote }}
-  when: nimble_filesystem_created.changed == False
+- fail:
+    msg: "A different volume is already mounted on the requested mountpoint: {{ nimble_volume_mountpoint }}"
+  when: 
+    - nimble_volume_mountpoint_mm.stdout != nimble_volume_device_name_mm.stdout
+    - nimble_volume_mountpoint_mm.stdout != ""
 
-- name: Mount volume
-  mount:
-    name: "{{ nimble_volume_mountpoint }}"
-    state: mounted
-    src: LABEL={{ util_volume_label }}
-    opts: "{{ nimble_volume_mount_options }},x-systemd.requires={{ nimble_volume_device_name }}"
-    fstype: xfs
-  retries: "{{ nimble_device_retries }}"
-  delay: "{{ nimble_device_delay }}"
-  register: nimble_volume_mounted
-  until: nimble_volume_mounted | success
+- block:
+  - name: Create filesystem label
+    include: util_volume_label.yml
+    vars:
+      util_volume_label: "{{ nimble_volume }}"
+  
+  - name: Create filesystem
+    filesystem: 
+      dev: "{{ nimble_volume_device_name }}"
+      fstype: xfs
+      opts: -L {{ util_volume_label }} {{ nimble_volume_mkfs_options }}
+    register: nimble_filesystem_created
+  
+  - name: Update label if this is an existing filesystem (clone)
+    shell: xfs_admin -L {{ util_volume_label | quote }} -U {{ ansible_date_time.iso8601_micro | to_uuid }} {{ nimble_volume_device_name | quote }}
+    when: nimble_filesystem_created.changed == False
+  
+  - name: Mount volume
+    mount:
+      name: "{{ nimble_volume_mountpoint }}"
+      state: mounted
+      src: LABEL={{ util_volume_label }}
+      opts: "{{ nimble_volume_mount_options }},x-systemd.requires={{ nimble_volume_device_name }}"
+      fstype: xfs
+    retries: "{{ nimble_device_retries }}"
+    delay: "{{ nimble_device_delay }}"
+    register: nimble_volume_mounted
+    until: nimble_volume_mounted | success
+  when: not (nimble_volume_mountpoint_mm.stdout == nimble_volume_device_name_mm.stdout)
