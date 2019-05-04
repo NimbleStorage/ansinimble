@@ -1,0 +1,19 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_group_cli
+
+- name: Execute NimbleOS CLI command
+  add_host:
+    hostname: nimbleos-cli
+    ansible_host: "{{ nimble_group_options['ip-address'] }}"
+    ansible_password: "{{ nimble_group_options.username }}"
+    ansible_user: "{{ nimble_group_password }}"
+- raw: "{{ nimble_group_cli }}"
+  become: no
+  delegate_to: nimbleos-cli
+  register: nimble_group_cli_return
+  ignore_errors: "{{ nimble_group_cli_ignore_errors | default(False) }}"

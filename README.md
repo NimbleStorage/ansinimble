@@ -9,6 +9,7 @@ This role assumes the latest Nimble Linux Toolkit (NLT) is installed on the host
 
 * Requires an HPE Nimble Storage array with NimbleOS 3.3+
 * Requires Ansible 2.2.3+ with the jmespath Python package installed (please see deprecation notes on Ansible 2.5 below)
+* Requires the `sshpass` package to be installed on the Ansible host if using the `group cli` task
 
 ### Cloud Volumes
 Host requirements are less stringent for Cloud Volumes. The Linux Connection Manager found on the Cloud Volumes portal needs to be installed but there is a task that can do that for you.
@@ -71,6 +72,8 @@ Ansinimble is beta software and might introduce breaking changes between version
    * [cloud divorce](https://github.com/NimbleStorage/ansinimble#cloud-divorce)
    * [host facts](https://github.com/NimbleStorage/ansinimble#host-facts)
    * [group facts](https://github.com/NimbleStorage/ansinimble#group-facts)
+   * [group_update](https://github.com/NimbleStorage/ansinimble#group-update)
+   * [group_cli](https://github.com/NimbleStorage/ansinimble#group-cli)
    * [nlt manage](https://github.com/NimbleStorage/ansinimble#nlt-manage)
    * [array setup](https://github.com/NimbleStorage/ansinimble#array-setup)
    * [password update](https://github.com/NimbleStorage/ansinimble#password-update)
@@ -684,12 +687,27 @@ ok: [smokey] => {
         ]
     }
 }
-**Note:** Calling group facts with nimble_group_facts multiple times in the same play will have undesired effects. If a certain fact(s) need to be refreshed mid-play, use nimble_group_fact_refresh with the keys needed to be refreshed.
 ```
+**Note:** Calling group facts with nimble_group_facts multiple times in the same play will have undesired effects. If a certain fact(s) need to be refreshed mid-play, use nimble_group_fact_refresh with the keys needed to be refreshed.
 
 Please see variables section for more info.
 
 **Note:** By default `nimble_group_facts` gobbles the entire group. At scale this could become an issue. Always try to be smart about what you need from the group and only query for data that is needed for processing.
+
+### group update
+Updates configuration of a group. This task accepts an endless list of configuration options. Please the REST API documentation available on HPE InfoSight for the particular version of NimbleOS. Used to enfore configuration and prevent drift.
+```
+nimble_group_update: Advanced data structure to apply group configration. See the examples section.
+```
+**Note**: Configuration is applied for each update regardless of current value of the specific option. This might be addressed in a future update.
+
+### group cli
+Uses the Ansible `raw` module to execute NimbleOS commands on the group.
+```
+nimble_group_cli: String to execute on the group. If passed on ansible-playbook -e argument, encapsulate in JSON format, see examples section.
+nimble_group_cli_ignore_errors: Set to True to ignore errors
+```
+
 
 ### nlt manage
 Manages NLT on a host. 
@@ -963,6 +981,51 @@ Lightweight debugging.
     - debug: 
         var: nimble_group_facts
 ```
+### [sample_group_update.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_group_update.yml)
+```
+---
+# Updates the group options. The following example updates the DNS domain, DNS servers and sets 
+# a custom login banner message.
+# $ ansible-playbook sample_group_update.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: group,
+        nimble_operation: update,
+        nimble_group_update: {
+          domain_name: example.com,
+          dns_servers: [
+            { "ip_addr": "8.8.8.8" },
+            { "ip_addr": "1.1.1.1" }
+          ],
+          login_banner_message:
+            "This array is managed by Ansible. Configuration changes 
+            may be overridden periodically. Contact support@example.com
+            for further information."
+        }
+      }
+```
+Please see the REST API guide on HPE InfoSight on the specific NimbleOS version what options are supported in `nimble_group_update`.
+
+### [sample_group_cli.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_group_cli.yml)
+```
+---
+# Execute a NimbleOS CLI command, stores return from the raw module in nimble_group_raw_return
+# $ ansible-playbook -e '{"nimble_group_cli": "group --list"}' \
+# sample_group_cli.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: group,
+        nimble_operation: cli
+      }
+  tasks:
+    - debug:
+        var: nimble_group_cli_return.stdout_lines
+```
+**Note:** The `raw` module requires `sshpass` to be installed on the Ansible host.
 
 ### [sample_provision.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_provision.yml)
 Provisions and mounts a new volume.

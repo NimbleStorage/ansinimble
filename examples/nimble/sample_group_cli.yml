@@ -1,0 +1,14 @@
+---
+# Execute a NimbleOS CLI command, stores return from the raw module in nimble_group_raw_return
+# $ ansible-playbook -e '{"nimble_group_cli": "group --list"}' \
+# sample_group_cli.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: group,
+        nimble_operation: cli
+      }
+  tasks:
+    - debug:
+        var: nimble_group_cli_return.stdout_lines
