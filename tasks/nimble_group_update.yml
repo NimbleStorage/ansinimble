@@ -1,0 +1,30 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_group_update
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_delegate_host: 127.0.0.1
+    nimble_group_facts:
+      groups: "fields=id"
+
+- name: Update group
+  uri:
+    url: "{{ nimble_group_url }}/groups/{{ nimble_group_facts.groups.0.id }}"
+    validate_certs: no
+    method: PUT
+    status_code: 200
+    body_format: json
+    body:
+      data: "{{ nimble_group_update }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_group_updated
+  until: nimble_group_updated | success
