@@ -1142,7 +1142,7 @@ Provisions and mounts a new volume.
       }
 ```
 
-### [sample_map.yml]((https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_map.yml)
+### [sample_map.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_map.yml)
 Maps a volume on the array to a host.
 ```
 ---
@@ -1166,7 +1166,7 @@ Maps a volume on the array to a host.
       }
 ```
 
-### [sample_unmap.yml]((https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_unmap.yml)
+### [sample_unmap.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_unmap.yml)
 Unmaps a volume on the array from a host.
 ```
 ---
@@ -1190,7 +1190,7 @@ Unmaps a volume on the array from a host.
       }
 ```
 
-### [sample_mount.yml]((https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_mount.yml)
+### [sample_mount.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_mount.yml)
 Mounts a volume that has been mapped to a host (creates a filesystem if there is none) and creates a fstab entry.
 ```
 ---
@@ -1207,7 +1207,7 @@ Mounts a volume that has been mapped to a host (creates a filesystem if there is
       }
 ```
 
-### [sample_umount.yml]((https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_umount.yml)
+### [sample_umount.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_umount.yml)
 Unmounts a filesystem and wipes fstab.
 ```
 ---
