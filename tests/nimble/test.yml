@@ -381,6 +381,7 @@
     nimble_volume_size: 30000
     nimble_volume_mountpoint: "/mnt/ansinimble-vol"
   roles:
+    - { role: debug_marker, local_test: "Resize and detach" }
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: resize, nimble_object: volume } 
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: detach, nimble_object: volume } 
@@ -393,7 +394,7 @@
     nimble_volume_mountpoint: "/mnt/ansinimble-vol"
     nimble_host_name: myhost1
   roles:
-    - { role: debug_marker, local_test: "Resize and delete" }
+    - { role: debug_marker, local_test: "Delete" }
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: volume } 
     - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: folder } 

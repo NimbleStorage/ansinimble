@@ -144,7 +144,7 @@ Ansinimble is beta software and might introduce breaking changes between version
 ## Role Variables
 The importance of variables depends on what objects are being managed.
 
-These are the offical defaults that are accompanied for each task or used as an example data structure.
+These are the offical defaults that are accompanied for each task or used as an example data structure. Some variables makes sense per host, per ansible host or grouped. Explore each task to learn more.
 ```
 ---
 # These are required.
@@ -253,9 +253,9 @@ nimble_host_protocol: iscsi
 # Set to True to disable any NLT interaction
 nimble_linux_toolkit_ignore: False
 
-# Set to True to disable connecting NLT to array
+# Set to False to enable connecting NLT to array
 # Not honored if nimble_linux_toolkit_ignore is True
-nimble_linux_toolkit_nogroup: False
+nimble_linux_toolkit_nogroup: True
 
 # Default initiator options
 nimble_initiator_group_options_default:
@@ -653,26 +653,8 @@ Example:
 ```
 ok: [smokey] => {
     "nimble_host_facts": {
-        "docker": {
-            "options": {
-                "docker.volume.dir": "/opt/nimble/", 
-                "nos.clone.snapshot.prefix": "BaseFor", 
-                "nos.default.perfpolicy.name": "DockerDefault", 
-                "nos.volume.destroy.when.removed": "false", 
-                "nos.volume.name.prefix": "", 
-                "nos.volume.name.suffix": ".docker"
-            }, 
-            "status": "DISABLED"
-        }, 
-        "groups": {
-            "main": {
-                "group_ip": "192.168.59.64", 
-                "protocol": "iscsi", 
-                "status": "enabled", 
-                "user": "admin"
-            }
-        }, 
-        "iqn": "iqn.1994-05.com.redhat:44be4d73789"
+        "iqn": "iqn.1994-05.com.redhat:44be4d73789",
+        "wwpns": []
     }
 }
 ```
@@ -714,9 +696,21 @@ Manages NLT on a host.
 ```
 nimble_linux_toolkit_state: Desired state, absent, present, running or stopped
 nimble_linux_toolkit_bundle: Full path on control node to NLT installer (only required when present or running when not installed)
-nimble_linux_toolkit_options: Additional installer flags (I.e docker or oracle)
+nimble_linux_toolkit_options: Additional installer flags (I.e docker or oracle). In list format.
 nimble_host_protocol: fc or iscsi, optimizes the install procedure for either protocol. Defaults to iscsi.
+nimble_linux_toolkit_nogroup: Do not configure NLT with nltadm --group --add, only relevant when used with legacy Docker or Oracle App Manager. Defaults is True.
+nimble_linux_toolkit_ignore: Defaults to False. Will not under any circumstance try to install NLT. Some tasks won't work but is primarily used for provisioning resources to hosts with manual discovery.
+nimble_static_host_facts: Used with the above parameter to manually populate host facts. See next paragraph.
 ```
+
+If provisioning and mapping resources to a host without using Ansible to discover IQN or WWNPs, the following data structure is needed on the host:
+
+```
+nimble_host_facts:
+  iqn: iqn.1993-08.org.debian:01:1d2529afe63e
+  wwpns: []
+```
+**Note**: World Wide Port Names can be found in `/sys/class/fc_host/host*/port_name` for FC and search for `initiatorname.iscsi` in /etc to find a host IQN when using iSCSI.
 
 ### array setup
 Sets up an array from scratch. The Ansible host needs to be configured with ZeroConf in the same network as the arrays that needs to be setup.

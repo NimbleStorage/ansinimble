@@ -105,9 +105,9 @@ nimble_host_protocol: iscsi
 # Set to True to disable any NLT interaction
 nimble_linux_toolkit_ignore: False
 
-# Set to True to disable connecting NLT to array
+# Set to False to enable connecting NLT to array
 # Not honored if nimble_linux_toolkit_ignore is True
-nimble_linux_toolkit_nogroup: False
+nimble_linux_toolkit_nogroup: True
 
 # Default initiator options
 nimble_initiator_group_options_default:
