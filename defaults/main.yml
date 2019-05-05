@@ -124,6 +124,7 @@ nimble_volume_mkfs_options: ""
 nimble_volume_size: 1000
 nimble_volume_options_default:
   description: "Volume created by Ansible"
+nimble_volume_update_options_default: {}
 
 # Default performance policy options
 nimble_perfpolicy_blocksize: 4096
