@@ -1,0 +1,50 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_volume
+    - nimble_volume_snapshot
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      volumes: "fields=name,id&name={{ nimble_volume }}"
+      snapshots: "fields=name,id&vol_name={{ nimble_volume }}&name={{ nimble_volume_snapshot }}"
+
+- include: nimble_util_volume_id.yml
+
+- name: Get nimble_snapshot_id
+  set_fact:
+    nimble_snapshot_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "snapshots[?name=='{{ nimble_volume_snapshot }}'].id | [0]"
+
+- fail:
+    msg: "No such volume {{ nimble_volume }} or snapshot {{ nimble_volume_snapshot }}"
+  when: not (nimble_volume_id and nimble_snapshot_id)
+
+- name: Merge options
+  set_fact: 
+    nimble_snapshot_update_options_default: "{{ nimble_snapshot_update_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ nimble_snapshot_update_options }}"
+  when: nimble_snapshot_update_options is defined
+
+- name: Update nimble_volume_snapshot
+  uri:
+    url: "{{ nimble_group_url }}/snapshots/{{ nimble_snapshot_id }}"
+    validate_certs: no
+    method: PUT
+    status_code: 200
+    body_format: json
+    body:
+      data: "{{ nimble_snapshot_update_options_default }}"
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_snapshot_updated
+  until: nimble_snapshot_updated | success
+  when: nimble_snapshot_update_options_default != {}

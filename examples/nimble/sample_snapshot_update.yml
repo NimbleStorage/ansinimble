@@ -1,0 +1,13 @@
+---
+# Updates a mutable snapshot attribue. The following example renames a snapshot on a volume.
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_volume_snapshot=myoldsnapname \
+# -e '{"nimble_snapshot_update_options": {"name": "mynewsnapname"}}' \
+# sample_snapshot_update.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: snapshot,
+        nimble_operation: update
+      }
