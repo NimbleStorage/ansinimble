@@ -1,0 +1,14 @@
+---
+# Updates a mutable volume attribue. The following example updates the IOPS limit and description.
+# $ ansible-playbook -e nimble_volume=myvol1 sample_volume_update.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: update #,
+        #nimble_volume_update_options: {
+        #  limit_iops: 2000,
+        #  description: Volume throttled by Ansible
+        #}
+      }
