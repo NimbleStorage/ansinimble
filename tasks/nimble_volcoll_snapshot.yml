@@ -1,0 +1,58 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_volcoll
+
+- name: Ensure a snapshot name
+  set_fact:
+    nimble_volcoll_snapshot: "{{ nimble_volcoll_snapshot | default(ansible_date_time.iso8601_basic) }}"
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      volume_collections: "fields=name,id&name={{ nimble_volcoll }}"
+      snapshot_collections: "fields=name,id&volcoll_name={{ nimble_volcoll }}"
+
+- name: Get nimble_volcoll_id
+  set_fact:
+    nimble_volcoll_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "volume_collections[?name=='{{ nimble_volcoll }}'].id | [0]"
+
+- fail:
+    msg: "No such volume collection: {{ nimble_volcoll }}"
+  when: not nimble_volcoll_id
+
+- name: Merge options
+  set_fact:
+    nimble_volcoll_snapshot_options_default: "{{ nimble_volcoll_snapshot_options_default | combine( { item.key: item.value } ) }}"
+  with_dict: "{{ nimble_volcoll_snapshot_options }}"
+  when: nimble_volcoll_snapshot_options is defined
+
+- name: Overlay name and id into volcoll snapshot options
+  set_fact:
+    nimble_volcoll_snapshot_options_default: "{{ nimble_volcoll_snapshot_options_default | combine( { 'name': nimble_volcoll_snapshot, 'volcoll_id': nimble_volcoll_id } ) }}"
+
+- name: Create snapshot collection
+  uri:
+    url: "{{ nimble_group_url }}/snapshot_collections"
+    validate_certs: no
+    method: POST
+    status_code: 201, 409
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+    body:
+      data: "{{ nimble_volcoll_snapshot_options_default }}"
+    return_content: yes
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_snapshots_created
+  until: nimble_snapshots_created | success
+  vars:
+    local_query: "snapshot_collections[?name=='{{ nimble_volcoll_snapshot }}'].name | [0]"
+  when: nimble_group_facts | json_query(local_query) != nimble_volcoll_snapshot

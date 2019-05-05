@@ -65,6 +65,7 @@ Ansinimble is beta software and might introduce breaking changes between version
    * [volume unprotect](https://github.com/NimbleStorage/ansinimble#volume-unprotect)
    * [volcoll create](https://github.com/NimbleStorage/ansinimble#volcoll-create)
    * [volcoll prune](https://github.com/NimbleStorage/ansinimble#volcoll-prune)
+   * [volcoll snapshot](https://github.com/NimbleStorage/ansinimble#volcoll-snapshot)
    * [prottmpl create](https://github.com/NimbleStorage/ansinimble#prottmpl-create)
    * [prottmpl delete](https://github.com/NimbleStorage/ansinimble#prottmpl-delete)
    * [replication partner](https://github.com/NimbleStorage/ansinimble#replication-partner)
@@ -125,6 +126,7 @@ Ansinimble is beta software and might introduce breaking changes between version
    * [sample_unprotect.yml](https://github.com/NimbleStorage/ansinimble#sample_unprotectyml)
    * [sample_volcoll_create.yml](https://github.com/NimbleStorage/ansinimble#sample_volcoll_createyml)
    * [sample_volcoll_prune.yml](https://github.com/NimbleStorage/ansinimble#sample_volcoll_pruneyml)
+   * [sample_volcoll_snapshot.yml](https://github.com/NimbleStorage/ansinimble#sample_volcoll_snapshotyml)
    * [sample_prottmpl_create.yml](https://github.com/NimbleStorage/ansinimble#sample_prottmpl_createyml)
    * [sample_prottmpl_delete.yml](https://github.com/NimbleStorage/ansinimble#sample_prottmpl_deleteyml)
    * [sample_nimble_partner.yml](https://github.com/NimbleStorage/ansinimble#sample_nimble_partneryml)
@@ -173,6 +175,7 @@ nimble_folder_update_options_default:
 # Default volcoll options (when created standalone)
 nimble_volcoll_options_default:
   description: "Volume Collection created by Ansible"
+nimble_volcoll_snapshot_options_default: {}
 
 # Default protection template options
 nimble_prottmpl_options_default:
@@ -602,6 +605,14 @@ nimble_volcoll_options: Key/value of volcoll options (see API documentation on H
 
 ### volcoll prune
 Prunes the array group of orphaned volume collections. No parameters needed.
+
+### volcoll snapshot
+Snapshots a volume collection;
+```
+nimble_volcoll: Volume collection name
+nimble_volcoll_snapshot: Optional volume collection snapshot name (uses a timestamp by default)
+nimble_volcoll_snapshot_options: Optional key/value pair of attributes to apply to the volume collection (see API documentation on HPE InfoSight for valid fields)
+```
 
 ### prottmpl create
 Creates a protection schedule with a set of schedules and replica destinations.
@@ -1408,6 +1419,22 @@ Prunes all empty volume collections.
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volcoll,
         nimble_operation: prune
+      }
+```
+
+### [sample_volcoll_snapshot.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_volcoll_snapshot.yml)
+```
+---
+# Provide nimble_volcoll and nimble_volcoll_snapshot as extra vars, i.e:
+# $ ansible-playbook -e nimble_volcoll=myvolcoll1 \
+# -e nimble_volcoll_snapshot=mysnap1 \
+# sample_volcoll_snapshot.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volcoll,
+        nimble_operation: snapshot 
       }
 ```
 
