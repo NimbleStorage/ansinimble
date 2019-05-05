@@ -1,0 +1,12 @@
+---
+# Provide nimble_volcoll and nimble_volcoll_snapshot as extra vars, i.e:
+# $ ansible-playbook -e nimble_volcoll=myvolcoll1 \
+# -e nimble_volcoll_snapshot=mysnap1 \
+# sample_volcoll_snapshot.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volcoll,
+        nimble_operation: snapshot 
+      }

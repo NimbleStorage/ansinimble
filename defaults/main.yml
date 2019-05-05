@@ -17,6 +17,7 @@ nimble_folder_update_options_default:
 # Default volcoll options (when created standalone)
 nimble_volcoll_options_default:
   description: "Volume Collection created by Ansible"
+nimble_volcoll_snapshot_options_default: {}
 
 # Default protection template options
 nimble_prottmpl_options_default:
