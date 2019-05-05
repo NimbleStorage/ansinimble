@@ -53,7 +53,7 @@ Ansinimble is beta software and might introduce breaking changes between version
    * [volume attach](https://github.com/NimbleStorage/ansinimble#volume-attach)
    * [volume mount](https://github.com/NimbleStorage/ansinimble#volume-mount)
    * [volume resize](https://github.com/NimbleStorage/ansinimble#volume-resize)
-   * [volume update (not implemented yet)](https://github.com/NimbleStorage/ansinimble#volume-update-not-implemented-yet)
+   * [volume update](https://github.com/NimbleStorage/ansinimble#volume-update)
    * [volume snapshot](https://github.com/NimbleStorage/ansinimble#volume-snapshot)
    * [volume umount](https://github.com/NimbleStorage/ansinimble#volume-umount)
    * [volume unmap](https://github.com/NimbleStorage/ansinimble#volume-unmap)
@@ -83,7 +83,7 @@ Ansinimble is beta software and might introduce breaking changes between version
 * [Cloud Volume Operations](https://github.com/NimbleStorage/ansinimble#cloud-volume-operations)
    * [cloud_object cloud_operation](https://github.com/NimbleStorage/ansinimble#cloud_object-cloud_operation)
    * [volume create](https://github.com/NimbleStorage/ansinimble#volume-create-1)
-   * [volume update](https://github.com/NimbleStorage/ansinimble#volume-update)
+   * [volume update](https://github.com/NimbleStorage/ansinimble#volume-update-1)
    * [volume map](https://github.com/NimbleStorage/ansinimble#volume-map-1)
    * [volume mount](https://github.com/NimbleStorage/ansinimble#volume-mount-1)
    * [volume resize](https://github.com/NimbleStorage/ansinimble#volume-resize-1)
@@ -108,6 +108,7 @@ Ansinimble is beta software and might introduce breaking changes between version
    * [sample_group_update.yml](https://github.com/NimbleStorage/ansinimble#sample_group_updateyml)
    * [sample_group_cli.yml](https://github.com/NimbleStorage/ansinimble#sample_group_cliyml)
    * [sample_provision.yml](https://github.com/NimbleStorage/ansinimble#sample_provisionyml)
+   * [sample_volume_update.yml](https://github.com/NimbleStorage/ansinimble#sample_volume_updateyml)
    * [sample_snapshot.yml](https://github.com/NimbleStorage/ansinimble#sample_snapshotyml)
    * [sample_restore.yml](https://github.com/NimbleStorage/ansinimble#sample_restoreyml)
    * [sample_resize.yml](https://github.com/NimbleStorage/ansinimble#sample_resizeyml)
@@ -277,6 +278,7 @@ nimble_volume_mkfs_options: ""
 nimble_volume_size: 1000
 nimble_volume_options_default:
   description: "Volume created by Ansible"
+nimble_volume_update_options_default: {}
 
 # Default performance policy options
 nimble_perfpolicy_blocksize: 4096
@@ -481,6 +483,13 @@ nimble_volume_options: A dictionary of Nimble volume options (please see the RES
 ```
 
 Note that the parameters `perfpolicy_id`, `pool_id` and `folder_id` accepts the vanity name as key in `nimble_volume_options`.
+
+### volume update
+Updates a mutable attribute on a volume.
+```
+nimble_volume: Nimble volume name
+nimble_volume_update_options: Key/value list of options to update. See the example section and the REST API documentation available on HPE InfoSight.
+```
 
 ### volume map
 Maps a volume to a host on the group.
@@ -1059,6 +1068,24 @@ Provisions and mounts a new volume.
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
         nimble_operation: mount 
+      }
+```
+
+### [sample_volume_update.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_volume_update.yml)
+```
+---
+# Updates a mutable volume attribue. The following example updates the IOPS limit and description.
+# $ ansible-playbook -e nimble_volume=myvol1 sample_volume_update.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: volume,
+        nimble_operation: update ,
+        nimble_volume_update_options: {
+          limit_iops: 2000,
+          description: Volume throttled by Ansible
+        }
       }
 ```
 
