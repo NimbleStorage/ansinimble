@@ -55,6 +55,7 @@ Ansinimble is beta software and might introduce breaking changes between version
    * [volume resize](https://github.com/NimbleStorage/ansinimble#volume-resize)
    * [volume update](https://github.com/NimbleStorage/ansinimble#volume-update)
    * [volume snapshot](https://github.com/NimbleStorage/ansinimble#volume-snapshot)
+   * [snapshot update](https://github.com/NimbleStorage/ansinimble#snapshot-update)
    * [volume umount](https://github.com/NimbleStorage/ansinimble#volume-umount)
    * [volume unmap](https://github.com/NimbleStorage/ansinimble#volume-unmap)
    * [volume detach](https://github.com/NimbleStorage/ansinimble#volume-detach)
@@ -77,9 +78,9 @@ Ansinimble is beta software and might introduce breaking changes between version
    * [nlt manage](https://github.com/NimbleStorage/ansinimble#nlt-manage)
    * [array setup](https://github.com/NimbleStorage/ansinimble#array-setup)
    * [password update](https://github.com/NimbleStorage/ansinimble#password-update)
-   * [perfpolicy_create](https://github.com/NimbleStorage/ansinimble#perfpolicy-create)
-   * [perfpolicy_update](https://github.com/NimbleStorage/ansinimble#perfpolicy-update)
-   * [perfpolicy_delete](https://github.com/NimbleStorage/ansinimble#perfpolicy-delete)
+   * [perfpolicy create](https://github.com/NimbleStorage/ansinimble#perfpolicy-create)
+   * [perfpolicy update](https://github.com/NimbleStorage/ansinimble#perfpolicy-update)
+   * [perfpolicy delete](https://github.com/NimbleStorage/ansinimble#perfpolicy-delete)
 * [Cloud Volume Operations](https://github.com/NimbleStorage/ansinimble#cloud-volume-operations)
    * [cloud_object cloud_operation](https://github.com/NimbleStorage/ansinimble#cloud_object-cloud_operation)
    * [volume create](https://github.com/NimbleStorage/ansinimble#volume-create-1)
@@ -110,6 +111,7 @@ Ansinimble is beta software and might introduce breaking changes between version
    * [sample_provision.yml](https://github.com/NimbleStorage/ansinimble#sample_provisionyml)
    * [sample_volume_update.yml](https://github.com/NimbleStorage/ansinimble#sample_volume_updateyml)
    * [sample_snapshot.yml](https://github.com/NimbleStorage/ansinimble#sample_snapshotyml)
+   * [sample_snapshot_update.yml](https://github.com/NimbleStorage/ansinimble#sample_snapshot_updateyml)
    * [sample_restore.yml](https://github.com/NimbleStorage/ansinimble#sample_restoreyml)
    * [sample_resize.yml](https://github.com/NimbleStorage/ansinimble#sample_resizeyml)
    * [sample_map.yml](https://github.com/NimbleStorage/ansinimble#sample_mapyml)
@@ -279,6 +281,7 @@ nimble_volume_size: 1000
 nimble_volume_options_default:
   description: "Volume created by Ansible"
 nimble_volume_update_options_default: {}
+nimble_snapshot_update_options_default: {}
 
 # Default performance policy options
 nimble_perfpolicy_blocksize: 4096
@@ -534,6 +537,14 @@ Snapshots a Nimble volume.
 ```
 nimble_volume: Volume to snapshot
 nimble_volume_snapshot: Snapshot name (optional, uses timestamp)
+```
+
+### snapshot update
+Updates mutable attributes on a snapshot.
+```
+nimble_volume: Volume snapshot exist on
+nimble_volume_snapshot: Snapshot to update
+nimble_snapshot_update_options: Key/value pair of options to update. See the examples and the REST API what fields are mutable.
 ```
 
 ### volume umount
@@ -1102,6 +1113,22 @@ Provisions and mounts a new volume.
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
         nimble_operation: snapshot 
+      }
+```
+### [sample_snapshot_update.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_snapshot_update.yml)
+```
+---
+# Updates a mutable snapshot attribue. The following example renames a snapshot on a volume.
+# $ ansible-playbook -e nimble_volume=myvol1 \
+# -e nimble_volume_snapshot=myoldsnapname \
+# -e '{"nimble_snapshot_update_options": {"name": "mynewsnapname"}}' \
+# sample_snapshot_update.yml
+
+- hosts: myarray1
+  roles:
+    - { role: NimbleStorage.Ansinimble,
+        nimble_object: snapshot,
+        nimble_operation: update
       }
 ```
 ### [sample_restore.yml](https://github.com/NimbleStorage/ansinimble/raw/master/examples/nimble/sample_restore.yml)
