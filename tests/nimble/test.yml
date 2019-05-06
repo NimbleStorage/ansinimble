@@ -15,6 +15,13 @@
         nimble_operation: create,
         nimble_object: volume 
       } 
+    - { role: NimbleStorage.AnsinimbleTest, 
+        nimble_operation: update,
+        nimble_object: volume,
+        nimble_volume_update_options: {
+          "limit_iops": 4000
+        }
+      } 
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: delete,
         nimble_object: volume
@@ -31,6 +38,24 @@
         nimble_operation: delete,
         nimble_object: perfpolicy
       } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: cli,
+        nimble_object: group,
+        nimble_group_cli: "group --list"
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: cli,
+        nimble_object: group,
+        nimble_group_cli: "foobar",
+        nimble_group_cli_ignore_errors: True
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: update,
+        nimble_object: group,
+        nimble_group_update: {
+          login_banner_message: "This was put here as a test"
+        }
+      } 
 
 - hosts: myarray1
   vars:
@@ -44,10 +69,29 @@
     nimble_host_name: myhost1
   roles:
     - { role: debug_marker, local_test: "First pass (array)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: folder } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: snapshot, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: create,
+        nimble_object: folder 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: create,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: map,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest, 
+        nimble_operation: snapshot,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest, 
+        nimble_operation: update,
+        nimble_object: snapshot,
+        nimble_snapshot_update_options: {
+          description: "This is a description"
+        }
+      } 
 
 - hosts: myhost1
   vars:
@@ -55,8 +99,14 @@
     nimble_volume_mountpoint: "/mnt/ansinimble-vol"
   roles:
     - { role: debug_marker, local_test: "First pass (host)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: attach, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: attach,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: mount,
+        nimble_object: volume 
+      } 
 
 # Touch a file
 - hosts: myhost1
@@ -79,8 +129,14 @@
     nimble_volume_snapshot: "ansinimble-snap"
   roles:
     - { role: debug_marker, local_test: "Update folders and create a snapshot" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: update, nimble_object: folder } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: snapshot, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: update,
+        nimble_object: folder 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: snapshot,
+        nimble_object: volume 
+      } 
   tasks:
     - name: Remove known file
       file:
@@ -95,8 +151,14 @@
     nimble_host_name: myhost1
   roles:
     - { role: debug_marker, local_test: "Create clone from last snapshot (array)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: create,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: map,
+        nimble_object: volume 
+      } 
 
 - hosts: myhost1
   vars:
@@ -104,10 +166,22 @@
     nimble_volume_mountpoint: "/mnt/ansinimble-cln"
   roles:
     - { role: debug_marker, local_test: "Create clone from last snapshot (host)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: attach, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: detach, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: attach,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: mount,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: umount,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: detach,
+        nimble_object: volume 
+      } 
 
 - hosts: myarray1
   vars:
@@ -115,8 +189,14 @@
     nimble_host_name: myhost1
   roles:
     - { role: debug_marker, local_test: "Create clone from last snapshot (array step #2)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: unmap,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: delete,
+        nimble_object: volume 
+      } 
 
 # Create a clone from a known snapshot
 - hosts: myarray1
@@ -128,8 +208,14 @@
     nimble_host_name: myhost1
   roles:
     - { role: debug_marker, local_test: "Create clone from known snapshot (array)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: create, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: create,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: map,
+        nimble_object: volume 
+      } 
 
 - hosts: myhost1
   vars:
@@ -137,8 +223,14 @@
     nimble_volume_mountpoint: "/mnt/ansinimble-cln"
   roles:
     - { role: debug_marker, local_test: "Create clone from known snapshot (host)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: attach, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: attach,
+        nimble_object: volume
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: mount,
+        nimble_object: volume 
+      } 
 
 # Ensure our file is in the clone
 - hosts: myhost1
@@ -161,8 +253,14 @@
     nimble_volume_mountpoint: "/mnt/ansinimble-cln"
   roles:
     - { role: debug_marker, local_test: "Remove known clone (host)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: detach, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: umount,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: detach,
+        nimble_object: volume 
+      } 
 
 - hosts: myarray1
   vars:
@@ -170,8 +268,14 @@
     nimble_host_name: myhost1
   roles:
     - { role: debug_marker, local_test: "Remove known clone (array)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: unmap,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: delete,
+        nimble_object: volume 
+      } 
 
 # Touch a file
 - hosts: myhost1
@@ -191,8 +295,14 @@
     nimble_volume_mountpoint: "/mnt/ansinimble-vol"
   roles:
     - { role: debug_marker, local_test: "Unmap/unmount for restore prep (host)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: detach, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: umount,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: detach, 
+        nimble_object: volume 
+      } 
 
 - hosts: myarray1
   vars:
@@ -200,7 +310,10 @@
     nimble_host_name: myhost1
   roles:
     - { role: debug_marker, local_test: "Unmap/unmount for restore prep (array)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: unmap, 
+        nimble_object: volume 
+      } 
 
 # Restore from last snapshot
 - hosts: myarray1
@@ -209,8 +322,14 @@
     nimble_host_name: myhost1
   roles:
     - { role: debug_marker, local_test: "Restore volume (array)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: restore, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: restore,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: map,
+        nimble_object: volume 
+      } 
 
 - hosts: myhost1
   vars:
@@ -218,8 +337,14 @@
     nimble_volume_mountpoint: "/mnt/ansinimble-vol"
   roles:
     - { role: debug_marker, local_test: "Restore volume (host)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: attach, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: attach, 
+        nimble_object: volume 
+      }
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: mount,
+        nimble_object: volume 
+      } 
 
 - hosts: myhost1
   vars: 
@@ -243,8 +368,14 @@
     nimble_volume_mountpoint: "/mnt/ansinimble-vol"
   roles:
     - { role: debug_marker, local_test: "Unmap/unmount #2 (host)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: detach, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: umount,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: detach,
+        nimble_object: volume 
+      } 
 
 - hosts: myarray1
   vars:
@@ -252,7 +383,10 @@
     nimble_host_name: myhost1
   roles:
     - { role: debug_marker, local_test: "Unmap/unmount #2 (array)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: unmap,
+        nimble_object: volume 
+      } 
 
 # Restore from known snapshot
 - hosts: myarray1
@@ -262,8 +396,14 @@
     nimble_host_name: myhost1
   roles:
     - { role: debug_marker, local_test: "Restore from known snapshot (array)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: restore, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: map, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: restore,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: map,
+        nimble_object: volume 
+      } 
 
 - hosts: myhost1
   vars:
@@ -271,8 +411,14 @@
     nimble_volume_mountpoint: "/mnt/ansinimble-vol"
   roles:
     - { role: debug_marker, local_test: "Restore from known snapshot (host)" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: attach, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: mount, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: attach,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: mount,
+        nimble_object: volume
+      } 
 
 - hosts: myhost1
   tasks:
@@ -316,14 +462,28 @@
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: create,
         nimble_object: volcoll,
-        nimble_volume_collection: "ansinimble-vol-manual",
+        nimble_volcoll: "ansinimble-vol-manual",
         nimble_protection_template: "Retain-30Daily"
       } 
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: protect,
         nimble_object: volume,
-        nimble_volume_collection: "ansinimble-vol-manual"
+        nimble_volcoll: "ansinimble-vol-manual"
       } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: snapshot,
+        nimble_object: volcoll,
+        nimble_volcoll: "ansinimble-vol-manual"
+      }
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: snapshot,
+        nimble_object: volcoll,
+        nimble_volcoll_snapshot: mysnappyshot,
+        nimble_volcoll_update_options: {
+          description: "This is a manual description"
+        },
+        nimble_volcoll: "ansinimble-vol-manual"
+      }
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: unprotect,
         nimble_object: volume
@@ -382,9 +542,18 @@
     nimble_volume_mountpoint: "/mnt/ansinimble-vol"
   roles:
     - { role: debug_marker, local_test: "Resize and detach" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: resize, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: umount, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: detach, nimble_object: volume } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: resize,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: umount,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: detach,
+        nimble_object: volume 
+      } 
 
 - hosts: myarray1
   vars:
@@ -395,9 +564,18 @@
     nimble_host_name: myhost1
   roles:
     - { role: debug_marker, local_test: "Delete" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: unmap, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: volume } 
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: delete, nimble_object: folder } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: unmap,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: delete,
+        nimble_object: volume 
+      } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: delete,
+        nimble_object: folder 
+      } 
   tags:
     - wipe
 
@@ -421,6 +599,9 @@
     nimble_linux_toolkit_state: absent
   roles:
     - { role: debug_marker, local_test: "Uninstall NLT" }
-    - { role: NimbleStorage.AnsinimbleTest, nimble_operation: manage, nimble_object: nlt } 
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: manage,
+        nimble_object: nlt 
+      } 
   tags:
     - uninstall

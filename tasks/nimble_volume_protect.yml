@@ -7,12 +7,12 @@
     - nimble_volume
 
 - fail:
-    msg: "nimble_protection_template or nimble_volume_collection are required"
-  when: nimble_protection_template is undefined and nimble_volume_collection is undefined
+    msg: "nimble_protection_template or nimble_volcoll are required"
+  when: nimble_protection_template is undefined and nimble_volcoll is undefined
 
 - fail:
-    msg: "nimble_protection_template and nimble_volume_collection are mutually exclusive"
-  when: nimble_protection_template is defined and nimble_volume_collection is defined
+    msg: "nimble_protection_template and nimble_volcoll are mutually exclusive"
+  when: nimble_protection_template is defined and nimble_volcoll is defined
 
 - name: Gather volcolls and protection templates
   include: nimble_group_facts.yml
@@ -32,10 +32,10 @@
     with_items:
       - "{{ nimble_group_facts | json_query(local_query) }}"
     vars:
-      local_query: "volume_collections[?name=='{{ nimble_volume_collection }}'].id | [0]"
+      local_query: "volume_collections[?name=='{{ nimble_volcoll }}'].id | [0]"
 
   - fail:
-      msg: "Unknown volume collection ({{ nimble_volume_collection }})"
+      msg: "Unknown volume collection ({{ nimble_volcoll }})"
     when: nimble_volume_protect_local.volcoll_id == ""
 
   - name: Assign volcoll
@@ -43,7 +43,7 @@
       url: "{{ nimble_group_url }}/volumes/{{ nimble_volume_id }}"
       validate_certs: no
       method: PUT
-      status_code: 200
+      status_code: 200, 409
       body_format: json
       headers:
         X-Auth-Token: "{{ nimble_group_token }}"
@@ -54,7 +54,7 @@
     retries: "{{ nimble_uri_retries }}"
     delay: "{{ nimble_uri_delay }}"
     until: local_volume_protect | success
-  when: nimble_volume_collection is defined
+  when: nimble_volcoll is defined
 
 - block: 
   - name: Lookup protection template

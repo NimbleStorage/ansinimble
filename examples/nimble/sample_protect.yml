@@ -1,10 +1,10 @@
 ---
-# Provide nimble_volume and nimble_volume_collection OR nimble_protection_template as extra vars, i.e:
+# Provide nimble_volume and nimble_volcoll OR nimble_protection_template as extra vars, i.e:
 # $ ansible-playbook -e nimble_volume=myvol1 \
 # -e nimble_protection_template=Retain-30 
 # sample_protect.yml
 # $ ansible-playbook -e nimble_volume=myvol1 \
-# -e nimble_volume_collection=myexistingvolcoll \
+# -e nimble_volcoll=myexistingvolcoll \
 # sample_protect.yml
 
 - hosts: myarray1

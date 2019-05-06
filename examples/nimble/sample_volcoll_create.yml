@@ -1,6 +1,6 @@
 ---
 # Create volume collection
-# $ ansible-playbook -e nimble_volume_collection=myvolcoll1 \
+# $ ansible-playbook -e nimble_volcoll=myvolcoll1 \
 # -e nimble_protection_template=myprottmpl1 \
 # sample_volcoll_create.yml
 
