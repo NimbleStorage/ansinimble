@@ -586,9 +586,9 @@ Protects a volume in either a dedicated volume collection with a protection temp
 ```
 nimble_volume: Volume name to protect
 nimble_protection_template: Name of protection template to create a new volume collection with
-nimble_volume_collection: Existing volume collection to add the volume to
+nimble_volcoll: Existing volume collection to add the volume to
 ```
-**Note**: `nimble_protection_template` and `nimble_volume_collection` are mutually exclusive.
+**Note**: `nimble_protection_template` and `nimble_volcoll` are mutually exclusive.
 
 ### volume unprotect
 Remove the volume collection association from a volume.
@@ -599,7 +599,7 @@ nimble_volume: Volume name to remove volume collection association from
 ### volcoll create
 Create a new volume collection from a protection template.
 ```
-nimble_volume_collection: Name of the volume collection
+nimble_volcoll: Name of the volume collection
 nimble_volcoll_options: Key/value of volcoll options (see API documentation on HPE InfoSight)
 ```
 
@@ -1358,12 +1358,12 @@ Changes the password of a user.
 Protects a Nimble volume.
 ```
 ---
-# Provide nimble_volume and nimble_volume_collection OR nimble_protection_template as extra vars, i.e:
+# Provide nimble_volume and nimble_volcoll OR nimble_protection_template as extra vars, i.e:
 # $ ansible-playbook -e nimble_volume=myvol1 \
 # -e nimble_protection_template=Retain-30 
 # sample_protect.yml
 # $ ansible-playbook -e nimble_volume=myvol1 \
-# -e nimble_volume_collection=myexistingvolcoll \
+# -e nimble_volcoll=myexistingvolcoll \
 # sample_protect.yml
 
 - hosts: myarray1
@@ -1395,7 +1395,7 @@ Creates a new volume collection.
 ```
 ---
 # Create volume collection
-# $ ansible-playbook -e nimble_volume_collection=myvolcoll1 \
+# $ ansible-playbook -e nimble_volcoll=myvolcoll1 \
 # -e nimble_protection_template=myprottmpl1 \
 # sample_volcoll_create.yml
 

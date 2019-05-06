@@ -4,7 +4,7 @@
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined
   with_items:
-    - nimble_volume_collection
+    - nimble_volcoll
     - nimble_protection_template
 
 - name: Gather volcolls
@@ -26,7 +26,7 @@
   when: nimble_volcoll_options is defined
 
 - set_fact:
-    nimble_volcoll_options_default: "{{ nimble_volcoll_options_default | combine( { 'name': nimble_volume_collection, 'prottmpl_id': nimble_prottmpl_id } ) }}"
+    nimble_volcoll_options_default: "{{ nimble_volcoll_options_default | combine( { 'name': nimble_volcoll, 'prottmpl_id': nimble_prottmpl_id } ) }}"
 
 - name: Create volcoll
   uri:
