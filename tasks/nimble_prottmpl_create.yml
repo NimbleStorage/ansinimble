@@ -15,12 +15,12 @@
       replication_partners:
 
 - name: Merge options
-  set_fact: 
+  set_fact:
     nimble_prottmpl_options_default: "{{ nimble_prottmpl_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_prottmpl_options }}"
   when: nimble_prottmpl_options is defined
 
-- set_fact: 
+- set_fact:
     nimble_prottmpl_options_default: "{{ nimble_prottmpl_options_default | combine( { 'name': nimble_protection_template } ) }}"
 
 - name: Create protection template
@@ -40,7 +40,7 @@
   register: nimble_prottmpl_created
   until: nimble_prottmpl_created | success
 
-- block: 
+- block:
   - name: Process schedules
     include: nimble_util_add_schedule.yml
     vars:

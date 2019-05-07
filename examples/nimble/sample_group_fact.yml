@@ -4,12 +4,12 @@
 - hosts: myarray1
   roles:
     - { role: NimbleStorage.Ansinimble,
-        nimble_object: group, 
+        nimble_object: group,
         nimble_operation: facts,
-        nimble_group_facts: { 
-          volumes: 'fields=name,serial_number' 
+        nimble_group_facts: {
+          volumes: 'fields=name,serial_number'
         }
       }
   tasks:
-    - debug: 
+    - debug:
         var: nimble_group_facts

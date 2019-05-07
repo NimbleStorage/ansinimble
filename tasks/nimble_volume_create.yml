@@ -1,13 +1,13 @@
 ---
 - name: Ensure nimble_volume
   fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
-  when: nimble_volume is undefined 
+  when: nimble_volume is undefined
 
 - name: Need NimbleOS version upfront
   include: nimble_group_facts.yml
   vars:
     nimble_group_facts:
-      software_versions: 
+      software_versions:
 
 - name: Figure out volume query (NimbleOS >=4)
   set_fact:
@@ -29,7 +29,7 @@
       performance_policies: "fields=name,id"
 
 - name: Merge options
-  set_fact: 
+  set_fact:
     nimble_volume_options_default: "{{ nimble_volume_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_volume_options }}"
   when: nimble_volume_options is defined

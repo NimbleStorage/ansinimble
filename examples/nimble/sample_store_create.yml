@@ -9,7 +9,7 @@
 
 - hosts: localhost
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: store,
         cloud_operation: create
       }

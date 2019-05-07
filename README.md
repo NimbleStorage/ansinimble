@@ -8,14 +8,15 @@ Ansinimble supports two different product lines. HPE Nimble Storage arrays and H
 This role assumes the latest Nimble Linux Toolkit (NLT) is installed on the host being managed by Ansible. The latest version of NLT may be obtained from [InfoSight](https://infosight.nimblestorage.com) (Nimble customers and partners only).
 
 * Requires an HPE Nimble Storage array with NimbleOS 3.3+
-* Requires Ansible 2.2.3+ with the jmespath Python package installed (please see deprecation notes on Ansible 2.5 below)
+* Requires Ansible 2.3.3+ with the jmespath Python package installed (please see deprecation notes on Ansible 2.5 below)
 * Requires the `sshpass` package to be installed on the Ansible host if using the `group cli` task
+* Requires the Python `netaddr` package if using the array setup task
 
 ### Cloud Volumes
 Host requirements are less stringent for Cloud Volumes. The Linux Connection Manager found on the Cloud Volumes portal needs to be installed but there is a task that can do that for you.
 
 * Requires API access to HPE Cloud Volumes
-* Requires Ansible 2.2.3+ with the jmespath and boto (for EC2 and HPE Cloud Volumes) Python package installed on the Ansible host. (please see deprectation notes on Ansible 2.5 below)
+* Requires Ansible 2.3.3+ with the jmespath and boto (for EC2 and HPE Cloud Volumes) Python package installed on the Ansible host. (please see deprectation notes on Ansible 2.5 below)
 
 ## Deprecation notes and tested versions of Ansible
 The following versions of Ansible are currently being tested for compatability with Ansinimble:

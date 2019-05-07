@@ -12,7 +12,7 @@
       replica_volumes:
 
 - name: Ensure play variables are sane
-  fail: 
+  fail:
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined
   with_items:
@@ -23,13 +23,13 @@
     - cloud_replica_provider
 
 - name: Ensure mandatory options
-  fail: 
+  fail:
     msg: "Missing required option {{ item }}"
   when: cloud_replica_options[item] is undefined
   with_items: "{{ cloud_replica_mandatory_options }}"
 
 - name: Merge options
-  set_fact: 
+  set_fact:
     cloud_replica_options_default: "{{ cloud_replica_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ cloud_replica_options }}"
 
@@ -45,7 +45,7 @@
 
 - fail:
     msg: "Cloud replica not found ({{ cloud_replica }})"
-  when: cloud_replica_data.replica_id is undefined 
+  when: cloud_replica_data.replica_id is undefined
 
 - name: Query for snapshots on cloud_replica
   uri:
@@ -65,7 +65,7 @@
     cloud_replica_snapshot_id: "{{ cloud_replica_snapshots.json.data[cloud_replica_snapshot_index].id }}"
   when: cloud_replica_snapshots.json.data.0 is defined
 
-- fail: 
+- fail:
     msg: "No snapshots found on replica ({{ cloud_replica }})"
   when: cloud_replica_snapshot_id is undefined
 
@@ -93,7 +93,7 @@
     body_format: json
     headers:
       Authorization: "Basic {{ cloud_portal_authz }}"
-    body: 
+    body:
       data: "{{ cloud_replica_options_default }}"
     return_content: yes
   register: cloud_volume_created

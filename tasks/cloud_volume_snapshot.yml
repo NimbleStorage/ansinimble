@@ -1,6 +1,6 @@
 ---
 - name: Ensure play variables are sane
-  fail: 
+  fail:
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined
   with_items:
@@ -30,7 +30,7 @@
     body_format: json
     headers:
       Authorization: "Basic {{ cloud_portal_authz }}"
-    body: 
+    body:
       data:
         name: "{{ cloud_volume_snapshot | default(ansible_date_time.iso8601_basic) }}"
         description: "{{ cloud_volume_snapshot_description | default('Created by Ansible') }}"

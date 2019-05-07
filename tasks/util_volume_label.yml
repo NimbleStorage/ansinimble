@@ -1,6 +1,8 @@
 ---
 - name: Generate volume label
-  shell: "echo -n {{ util_volume_label }}| cksum | awk '{ print $1 }'"
+  shell: set -o pipefail && echo -n {{ util_volume_label }} | cksum | awk '{ print $1 }'
+  args:
+    executable: /bin/bash
   register: util_volume_label_generated
 
 - set_fact:

@@ -1,11 +1,11 @@
 ---
-# Delete protection template 
+# Delete protection template
 # $ ansible-playbook -e nimble_protection_template=myprottmpl1 \
 # sample_prottmpl_delete.yml
 
 - hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         nimble_object: prottmpl,
         nimble_operation: delete
       }

@@ -29,7 +29,7 @@
     headers:
       X-Auth-Token: "{{ nimble_group_token }}"
     body:
-      data: 
+      data:
         vol_id: "{{ nimble_volume_id }}"
         name: "{{ nimble_volume_snapshot }}"
     return_content: yes

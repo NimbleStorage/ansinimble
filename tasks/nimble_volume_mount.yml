@@ -27,37 +27,39 @@
 
 - fail:
     msg: "{{ nimble_volume_device_name }} does not exist."
-  when: nimble_volume_device_info.stat.exists == False
+  when: not nimble_volume_device_info.stat.exists
 
 - shell: mountpoint -d "{{ nimble_volume_mountpoint }}" || true
   register: nimble_volume_mountpoint_mm
+  changed_when: False
 
 - shell: mountpoint -x "{{ nimble_volume_device_name }}" || true
   register: nimble_volume_device_name_mm
+  changed_when: False
 
 - fail:
     msg: "A different volume is already mounted on the requested mountpoint: {{ nimble_volume_mountpoint }}"
-  when: 
+  when:
     - nimble_volume_mountpoint_mm.stdout != nimble_volume_device_name_mm.stdout
-    - nimble_volume_mountpoint_mm.stdout != ""
+    - nimble_volume_mountpoint_mm.stdout
 
 - block:
   - name: Create filesystem label
     include: util_volume_label.yml
     vars:
       util_volume_label: "{{ nimble_volume }}"
-  
+
   - name: Create filesystem
-    filesystem: 
+    filesystem:
       dev: "{{ nimble_volume_device_name }}"
       fstype: xfs
       opts: -L {{ util_volume_label }} {{ nimble_volume_mkfs_options }}
     register: nimble_filesystem_created
-  
+
   - name: Update label if this is an existing filesystem (clone)
-    shell: xfs_admin -L {{ util_volume_label | quote }} -U {{ ansible_date_time.iso8601_micro | to_uuid }} {{ nimble_volume_device_name | quote }}
-    when: nimble_filesystem_created.changed == False
-  
+    command: xfs_admin -L {{ util_volume_label | quote }} -U {{ ansible_date_time.iso8601_micro | to_uuid }} {{ nimble_volume_device_name | quote }}
+    when: not nimble_filesystem_created.changed
+
   - name: Mount volume
     mount:
       name: "{{ nimble_volume_mountpoint }}"

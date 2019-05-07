@@ -9,7 +9,7 @@
 - name: Ensure group
   include: nimble_group_facts.yml
   vars:
-    nimble_group_facts: 
+    nimble_group_facts:
       performance_policies:
 
 - name: Get nimble_perfpolicy_id
@@ -19,7 +19,7 @@
     local_query: "performance_policies[?name=='{{ nimble_perfpolicy }}'].id | [0]"
 
 - name: Merge options
-  set_fact: 
+  set_fact:
     nimble_perfpolicy_update_options_default: "{{ nimble_perfpolicy_update_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_perfpolicy_update_options }}"
   when: nimble_perfpolicy_update_options is defined

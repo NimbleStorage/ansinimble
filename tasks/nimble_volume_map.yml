@@ -12,14 +12,14 @@
     nimble_delegate_host: "{{ nimble_host_name }}"
     nimble_delegate_host_facts: True
   include: nimble_host_facts.yml
-  when: nimble_host_facts is undefined and not nimble_static_host_facts 
+  when: nimble_host_facts is undefined and not nimble_static_host_facts
 
 - name: Lookup static nimble_host_facts
   set_fact:
     nimble_host_facts: "{{ hostvars[nimble_host_name]['nimble_host_facts'] | default(omit) }}"
-  when: nimble_host_facts is undefined and nimble_static_host_facts 
- 
-- fail: 
+  when: nimble_host_facts is undefined and nimble_static_host_facts
+
+- fail:
     msg: "nimble_host_vars unconfigured or unable to lookup dynamically"
   when: nimble_host_facts is undefined
 
@@ -34,7 +34,7 @@
       subnets: "fields=allow_iscsi,discovery_ip"
 
 - name: Merge nimble_initiator_group_options
-  set_fact: 
+  set_fact:
     nimble_initiator_group_options_default: "{{ nimble_initiator_group_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_initiator_group_options }}"
   when: nimble_initiator_group_options is defined
@@ -64,7 +64,7 @@
   until: nimble_initiator_group | success
 
 - name: Merge nimble_initiator_options
-  set_fact: 
+  set_fact:
     nimble_initiator_options_default: "{{ nimble_initiator_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_initiator_options }}"
   when: nimble_initiator_options is defined
@@ -81,13 +81,13 @@
     local_query: "initiator_groups[?name==`{{ nimble_host_name }}`].id | [0]"
   when: nimble_initiator_group.json is undefined
 
-- block: 
+- block:
   - name: Merge nimble_initiator_group_id
     set_fact:
       nimble_initiator_options_default: "{{ nimble_initiator_options_default | combine( { 'initiator_group_id': nimble_initiator_group_id } ) }}"
   - set_fact:
       nimble_initiator_options_default: "{{ nimble_initiator_options_default | combine( { 'label': nimble_host_name + ':sw-iscsi'}) }}"
-  
+
   - name: Create iSCSI Initiator
     uri:
       url: "{{ nimble_group_url }}/initiators"
@@ -120,7 +120,7 @@
       headers:
         X-Auth-Token: "{{ nimble_group_token }}"
       body:
-       data: 
+       data:
          access_protocol: fc
          initiator_group_id: "{{ nimble_initiator_group_id }}"
          wwpn: "{{ item }}"
@@ -173,7 +173,7 @@
        initiator_group_id: "{{ nimble_initiator_group_id }}"
        vol_id: "{{ nimble_volume_id }}"
     return_content: yes
-  when: nimble_group_facts | json_query(local_query) == [] and nimble_volume_id != '' and nimble_initiator_group_id is defined
+  when: nimble_group_facts | json_query(local_query) == [] and nimble_volume_id and nimble_initiator_group_id is defined
   vars:
     local_query: "access_control_records[?initiator_group_id=='{{ nimble_initiator_group_id }}' && vol_id=='{{ nimble_volume_id }}'].id"
   retries: "{{ nimble_uri_retries }}"

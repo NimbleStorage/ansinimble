@@ -1,5 +1,5 @@
 ---
-# Updates the group options. The following example updates the DNS domain, DNS servers and sets 
+# Updates the group options. The following example updates the DNS domain, DNS servers and sets
 # a custom login banner message.
 # $ ansible-playbook sample_group_update.yml
 
@@ -15,7 +15,7 @@
             { "ip_addr": "1.1.1.1" }
           ],
           login_banner_message:
-            "This array is managed by Ansible. Configuration changes 
+            "This array is managed by Ansible. Configuration changes
             may be overridden periodically. Contact support@example.com
             for further information."
         }

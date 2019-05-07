@@ -1,6 +1,6 @@
 ---
 - name: Ensure play variables are sane
-  fail: 
+  fail:
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined
   with_items:
@@ -53,7 +53,7 @@
 - name: No shapshot ID
   fail:
     msg: "No snapshot to restore from, either named snapshot in cloud_volume_snapshot doesn't exist or there's no shapshots"
-  when: cloud_volume_snapshot_id == ""
+  when: not cloud_volume_snapshot_id
 
 - name: Restore Cloud Volume
   uri:
@@ -64,8 +64,8 @@
     body_format: json
     headers:
       Authorization: "Basic {{ cloud_portal_authz }}"
-    body: 
-      data: 
+    body:
+      data:
         snapshot_ref: "{{ cloud_volume_snapshot_id }}"
     return_content: yes
   register: cloud_volume_restored

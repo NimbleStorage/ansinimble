@@ -19,13 +19,13 @@
   vars:
     nimble_group_facts:
       volumes:
-      volume_collections: 
+      volume_collections:
       protection_templates:
 
 - name: Lookup volume ID into nimble_volume_id
-  include: nimble_util_volume_id.yml 
+  include: nimble_util_volume_id.yml
 
-- block: 
+- block:
   - name: Lookup volcoll
     set_fact:
       nimble_volume_protect_local: "{{ nimble_volume_protect_local | combine( { 'volcoll_id': item } ) }}"
@@ -36,7 +36,7 @@
 
   - fail:
       msg: "Unknown volume collection ({{ nimble_volcoll }})"
-    when: nimble_volume_protect_local.volcoll_id == ""
+    when: not nimble_volume_protect_local.volcoll_id
 
   - name: Assign volcoll
     uri:
@@ -56,7 +56,7 @@
     until: local_volume_protect | success
   when: nimble_volcoll is defined
 
-- block: 
+- block:
   - name: Lookup protection template
     set_fact:
       nimble_volume_protect_local: "{{ nimble_volume_protect_local | combine( { 'id': item } ) }}"
@@ -64,11 +64,11 @@
       - "{{ nimble_group_facts | json_query(local_query) }}"
     vars:
       local_query: "protection_templates[?name=='{{ nimble_protection_template }}'].id | [0]"
-  
+
   - fail:
       msg: "Unknown protection template ({{ nimble_protection_template }})"
-    when: nimble_volume_protect_local.id == ""
-    
+    when: not nimble_volume_protect_local.id
+
   - name: Create volcoll
     uri:
       url: "{{ nimble_group_url }}/volume_collections"
@@ -79,7 +79,7 @@
       headers:
         X-Auth-Token: "{{ nimble_group_token }}"
       body:
-        data: 
+        data:
           name: "{{ nimble_volume }}"
           prottmpl_id: "{{ nimble_volume_protect_local.id }}"
           is_standalone_volcoll: True
@@ -88,7 +88,7 @@
     delay: "{{ nimble_uri_delay }}"
     register: nimble_volcoll_created
     until: nimble_volcoll_created | success
-  
+
   - name: Assign volcoll
     uri:
       url: "{{ nimble_group_url }}/volumes/{{ nimble_volume_id }}"

@@ -12,14 +12,14 @@
     nimble_group_facts: {}
 
 - name: Merge options
-  set_fact: 
+  set_fact:
     nimble_perfpolicy_options_default: "{{ nimble_perfpolicy_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_perfpolicy_options }}"
   when: nimble_perfpolicy_options is defined
 
 - name: Overlay nimble_perfpolicy_blocksize and nimble_perfpolicy
   set_fact:
-    nimble_perfpolicy_options_default: "{{ nimble_perfpolicy_options_default | 
+    nimble_perfpolicy_options_default: "{{ nimble_perfpolicy_options_default |
         combine( { 'block_size': nimble_perfpolicy_blocksize, 'name': nimble_perfpolicy } ) }}"
 
 - name: Create Performance Policy

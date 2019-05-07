@@ -9,7 +9,7 @@
 - name: Ensure group
   include: nimble_group_facts.yml
   vars:
-    nimble_group_facts: 
+    nimble_group_facts:
       performance_policies:
 
 - name: Get nimble_perfpolicy_id
@@ -21,7 +21,7 @@
 
 - fail:
     msg: "No Performance Policy named '{{ nimble_perfpolicy }}' found."
-  when: nimble_perfpolicy_id == ""
+  when: not nimble_perfpolicy_id
 
 - name: Delete Performance Policy
   uri:

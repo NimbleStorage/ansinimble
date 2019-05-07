@@ -1,12 +1,12 @@
 ---
 - hosts: all
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: portal,
         cloud_operation: facts
       }
   tasks:
-    - debug: 
+    - debug:
         var: cloud_portal_facts
-    - debug: 
+    - debug:
         var: cloud_host_facts

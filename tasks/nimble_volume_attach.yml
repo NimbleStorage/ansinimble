@@ -25,6 +25,7 @@
 
 - name: Rescan FC host
   command: ncmadm -fcrescan
+  changed_when: False
 
 - name: Wait for device to appear
   wait_for:

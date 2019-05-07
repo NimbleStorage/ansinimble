@@ -10,22 +10,22 @@
     - nimble_group_facts
 
 - name: Merge options
-  set_fact: 
+  set_fact:
     nimble_protsched_options_default: "{{ nimble_protsched_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_protection_schedule }}"
 
 - set_fact:
     nimble_protsched_options_default: "{{ nimble_protsched_options_default | combine( { 'name': nimble_protection_schedule_name, 'volcoll_or_prottmpl_id': nimble_protection_template_id } ) }}"
 
-- block: 
-  - name: Get nimble_partner_id 
-    set_fact: 
-      nimble_partner_id: "{{ nimble_group_facts | json_query(local_query) }}" 
-    vars: 
-      local_query: "replication_partners[?name=='{{ nimble_protsched_options_default.downstream_partner_id }}'].id | [0]" 
-  - set_fact: 
-      nimble_protsched_options_default: "{{ nimble_protsched_options_default | combine( { 'downstream_partner_id': nimble_partner_id } ) }}" 
-  when: nimble_protsched_options_default.downstream_partner_id is defined 
+- block:
+  - name: Get nimble_partner_id
+    set_fact:
+      nimble_partner_id: "{{ nimble_group_facts | json_query(local_query) }}"
+    vars:
+      local_query: "replication_partners[?name=='{{ nimble_protsched_options_default.downstream_partner_id }}'].id | [0]"
+  - set_fact:
+      nimble_protsched_options_default: "{{ nimble_protsched_options_default | combine( { 'downstream_partner_id': nimble_partner_id } ) }}"
+  when: nimble_protsched_options_default.downstream_partner_id is defined
 
 - name: Create protection schedule
   uri:

@@ -6,7 +6,7 @@
   vars:
     cloud_host_ip: "{{ ansible_default_ipv4.address }}"
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: replica,
         cloud_operation: clone
       }

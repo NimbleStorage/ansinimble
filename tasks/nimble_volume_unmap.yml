@@ -29,7 +29,7 @@
     status_code: 200
     headers:
       X-Auth-Token: "{{ nimble_group_token }}"
-  when: nimble_volume_acr is defined and nimble_volume_acr != ''
+  when: nimble_volume_acr is defined and nimble_volume_acr
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_acr_deleted

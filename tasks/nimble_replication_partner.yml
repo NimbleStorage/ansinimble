@@ -13,11 +13,11 @@
 
 - name: Build partnership
   set_fact:
-    nimble_partnerships: "{{ {} | combine( { nimble_partner: { 'upstream': '', 'downstream': '' } } ) }}" 
+    nimble_partnerships: "{{ {} | combine( { nimble_partner: { 'upstream': '', 'downstream': '' } } ) }}"
   when: nimble_partnerships is undefined
 
 - set_fact:
-    nimble_local_partnership: {} 
+    nimble_local_partnership: {}
     nimble_local_partnership_upstream:
       name: "{{ nimble_partnerships[nimble_partner].upstream.name | default(nimble_partner) }}"
       hostname: "{{ nimble_partnerships[nimble_partner].upstream.hostname | default(nimble_partner) }}"
@@ -37,7 +37,7 @@
   set_fact:
     nimble_local_partnership_upstream: "{{ nimble_local_partnership_upstream | combine( { item.key: item.value } ) }}"
   when: nimble_local_partnership_upstream[item.key] is undefined
-  with_dict: "{{ nimble_partnerships[nimble_partner].upstream}}"
+  with_dict: "{{ nimble_partnerships[nimble_partner].upstream }}"
   no_log: True
 - set_fact:
     nimble_local_partnership_downstream: "{{ nimble_local_partnership_downstream | combine( { item.key: item.value } ) }}"

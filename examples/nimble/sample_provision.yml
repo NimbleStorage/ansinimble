@@ -9,11 +9,11 @@
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: create 
+        nimble_operation: create
       }
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: map 
+        nimble_operation: map
       }
 
 - hosts: myhost1
@@ -24,5 +24,5 @@
       }
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: mount 
+        nimble_operation: mount
       }

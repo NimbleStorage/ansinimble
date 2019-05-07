@@ -1,12 +1,12 @@
 ---
 # Provide nimble_volume and nimble_volume_size as extra vars, i.e:
 # $ ansible-playbook -e nimble_volume=myvol1 \
-# -e nimble_volume_size=2000 
+# -e nimble_volume_size=2000
 # sample_resize.yml
 
 - hosts: myhost1
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: resize 
+        nimble_operation: resize
       }

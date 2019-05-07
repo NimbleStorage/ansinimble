@@ -27,7 +27,7 @@
   when: not (nimble_volume_id and nimble_snapshot_id)
 
 - name: Merge options
-  set_fact: 
+  set_fact:
     nimble_snapshot_update_options_default: "{{ nimble_snapshot_update_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_snapshot_update_options }}"
   when: nimble_snapshot_update_options is defined

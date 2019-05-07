@@ -1,6 +1,6 @@
 ---
 - name: Ensure play variables are sane
-  fail: 
+  fail:
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined
   with_items:
@@ -44,6 +44,7 @@
   command: ncvol --disconnect --device '{{ cloud_volume_device_name_path.stat.lnk_source }}'
   register: cloud_volume_umount
   failed_when: not cloud_volume_umount.stdout | search("The target is not connected to the host|done")
+  changed_when: False
 
 - name: Wait for device to disappear
   wait_for:

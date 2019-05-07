@@ -1,6 +1,6 @@
 ---
 - name: Ensure play variables are sane
-  fail: 
+  fail:
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined
   with_items:
@@ -31,4 +31,4 @@
   delay: "{{ cloud_uri_delay }}"
   register: cloud_store_deleted
   until: cloud_store_deleted | success
-  when: cloud_store_id != ''
+  when: cloud_store_id

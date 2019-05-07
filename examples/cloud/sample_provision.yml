@@ -3,7 +3,7 @@
 # $ ansible-playbook -i ec2.py -l tag_cloudhost -e cloud_volume=mycloudvol1 sample_provision.yml
 - hosts: all
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: volume,
         cloud_operation: create,
         cloud_volume_provider: "Amazon AWS",
@@ -13,12 +13,12 @@
           existing_cloud_subnet: "172.31.0.0/16"
         }
       }
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: volume,
         cloud_operation: map,
         cloud_host_ip: "{{ ansible_default_ipv4.address }}"
       }
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: volume,
         cloud_operation: mount,
         cloud_volume_mountpoint: "/mnt/{{ cloud_volume }}"

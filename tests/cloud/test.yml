@@ -1,10 +1,10 @@
 ---
 - hosts: "{{ local_smokers }}"
   tasks:
-    - set_fact: 
+    - set_fact:
         local_uuid: "{{ (inventory_hostname + ansible_date_time.iso8601_micro) | to_uuid | regex_replace('-','')}}"
 
-    - set_fact: 
+    - set_fact:
         local_provider: "Amazon AWS"
         local_region: "us-west-1"
         local_subnet: "172.31.0.0/16"
@@ -30,7 +30,7 @@
   roles:
     - { role: "{{ local_role }}",
         cloud_operation: create,
-        cloud_object: store } 
+        cloud_object: store }
 
 - hosts: "{{ local_smokers }}"
   vars:
@@ -40,27 +40,27 @@
   roles:
     - { role: "{{ local_role }}",
         cloud_operation: resize,
-        cloud_object: store } 
+        cloud_object: store }
     - { role: "{{ local_role }}",
         cloud_operation: delete,
-        cloud_object: store } 
+        cloud_object: store }
 
 # Hello World
 - hosts: "{{ local_smokers }}"
   vars:
     cloud_lcm_state: present
   roles:
-    - { role: "{{ local_role }}", cloud_operation: manage, cloud_object: lcm } 
+    - { role: "{{ local_role }}", cloud_operation: manage, cloud_object: lcm }
 
 - hosts: "{{ local_smokers }}"
   vars:
     cloud_volume: "{{ local_uuid }}-vol"
     cloud_volume_mountpoint: "/mnt/{{ local_uuid }}-vol"
   roles:
-    - { role: "{{ local_role }}", cloud_operation: create, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: map, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: mount, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: snapshot, cloud_object: volume } 
+    - { role: "{{ local_role }}", cloud_operation: create, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: map, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: mount, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: snapshot, cloud_object: volume }
 
 # Take a snap
 - hosts: "{{ local_smokers }}"
@@ -68,7 +68,7 @@
     cloud_volume: "{{ local_uuid }}-vol"
     cloud_volume_snapshot: "{{ local_uuid }}snap"
   roles:
-    - { role: "{{ local_role }}", cloud_operation: snapshot, cloud_object: volume } 
+    - { role: "{{ local_role }}", cloud_operation: snapshot, cloud_object: volume }
 
 # Create a clone from last snapshot
 - hosts: "{{ local_smokers }}"
@@ -77,12 +77,12 @@
     cloud_volume: "{{ local_uuid }}-cln-last"
     cloud_volume_mountpoint: "/mnt/{{ local_uuid }}-cln-last"
   roles:
-    - { role: "{{ local_role }}", cloud_operation: create, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: map, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: mount, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: umount, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: unmap, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: delete, cloud_object: volume } 
+    - { role: "{{ local_role }}", cloud_operation: create, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: map, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: mount, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: umount, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: unmap, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: delete, cloud_object: volume }
 
 # Create a clone from a known snapshot
 - hosts: "{{ local_smokers }}"
@@ -93,12 +93,12 @@
     cloud_volume_mountpoint: "/mnt/{{ local_uuid }}-cln-known"
   roles:
     - { role: debug_marker, local_test: "Create a clone from a known snapshot" }
-    - { role: "{{ local_role }}", cloud_operation: create, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: map, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: mount, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: umount, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: unmap, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: delete, cloud_object: volume } 
+    - { role: "{{ local_role }}", cloud_operation: create, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: map, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: mount, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: umount, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: unmap, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: delete, cloud_object: volume }
 
 # Touch a file
 - hosts: "{{ local_smokers }}"
@@ -118,8 +118,8 @@
     cloud_volume_mountpoint: "/mnt/{{ local_uuid }}-vol"
   roles:
     - { role: debug_marker, local_test: "Prepare for restore from last snapshot {{ cloud_volume }}" }
-    - { role: "{{ local_role }}", cloud_operation: umount, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: unmap, cloud_object: volume } 
+    - { role: "{{ local_role }}", cloud_operation: umount, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: unmap, cloud_object: volume }
 
 # Restore from last snapshot
 - hosts: "{{ local_smokers }}"
@@ -128,12 +128,12 @@
     cloud_volume_mountpoint: "/mnt/{{ local_uuid }}-vol"
   roles:
     - { role: debug_marker, local_test: "Restore from last snapshot" }
-    - { role: "{{ local_role }}", cloud_operation: restore, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: map, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: mount, cloud_object: volume } 
+    - { role: "{{ local_role }}", cloud_operation: restore, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: map, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: mount, cloud_object: volume }
 
 - hosts: "{{ local_smokers }}"
-  vars: 
+  vars:
     cloud_volume: "{{ local_uuid }}-vol"
   tasks:
     - name: Is the file gone?
@@ -153,8 +153,8 @@
     cloud_volume_mountpoint: "/mnt/{{ local_uuid }}-vol"
   roles:
     - { role: debug_marker, local_test: "Prep restore from a known snapshot" }
-    - { role: "{{ local_role }}", cloud_operation: umount, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: unmap, cloud_object: volume } 
+    - { role: "{{ local_role }}", cloud_operation: umount, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: unmap, cloud_object: volume }
 
 # Restore from known snapshot
 - hosts: "{{ local_smokers }}"
@@ -163,18 +163,18 @@
     cloud_volume_mountpoint: "/mnt/{{ local_uuid }}-vol"
     cloud_volume_snapshot: "{{ local_uuid }}snap"
   roles:
-    - { role: "{{ local_role }}", cloud_operation: restore, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: map, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: mount, cloud_object: volume } 
+    - { role: "{{ local_role }}", cloud_operation: restore, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: map, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: mount, cloud_object: volume }
 
-# Resize 
+# Resize
 - hosts: "{{ local_smokers }}"
   vars:
     cloud_volume_size: 30000
     cloud_volume: "{{ local_uuid }}-vol"
     cloud_volume_mountpoint: "/mnt/{{ local_uuid }}-vol"
   roles:
-    - { role: "{{ local_role }}", cloud_operation: resize, cloud_object: volume } 
+    - { role: "{{ local_role }}", cloud_operation: resize, cloud_object: volume }
 
 # Delete
 - hosts: "{{ local_smokers }}"
@@ -182,12 +182,12 @@
     cloud_volume: "{{ local_uuid }}-vol"
     cloud_volume_mountpoint: "/mnt/{{ local_uuid }}-vol"
   roles:
-    - { role: "{{ local_role }}", cloud_operation: umount, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: unmap, cloud_object: volume } 
-    - { role: "{{ local_role }}", cloud_operation: delete, cloud_object: volume } 
+    - { role: "{{ local_role }}", cloud_operation: umount, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: unmap, cloud_object: volume }
+    - { role: "{{ local_role }}", cloud_operation: delete, cloud_object: volume }
 
 - hosts: "{{ local_smokers }}"
   vars:
     cloud_lcm_state: absent
   roles:
-    - { role: "{{ local_role }}", cloud_operation: manage, cloud_object: lcm } 
+    - { role: "{{ local_role }}", cloud_operation: manage, cloud_object: lcm }

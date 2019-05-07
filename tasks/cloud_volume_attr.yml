@@ -3,7 +3,7 @@
   vars:
     local_volume: "{{ cloud_volume }}"
 
-- block: 
+- block:
   - uri:
       url: "{{ cloud_portal_api_endpoint }}/cloud_volumes/{{ cloud_volume_id }}"
       validate_certs: yes

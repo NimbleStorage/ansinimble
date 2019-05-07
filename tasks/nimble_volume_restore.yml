@@ -7,7 +7,7 @@
   include: nimble_group_facts.yml
   vars:
     nimble_group_facts:
-      software_versions: 
+      software_versions:
 
 - name: Figure out volume query (NimbleOS >=4)
   set_fact:

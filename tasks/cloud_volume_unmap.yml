@@ -1,6 +1,6 @@
 ---
 - name: Ensure play variables are sane
-  fail: 
+  fail:
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined
   with_items:
@@ -31,11 +31,11 @@
     body_format: json
     headers:
       Authorization: "Basic {{ cloud_portal_authz }}"
-    body: 
-      data: 
+    body:
+      data:
         initiator_ip: "{{ cloud_host_ip }}"
     return_content: yes
-  when: cloud_volume_id != ''
+  when: cloud_volume_id
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_volume_unmap

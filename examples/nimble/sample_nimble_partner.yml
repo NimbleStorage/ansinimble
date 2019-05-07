@@ -6,13 +6,13 @@
 #
 # The nimble_partnerships var describes partnerships and should be protected with Ansible vault,
 # please see defaults.yml of role for example
-# 
+#
 # $ ansible-playbook -e nimble_partner=mypartnership \
 # sample_nimble_partner.yml
 
 - hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         nimble_object: replication,
         nimble_operation: partner
       }

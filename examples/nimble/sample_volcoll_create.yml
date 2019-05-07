@@ -6,7 +6,7 @@
 
 - hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         nimble_object: volcoll,
         nimble_operation: create
       }

@@ -12,7 +12,7 @@
 
 - block:
   - name: Ensure play variables are sane
-    fail: 
+    fail:
       msg: "Missing variable {{ item }}"
     when: vars[item] is undefined
     with_items:
@@ -22,13 +22,13 @@
       - cloud_volume_provider
 
   - name: Ensure mandatory options
-    fail: 
+    fail:
       msg: "Missing required option {{ item }}"
     when: cloud_volume_options[item] is undefined
     with_items: "{{ cloud_volume_mandatory_options }}"
 
   - name: Merge options
-    set_fact: 
+    set_fact:
       cloud_volume_options_default: "{{ cloud_volume_options_default | combine( { item.key: item.value } ) }}"
     with_dict: "{{ cloud_volume_options }}"
 
@@ -40,7 +40,7 @@
 
 - block:
   - name: Ensure play variables are sane (for clones)
-    fail: 
+    fail:
       msg: "Missing variable {{ item }}"
     when: vars[item] is undefined
     with_items:
@@ -48,17 +48,17 @@
       - cloud_volume_from_options
       - cloud_volume_region
       - cloud_volume_provider
-  
+
   - name: Get Cloud Volume ID of parent when cloning
     include: cloud_volume_id.yml
     vars:
       local_volume: "{{ cloud_volume_from }}"
 
   - name: Merge options
-    set_fact: 
+    set_fact:
       cloud_volume_from_default: "{{ cloud_volume_from_default | combine( { item.key: item.value } ) }}"
     with_dict: "{{ cloud_volume_from_options }}"
-  
+
   - name: Query for snapshots on cloud_volume_from
     uri:
       url: "{{ cloud_portal_api_endpoint }}/cloud_volumes/{{ cloud_volume_id }}/snapshots"
@@ -112,7 +112,7 @@
       body_format: json
       headers:
         Authorization: "Basic {{ cloud_portal_authz }}"
-      body: 
+      body:
         data: "{{ cloud_volume_options_default }}"
       return_content: yes
     register: cloud_volume_created
@@ -134,7 +134,7 @@
       body_format: json
       headers:
         Authorization: "Basic {{ cloud_portal_authz }}"
-      body: 
+      body:
         data: "{{ cloud_volume_from_default }}"
       return_content: yes
     register: cloud_volume_created

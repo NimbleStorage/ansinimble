@@ -20,9 +20,9 @@
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: unmap 
+        nimble_operation: unmap
       }
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: delete 
+        nimble_operation: delete
       }

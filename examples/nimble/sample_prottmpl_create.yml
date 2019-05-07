@@ -1,11 +1,11 @@
 ---
-# Create default protection template 
-# $ ansible-playbook -e nimble_protection_template=myprottmpl1 
+# Create default protection template
+# $ ansible-playbook -e nimble_protection_template=myprottmpl1
 # sample_prottmpl_create.yml
 
 - hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         nimble_object: prottmpl,
         nimble_operation: create
       }
@@ -17,7 +17,7 @@
 # Note: downstream_partner_id will be translated from a human-readable group name to an id
 - hosts: myarray1
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         nimble_object: prottmpl,
         nimble_operation: create,
         nimble_protection_schedules: {
