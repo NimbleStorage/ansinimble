@@ -10,9 +10,9 @@
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: create 
+        nimble_operation: create
       }
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: map 
+        nimble_operation: map
       }

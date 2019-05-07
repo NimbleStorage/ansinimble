@@ -20,7 +20,7 @@
   delay: "{{ cloud_uri_delay }}"
   until: cloud_portal_token | success
 
-- name: Store portal token 
+- name: Store portal token
   set_fact:
     cloud_portal_token: "{{ cloud_portal_access_key }}:{{ cloud_portal_token.json.token }}"
 
@@ -61,7 +61,7 @@
   until: cloud_portal_data | success
 
 - name: Combine portal facts
-  set_fact: 
+  set_fact:
     cloud_portal_facts_local: "{{ cloud_portal_facts_local | combine( { item.item.key: item.json.data } ) }}"
   with_items: "{{ cloud_portal_data.results }}"
   no_log: "{{ cloud_silence_payload }}"

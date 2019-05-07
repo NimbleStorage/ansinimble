@@ -5,12 +5,12 @@
   register: nimble_nlt_state
   delegate_to: "{{ nimble_delegate_host | default(ansible_hostname) }}"
   delegate_facts: "{{ nimble_delegate_facts | default(False) }}"
-  when: nimble_linux_toolkit_ignore == False
+  when: not nimble_linux_toolkit_ignore
 
 - include: nimble_nlt_manage.yml
   vars:
     nimble_linux_toolkit_state: running
-  when: nimble_linux_toolkit_ignore == False and nimble_nlt_state.status.SubState != 'running'
+  when: not nimble_linux_toolkit_ignore and nimble_nlt_state.status.SubState != 'running'
 
 - block:
   - name: Probe my IQN
@@ -22,7 +22,7 @@
     register: nimble_host_iqn
     when: nimble_host_iqn_file_stat.stat.exists
 
-  - name: Probe WWPNs 
+  - name: Probe WWPNs
     shell: ls /sys/class/fc_host/host*/port_name || true
     register: nimble_host_fc_adapters
 
@@ -33,9 +33,9 @@
     no_log: True
 
   - set_fact:
-      nimble_host_wwpns: "{{ nimble_host_wwpns }} + [ '{{ item.content | b64decode | 
-            regex_replace('([a-zA-Z0-9]{2})','\\1:') | 
-            regex_replace('0x:(.*):\n$','\\1')}}' ]"
+      nimble_host_wwpns: "{{ nimble_host_wwpns }} + [ '{{ item.content | b64decode |
+            regex_replace('([a-zA-Z0-9]{2})','\\1:') |
+            regex_replace('0x:(.*):\n$','\\1') }}' ]"
     vars:
       nimble_host_wwpns: []
     with_items: "{{ nimble_host_port_names.results }}"

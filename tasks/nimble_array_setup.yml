@@ -4,13 +4,17 @@
 # delegate raw to host
 - name: Find array
   shell: >
-    avahi-browse _http._tcp -rpkt | grep serial={{ nimble_array_serial }} | 
-    awk '-F;' '{ if ($2 == "{{ nimble_array_discovery_interface | default(ansible_default_ipv4.interface)}}" && $1 == "=") print $8 }'
+    set -o pipefail &&
+    avahi-browse _http._tcp -rpkt | grep serial={{ nimble_array_serial }} |
+    awk '-F;' '{ if ($2 == "{{ nimble_array_discovery_interface | default(ansible_default_ipv4.interface) }}" && $1 == "=") print $8 }'
   register: nimble_array_mdns
+  args:
+    executable: /bin/bash
+  changed_when: False
 
 - fail:
-    msg: "Could not find IP address for {{ nimble_array_serial }} using 'avahi-browse _http._tcp -rpkt' on {{ inventory_hostname }}" 
-  when: nimble_array_mdns.stdout|ipaddr == false
+    msg: "Could not find IP address for {{ nimble_array_serial }} using 'avahi-browse _http._tcp -rpkt' on {{ inventory_hostname }}"
+  when: not nimble_array_mdns.stdout | ipaddr
 
 - name: Add to inventory
   add_host:
@@ -32,11 +36,11 @@
   ignore_errors: True
   become: no
 
-- block: 
+- block:
   - debug:
       var: nimble_array_setup_error
   - fail:
       msg: Failed to setup array {{ nimble_array_serial }}, maybe it has already been setup?
-  when: nimble_array_setup_error.failed is defined and nimble_array_setup_error.failed == True
+  when: nimble_array_setup_error.failed is defined and nimble_array_setup_error.failed
 
 - debug: var=nimble_array_setup_error

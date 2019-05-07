@@ -5,8 +5,8 @@
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: group,
-        nimble_operation: facts 
+        nimble_operation: facts
       }
   tasks:
-    - debug: 
+    - debug:
         var: nimble_group_facts

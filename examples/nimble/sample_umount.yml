@@ -7,5 +7,5 @@
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: umount 
+        nimble_operation: umount
       }

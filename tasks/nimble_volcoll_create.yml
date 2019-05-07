@@ -11,7 +11,7 @@
   include: nimble_group_facts.yml
   vars:
     nimble_group_facts:
-      protection_templates: 
+      protection_templates:
 
 - name: Get nimble_prottmpl_id
   set_fact:
@@ -20,7 +20,7 @@
     local_query: "protection_templates[?name=='{{ nimble_protection_template }}'].id | [0]"
 
 - name: Merge options
-  set_fact: 
+  set_fact:
     nimble_volcoll_options_default: "{{ nimble_volcoll_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_volcoll_options }}"
   when: nimble_volcoll_options is defined

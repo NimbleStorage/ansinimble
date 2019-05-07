@@ -224,7 +224,7 @@ cloud_portal_url: "{{ cloud_portal_http_scheme }}://{{ cloud_portal_http_host }}
 cloud_portal_api_endpoint: "{{ cloud_portal_url }}/api/{{ cloud_portal_api_version }}"
 
 # HTTP/JSON tunables
-cloud_uri_retries: 24 
+cloud_uri_retries: 24
 cloud_uri_delay: 10
 cloud_silence_payload: True
 
@@ -257,14 +257,14 @@ cloud_volume_options_default:
 
 cloud_volume_mandatory_options:
   - existing_cloud_subnet
-  - private_cloud 
+  - private_cloud
 
 cloud_replica_options_default:
   iops: 1000
 
 cloud_replica_mandatory_options:
   - existing_cloud_subnet
-  - private_cloud 
+  - private_cloud
 
 cloud_replica_snapshot_index: 0
 

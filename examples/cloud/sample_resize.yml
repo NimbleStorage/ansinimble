@@ -4,7 +4,7 @@
 
 - hosts: all
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: volume,
         cloud_operation: resize,
         cloud_volume_mountpoint: "/mnt/{{ cloud_volume }}"

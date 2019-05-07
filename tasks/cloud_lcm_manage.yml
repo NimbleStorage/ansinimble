@@ -2,7 +2,7 @@
 - name: Inspect LCM
   stat:
     path: "{{ cloud_lcm_prefix }}"
-  register: cloud_lcm_installed 
+  register: cloud_lcm_installed
 
 - name: Verify state
   fail:
@@ -10,7 +10,7 @@
   when: cloud_lcm_state not in ['absent', 'present'] or cloud_lcm_state is undefined
 
 - name: Verify package params
-  fail: 
+  fail:
     msg: "Please specify Linux Connection Manager URL in cloud_lcm_installer"
   when: cloud_lcm_installer is undefined and cloud_lcm_state in ['present'] and not cloud_lcm_installed.stat.exists
 
@@ -19,7 +19,7 @@
     set_fact:
       nimble_host_flavor: yum
     when: ansible_os_family == 'RedHat'
-  
+
   - name: deb-based
     set_fact:
       nimble_host_flavor: apt

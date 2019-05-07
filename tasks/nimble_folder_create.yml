@@ -10,7 +10,7 @@
       pools: "fields=name,id"
 
 - name: Merge options
-  set_fact: 
+  set_fact:
     nimble_folder_options_default: "{{ nimble_folder_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_folder_options }}"
   when: nimble_folder_options is defined

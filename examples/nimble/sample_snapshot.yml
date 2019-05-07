@@ -8,5 +8,5 @@
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: snapshot 
+        nimble_operation: snapshot
       }

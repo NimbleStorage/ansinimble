@@ -1,6 +1,6 @@
 ---
 - name: Ensure play variables are sane
-  fail: 
+  fail:
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined
   with_items:
@@ -28,6 +28,7 @@
            --chap-secret {{ cloud_portal_facts.session.attributes.chap_secret }}
   register: cloud_volume_mount
   failed_when: not cloud_volume_mount.stdout | search('done|Volume is already connected to host|')
+  changed_when: False
 
 - name: Create device string
   set_fact:
@@ -50,7 +51,7 @@
     util_volume_label: "{{ cloud_volume }}"
 
 - name: Create filesystem
-  filesystem: 
+  filesystem:
     dev: "{{ cloud_volume_device_name }}"
     fstype: xfs
     opts: -L {{ util_volume_label }} {{ cloud_volume_mkfs_options }}
@@ -67,8 +68,8 @@
     command: xfs_repair -L {{ cloud_volume_device_name | quote }}
 
   - name: Update label if this is an existing filesystem (clone)
-    shell: xfs_admin -L {{ util_volume_label | quote }} -U {{ ansible_date_time.iso8601_micro | to_uuid }} {{ cloud_volume_device_name | quote }}
-  when: cloud_filesystem_created.changed == False and cloud_volume_mountpoint_stat.rc != 0
+    command: xfs_admin -L {{ util_volume_label | quote }} -U {{ ansible_date_time.iso8601_micro | to_uuid }} {{ cloud_volume_device_name | quote }}
+  when: not cloud_filesystem_created.changed and cloud_volume_mountpoint_stat.rc != 0
 
 - name: Mount volume
   mount:

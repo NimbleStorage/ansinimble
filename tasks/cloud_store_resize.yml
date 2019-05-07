@@ -1,6 +1,6 @@
 ---
 - name: Ensure play variables are sane
-  fail: 
+  fail:
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined
   with_items:
@@ -24,10 +24,10 @@
     cloud_store_id: "{{ cloud_portal_facts | json_query(local_query) }}"
   vars:
     local_query: "replication_stores[?attributes.name=='{{ cloud_store }}'].id | [0]"
-  
+
 - fail:
     msg: "Cloud store ({{ cloud_store }}) not found."
-  when: cloud_store_id == ''
+  when: cloud_store_id
 
 - name: Update Replication Store
   uri:

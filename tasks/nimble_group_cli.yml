@@ -17,3 +17,4 @@
   delegate_to: nimbleos-cli
   register: nimble_group_cli_return
   ignore_errors: "{{ nimble_group_cli_ignore_errors | default(False) }}"
+  changed_when: False

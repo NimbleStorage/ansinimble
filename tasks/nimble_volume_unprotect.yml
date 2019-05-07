@@ -10,7 +10,7 @@
   include: nimble_group_facts.yml
   vars:
     nimble_group_facts:
-      volumes: 
+      volumes:
 
 - name: Get nimble_volume_id
   include: nimble_util_volume_id.yml

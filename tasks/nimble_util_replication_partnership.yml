@@ -22,7 +22,7 @@
     nimble_replication_partner_payload: "{{ nimble_local_partnership[nimble_partnership_direction] }}"
 - set_fact:
     nimble_replication_partner_payload: "{{ nimble_replication_partner_payload | combine( { 'secret': nimble_local_partnership.secret }) }}"
-- set_fact: 
+- set_fact:
     nimble_replication_partner_data: {}
 - set_fact:
     nimble_replication_partner_data: "{{ nimble_replication_partner_data | combine( { item.key: item.value } ) }}"
@@ -51,7 +51,7 @@
   delay: "{{ nimble_uri_delay }}"
   register: nimble_partner_created
   until: nimble_partner_created | success
-  when: nimble_partner_id == ""
+  when: not nimble_partner_id | string
 
 - name: Test partnership
   uri:
@@ -67,4 +67,4 @@
   delay: "{{ nimble_uri_delay }}"
   register: nimble_partner_tested
   until: nimble_partner_tested | success
-  when: nimble_partner_id != ""
+  when: nimble_partner_id | string

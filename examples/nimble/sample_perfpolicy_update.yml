@@ -10,7 +10,7 @@
       compress: True
       dedupe_enabled: True
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         nimble_object: perfpolicy,
         nimble_operation: update
       }

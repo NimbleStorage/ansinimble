@@ -1,6 +1,6 @@
 ---
 - name: Ensure play variables are sane
-  fail: 
+  fail:
     msg: "Missing variable {{ item }}"
   when: vars[item] is undefined
   with_items:
@@ -23,7 +23,7 @@
   vars:
     local_volume: "{{ cloud_volume }}"
 
-- name: Only allow growing of volumes 
+- name: Only allow growing of volumes
   fail:
     msg: "New size ({{ cloud_volume_size }}) must be greater than old size ({{ cloud_volume_attr.size }})"
   when: cloud_volume_attr.size > cloud_volume_size
@@ -38,10 +38,10 @@
     headers:
       Authorization: "Basic {{ cloud_portal_authz }}"
     body:
-      data: 
+      data:
         size: '{{ cloud_volume_size }}'
     return_content: yes
-  when: cloud_volume_id != ''
+  when: cloud_volume_id
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_volume_resize
@@ -49,9 +49,11 @@
 
 - name: Rescan target
   command: iscsiadm -m node -R -T {{ cloud_volume_attr.target_name }}
+  changed_when: False
 
 - name: Reload devmap
   command: multipath -r
+  changed_when: False
 
 - name: Reload devmap (again)
   command: multipath -r
@@ -59,6 +61,7 @@
 
 - name: Resize nimble_volume
   command: xfs_growfs {{ cloud_volume_mountpoint | quote }}
+  changed_when: False
 
 - name: Refresh volumes
   include: cloud_portal_facts.yml

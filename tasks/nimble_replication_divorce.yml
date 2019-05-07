@@ -19,7 +19,7 @@
     local_query: "replication_partners[?name=='{{ nimble_partner }}'].id | [0]"
 - fail:
     msg: "Partner not found: {{ nimble_partner }}"
-  when: nimble_partner_id == ""
+  when: not nimble_partner_id
 
 - name: Divorce partner
   uri:
@@ -34,4 +34,4 @@
   delay: "{{ nimble_uri_delay * 3 }}"
   register: nimble_partner_deleted
   until: nimble_partner_deleted | success
-  when: nimble_partner_id != ""
+  when: nimble_partner_id | string

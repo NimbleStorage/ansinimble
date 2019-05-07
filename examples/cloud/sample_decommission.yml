@@ -6,16 +6,16 @@
   vars:
     cloud_host_ip: "{{ ansible_default_ipv4.address }}"
   roles:
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: volume,
         cloud_operation: umount,
         cloud_volume_mountpoint: "/mnt/{{ cloud_volume }}"
       }
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: volume,
         cloud_operation: unmap
       }
-    - { role: NimbleStorage.Ansinimble, 
+    - { role: NimbleStorage.Ansinimble,
         cloud_object: volume,
         cloud_operation: delete
       }

@@ -19,7 +19,7 @@
   when: not nimble_volume_id
 
 - name: Merge options
-  set_fact: 
+  set_fact:
     nimble_volume_update_options_default: "{{ nimble_volume_update_options_default | combine( { item.key: item.value } ) }}"
   with_dict: "{{ nimble_volume_update_options }}"
   when: nimble_volume_update_options is defined

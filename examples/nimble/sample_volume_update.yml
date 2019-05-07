@@ -6,7 +6,7 @@
   roles:
     - { role: NimbleStorage.Ansinimble,
         nimble_object: volume,
-        nimble_operation: update ,
+        nimble_operation: update,
         nimble_volume_update_options: {
           limit_iops: 2000,
           description: Volume throttled by Ansible
