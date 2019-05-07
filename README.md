@@ -484,6 +484,7 @@ nimble_folder: Folder name
 Create a new volume or clone from a snapshot.
 ```
 nimble_volume: An ASCII string (some special characters allowed)
+nimble_volume_size: Optional size in MiB, defaults to 10GiB
 nimble_volume_from: Create volume from this source volume (name) 
 nimble_volume_snapshot: Use this source snapshot to clone from (uses last snapshot if not specified)
 nimble_volume_options: A dictionary of Nimble volume options (please see the REST documentation)
