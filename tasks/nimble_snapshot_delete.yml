@@ -1,0 +1,36 @@
+---
+- name: Ensure play variables are sane
+  fail:
+    msg: "Missing variable {{ item }}"
+  when: vars[item] is undefined
+  with_items:
+    - nimble_volume
+    - nimble_volume_snapshot
+
+- name: Refresh group facts
+  include: nimble_group_facts.yml
+  vars:
+    nimble_group_facts:
+      snapshots: "fields=name,id&vol_name={{ nimble_volume }}&name={{ nimble_volume_snapshot }}"
+
+- name: Get nimble_snapshot_id
+  set_fact:
+    nimble_snapshot_id: "{{ nimble_group_facts | json_query(local_query) }}"
+  vars:
+    local_query: "snapshots[?name=='{{ nimble_volume_snapshot }}'].id | [0]"
+
+- name: Delete nimble_volume_snapshot
+  uri:
+    url: "{{ nimble_group_url }}/snapshots/{{ nimble_snapshot_id }}"
+    validate_certs: no
+    method: DELETE
+    status_code: 200
+    body_format: json
+    headers:
+      X-Auth-Token: "{{ nimble_group_token }}"
+  retries: "{{ nimble_uri_retries }}"
+  delay: "{{ nimble_uri_delay }}"
+  register: nimble_snapshot_deleted
+  until: nimble_snapshot_deleted | success
+  changed_when: nimble_snapshot_deleted.status == 200
+  when: nimble_snapshot_id != ""
