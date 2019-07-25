@@ -1,19 +1,21 @@
 ---
 - name: Ensure nimble_volume
-  fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
+  fail:
+    msg: "Missing variable nimble_volume, please provide a volume name in nimble_volume"
   when: nimble_volume is undefined
 
 - name: Refresh group facts
   include: nimble_group_facts.yml
   vars:
     nimble_group_facts:
-      volumes: "fields=name,id&name={{ nimble_volume }}"
+      volumes: "fields=name,id,online&name={{ nimble_volume }}"
 
 - name: Get nimble_volume_id
   set_fact:
     nimble_volume_id: "{{ nimble_group_facts | json_query(local_query) }}"
   vars:
     local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"
+  when: nimble_group_facts.volumes | length > 0
 
 - name: Offline nimble_volume
   uri:
@@ -32,6 +34,11 @@
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_offlined
   until: nimble_volume_offlined | success
+  changed_when:
+  - nimble_volume_offlined.status == 200
+  when:
+  - nimble_volume_id is defined
+  - nimble_group_facts.volumes.0.online
 
 - name: Delete nimble_volume
   uri:
@@ -45,3 +52,6 @@
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_deleted
   until: nimble_volume_deleted | success
+  when: nimble_group_facts.volumes.0 is defined and
+        (nimble_volume_offlined.changed or nimble_group_facts.volumes.0.online == false)
+  changed_when: nimble_volume_deleted.status == 200
