@@ -1,6 +1,7 @@
 ---
 - name: Ensure nimble_volume
-  fail: msg="Missing variable nimble_volume, please provide a volume name in nimble_volume"
+  fail:
+    msg: "Missing variable nimble_volume, please provide a volume name in nimble_volume"
   when: nimble_volume is undefined
 
 - name: Need NimbleOS version upfront
@@ -65,8 +66,9 @@
       nimble_volume_snapshot_id: "{{ nimble_volume_snapshots.json | json_query(local_query) }}"
     vars:
       local_query: "data[?name=='{{ nimble_volume_snapshot }}' && vol_id=='{{ nimble_volume_id }}'].id | [0]"
+    when: nimble_volume_snapshot is defined
 
-  when: nimble_volume_snapshot is defined and nimble_volume_from is defined
+  when: nimble_volume_from is defined
 
 - name: Grab last snapshot if not specified (NimbleOS 4.x)
   set_fact:
@@ -103,6 +105,35 @@
       local_query: "data[?vol_id=='{{ nimble_volume_id }}'].id | [0]"
 
   when: nimble_volume_snapshot is undefined and nimble_volume_from is defined and nimble_group_version | version_compare('4', '<')
+
+- block:
+  - name: Ensure a snapshot name
+    set_fact:
+      nimble_volume_snapshot: "{{ ansible_date_time.iso8601_basic }}"
+
+  - name: Create snapshot
+    uri:
+      url: "{{ nimble_group_url }}/snapshots"
+      validate_certs: no
+      method: POST
+      status_code: 201
+      body_format: json
+      headers:
+        X-Auth-Token: "{{ nimble_group_token }}"
+      body:
+        data:
+          vol_id: "{{ nimble_volume_id }}"
+          name: "{{ nimble_volume_snapshot }}"
+      return_content: yes
+    retries: "{{ nimble_uri_retries }}"
+    delay: "{{ nimble_uri_delay }}"
+    register: nimble_snapshot_created
+
+  - name: Generated snapshot id
+    set_fact:
+      nimble_volume_snapshot_id: "{{ nimble_snapshot_created.json.data.id }}"
+
+  when: nimble_volume_snapshot_id == ""
 
 - name: Overlay clone volume options
   set_fact:
@@ -148,10 +179,11 @@
     body:
       data: "{{ nimble_volume_options_default }}"
     return_content: yes
-  register: local_volume
+  register: nimble_volume_created
   when: nimble_group_facts | json_query(local_query) == []
   vars:
     local_query: "volumes[?name=='{{ nimble_volume_options_default.name }}'].name"
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
-  until: local_volume | success
+  until: nimble_volume_created | success
+  changed_when: nimble_volume_created.status == 201
