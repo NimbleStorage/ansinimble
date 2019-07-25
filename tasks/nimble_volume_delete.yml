@@ -17,7 +17,7 @@
     local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"
   when: nimble_group_facts.volumes | length > 0
 
-- name: Offline nimble_volume
+- name: Offline nimble_volume and disassociate from potential volcoll
   uri:
     url: "{{ nimble_group_url }}/volumes/{{ nimble_volume_id }}?force=true"
     validate_certs: no
@@ -28,6 +28,7 @@
       data:
         id: "{{ nimble_volume_id }}"
         online: False
+        volcoll_id: ""
     headers:
       X-Auth-Token: "{{ nimble_group_token }}"
   retries: "{{ nimble_uri_retries }}"
