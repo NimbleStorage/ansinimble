@@ -8,7 +8,7 @@
   include: nimble_group_facts.yml
   vars:
     nimble_group_facts:
-      volumes: "fields=name,id,online&name={{ nimble_volume }}"
+      volumes: "fields=name,id&name={{ nimble_volume }}"
 
 - name: Get nimble_volume_id
   set_fact:
@@ -17,7 +17,7 @@
     local_query: "volumes[?name=='{{ nimble_volume }}'].id | [0]"
   when: nimble_group_facts.volumes | length > 0
 
-- name: Offline nimble_volume
+- name: Prepare nimble_volume for deletion
   uri:
     url: "{{ nimble_group_url }}/volumes/{{ nimble_volume_id }}?force=true"
     validate_certs: no
@@ -28,17 +28,17 @@
       data:
         id: "{{ nimble_volume_id }}"
         online: False
+        volcoll_id: ""
     headers:
       X-Auth-Token: "{{ nimble_group_token }}"
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
-  register: nimble_volume_offlined
-  until: nimble_volume_offlined | success
+  register: nimble_volume_deleteprep
+  until: nimble_volume_deleteprep | success
   changed_when:
-  - nimble_volume_offlined.status == 200
+  - nimble_volume_deleteprep.status == 200
   when:
   - nimble_volume_id is defined
-  - nimble_group_facts.volumes.0.online
 
 - name: Delete nimble_volume
   uri:
@@ -52,6 +52,5 @@
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_deleted
   until: nimble_volume_deleted | success
-  when: nimble_group_facts.volumes.0 is defined and
-        (nimble_volume_offlined.changed or nimble_group_facts.volumes.0.online == false)
+  when: nimble_volume_deleteprep.changed
   changed_when: nimble_volume_deleted.status == 200
