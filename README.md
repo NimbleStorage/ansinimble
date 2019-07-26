@@ -2,7 +2,7 @@
 Manages software and products from Nimble Storage. This is BETA software.
 
 ## Requirements
-Ansinimble supports two different product lines. HPE Nimble Storage arrays and HPE Cloud Volumes. Requirements vary slightly between products. 
+Ansinimble supports two different product lines. HPE Nimble Storage arrays and HPE Cloud Volumes. Requirements vary slightly between products.
 
 ### Nimble Arrays
 This role assumes the latest Nimble Linux Toolkit (NLT) is installed on the host being managed by Ansible. The latest version of NLT may be obtained from [InfoSight](https://infosight.nimblestorage.com) (Nimble customers and partners only).
@@ -41,12 +41,14 @@ Ansinimble is beta software and might introduce breaking changes between version
 
 **Important:** When executing with Ansible 2.5+, `ansible-playbook -b` (become) must be used for the role to work properly. This is due to a change in the `include` statement.
 
-# Reference Documentation Tables of Contents
-Getting started with the Ansinimble role can be initimating. Keep an eye out on [datamattson.io](https://datamattsson.io) with the [Ansinimble](https://datamattsson.tumblr.com/search/ansinimble) tag.
+# Documentation
+Getting started with the Ansinimble role can be intimidating. Keep an eye out on [datamattson.io](https://datamattsson.io) with the [Ansinimble](https://datamattsson.tumblr.com/search/ansinimble) tag.
 
 Tutorials available so far:
 * [An Ansinimble Tutorial](https://datamattsson.tumblr.com/post/184716336821/an-ansinimble-tutorial)
 * [Ansinimble Tutorial: Clone Refresh](https://datamattsson.tumblr.com/post/185397608286/ansinimble-tutorial-clone-refresh)
+
+There's also plenty of [examples](https://github.com/NimbleStorage/ansinimble#example-playbooks) further down and in the [examples](examples) directory.
 
 ## Reference documentation
 * [Role Variables](https://github.com/NimbleStorage/ansinimble#role-variables)
