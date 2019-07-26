@@ -17,10 +17,10 @@ tags:
 	ansible-playbook -t ${ARGS} -l $(ROLE_LIMIT) $(ROLE_DEST)/tests/nimble/test.yml
 
 tests:
-	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/tests/nimble/test.yml 
+	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/tests/nimble/test.yml
 
 nopartner:
-	ansible-playbook -l $(ROLE_LIMIT) --skip-tags=nopartner $(ROLE_DEST)/tests/nimble/test.yml 
+	ansible-playbook -l $(ROLE_LIMIT) --skip-tags=nopartner $(ROLE_DEST)/tests/nimble/test.yml
 
 copy:
 	rm -rf $(ROLE_DEST)
@@ -33,24 +33,26 @@ copyhost:
 	cp -a $(ROLE_SRC)/* $(ROLE_DIST_DEST)/
 
 clean:
-	rm -rf $(ROLE_DEST)	
+	rm -rf $(ROLE_DEST)
 
 bundle:
-	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/examples/nimble/sample_install.yml 
+	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/examples/nimble/sample_install.yml
 
 unbundle:
 	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/examples/nimble/sample_uninstall.yml
 cv:
-	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/tests/nimble/cloud.yml 
+	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/tests/nimble/cloud.yml
 full:
 	sudo pip install ansible==2.3.3.0
-	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/tests/nimble/test.yml 
+	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/tests/nimble/test.yml
 	sudo pip install ansible==2.4.6.0
-	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/tests/nimble/test.yml 
+	ansible-playbook -l $(ROLE_LIMIT) $(ROLE_DEST)/tests/nimble/test.yml
 	sudo pip install ansible==2.5.15
-	ansible-playbook -l $(ROLE_LIMIT) -b $(ROLE_DEST)/tests/nimble/test.yml 
-	sudo pip install ansible==2.6.16
-	ansible-playbook -l $(ROLE_LIMIT) -b $(ROLE_DEST)/tests/nimble/test.yml 
-	sudo pip install ansible==2.7.10
-	ansible-playbook -l $(ROLE_LIMIT) -b $(ROLE_DEST)/tests/nimble/test.yml 
+	ansible-playbook -l $(ROLE_LIMIT) -b $(ROLE_DEST)/tests/nimble/test.yml
+	sudo pip install ansible==2.6.18
+	ansible-playbook -l $(ROLE_LIMIT) -b $(ROLE_DEST)/tests/nimble/test.yml
+	sudo pip install ansible==2.7.12
+	ansible-playbook -l $(ROLE_LIMIT) -b $(ROLE_DEST)/tests/nimble/test.yml
+	sudo pip install ansible==2.8.3
+	ansible-playbook -l $(ROLE_LIMIT) -b $(ROLE_DEST)/tests/nimble/test.yml
 	sudo pip install ansible==2.4.6.0
