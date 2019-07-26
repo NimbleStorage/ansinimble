@@ -133,7 +133,9 @@
     set_fact:
       nimble_volume_snapshot_id: "{{ nimble_snapshot_created.json.data.id }}"
 
-  when: nimble_volume_snapshot_id == ""
+  when:
+  - nimble_volume_snapshot_id is defined
+  - nimble_volume_snapshot_id == ""
 
 - name: Overlay clone volume options
   set_fact:

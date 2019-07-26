@@ -12,6 +12,10 @@
   roles:
     - { role: debug_marker, local_test: "NLT-less operation" }
     - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: delete,
+        nimble_object: volume
+      }
+    - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: create,
         nimble_object: volume
       }
@@ -271,6 +275,10 @@
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: unmap,
         nimble_object: volume
+      }
+    - { role: NimbleStorage.AnsinimbleTest,
+        nimble_operation: delete,
+        nimble_object: snapshot,
       }
     - { role: NimbleStorage.AnsinimbleTest,
         nimble_operation: delete,

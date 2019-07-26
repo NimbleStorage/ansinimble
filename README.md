@@ -25,6 +25,7 @@ The following versions of Ansible are currently being tested for compatability w
 * 2.5.15
 * 2.6.16
 * 2.7.10
+* 2.8.3
 
 Deprecated Ansible versions Ansinimble no longer support:
 * 2.2.3.0
@@ -40,8 +41,14 @@ Ansinimble is beta software and might introduce breaking changes between version
 
 **Important:** When executing with Ansible 2.5+, `ansible-playbook -b` (become) must be used for the role to work properly. This is due to a change in the `include` statement.
 
-# Reference Documentation Tables of Contents 
+# Reference Documentation Tables of Contents
+Getting started with the Ansinimble role can be initimating. Keep an eye out on [datamattson.io](https://datamattsson.io) with the [Ansinimble](https://datamattsson.tumblr.com/search/ansinimble) tag.
 
+Tutorials available so far:
+* [An Ansinimble Tutorial](https://datamattsson.tumblr.com/post/184716336821/an-ansinimble-tutorial)
+* [Ansinimble Tutorial: Clone Refresh](https://datamattsson.tumblr.com/post/185397608286/ansinimble-tutorial-clone-refresh)
+
+## Reference documentation
 * [Role Variables](https://github.com/NimbleStorage/ansinimble#role-variables)
 * [Usage](https://github.com/NimbleStorage/ansinimble#usage)
 * [Nimble Storage Array Operations](https://github.com/NimbleStorage/ansinimble#nimble-storage-array-operations)
@@ -528,13 +535,6 @@ Resizes (expands) a volume and filesystem.
 nimble_volume: Volume name to resize
 nimble_volume_size: Size in MiB to set volume to (currently no sanity checks)
 nimble_volume_mountpoint: Where the volume is currently mounted
-```
-
-### volume update (not implemented yet)
-Updates a volume.
-```
-nimble_volume: Volume name to change
-nimble_volume_options: A dictionary of keys and values to update the volume with
 ```
 
 ### volume snapshot
