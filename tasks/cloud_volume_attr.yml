@@ -16,7 +16,7 @@
     register: cloud_volume_attr_fetch
     retries: "{{ cloud_uri_retries }}"
     delay: "{{ cloud_uri_delay }}"
-    until: cloud_volume_attr_fetch | success
+    until: cloud_volume_attr_fetch is success
 
   - set_fact:
       cloud_volume_attr: "{{ cloud_volume_attr_fetch.json.data.attributes }}"

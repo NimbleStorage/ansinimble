@@ -18,7 +18,7 @@
   register: cloud_portal_token
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
-  until: cloud_portal_token | success
+  until: cloud_portal_token is success
 
 - name: Store portal token
   set_fact:
@@ -58,7 +58,7 @@
   no_log: "{{ cloud_silence_payload }}"
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
-  until: cloud_portal_data | success
+  until: cloud_portal_data is success
 
 - name: Combine portal facts
   set_fact:

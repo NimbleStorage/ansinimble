@@ -38,7 +38,7 @@
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_volume_updated
-  until: cloud_volume_updated | success
+  until: cloud_volume_updated is success
 
 - name: Refresh volumes
   include: cloud_portal_facts.yml

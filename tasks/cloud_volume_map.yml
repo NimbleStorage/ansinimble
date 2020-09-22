@@ -39,4 +39,4 @@
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_volume_map
-  until: cloud_volume_map | success
+  until: cloud_volume_map is success

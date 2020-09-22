@@ -30,5 +30,5 @@
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_store_deleted
-  until: cloud_store_deleted | success
+  until: cloud_store_deleted is success
   when: cloud_store_id

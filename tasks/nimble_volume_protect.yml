@@ -53,7 +53,7 @@
     register: local_volume_protect
     retries: "{{ nimble_uri_retries }}"
     delay: "{{ nimble_uri_delay }}"
-    until: local_volume_protect | success
+    until: local_volume_protect is success
   when: nimble_volcoll is defined
 
 - block:
@@ -87,7 +87,7 @@
     retries: "{{ nimble_uri_retries }}"
     delay: "{{ nimble_uri_delay }}"
     register: nimble_volcoll_created
-    until: nimble_volcoll_created | success
+    until: nimble_volcoll_created is success
 
   - name: Assign volcoll
     uri:
@@ -105,5 +105,5 @@
     register: local_volume_protect
     retries: "{{ nimble_uri_retries }}"
     delay: "{{ nimble_uri_delay }}"
-    until: local_volume_protect | success
+    until: local_volume_protect is success
   when: nimble_protection_template is defined

@@ -17,5 +17,5 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volcoll_deleted
-  until: nimble_volcoll_deleted | success
+  until: nimble_volcoll_deleted is success
   with_items: "{{ nimble_group_facts.volume_collections }}"

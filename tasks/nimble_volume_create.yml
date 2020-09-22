@@ -13,12 +13,12 @@
 - name: Figure out volume query (NimbleOS >=4)
   set_fact:
     nimble_volume_query: "fields=name,id,last_snap"
-  when: nimble_group_version | version_compare('4', '>=')
+  when: nimble_group_version is version_compare('4', '>=')
 
 - name: Figure out volume query (NimbleOS < 4)
   set_fact:
     nimble_volume_query: "fields=name,id"
-  when: nimble_group_version | version_compare('4', '<')
+  when: nimble_group_version is version_compare('4', '<')
 
 - name: Refresh group facts
   include: nimble_group_facts.yml
@@ -59,7 +59,7 @@
     register: nimble_volume_snapshots
     retries: "{{ nimble_uri_retries }}"
     delay: "{{ nimble_uri_delay }}"
-    until: nimble_volume_snapshots | success
+    until: nimble_volume_snapshots is success
 
   - name: Retrieve snapshot id
     set_fact:
@@ -75,7 +75,7 @@
     nimble_volume_snapshot_id: "{{ nimble_group_facts | json_query(local_query) }}"
   vars:
     local_query: "volumes[?name=='{{ nimble_volume_from }}'].last_snap.snap_id | [0]"
-  when: nimble_volume_snapshot is undefined and nimble_volume_from is defined and nimble_group_version | version_compare('4', '>=')
+  when: nimble_volume_snapshot is undefined and nimble_volume_from is defined and nimble_group_version is version_compare('4', '>=')
 
 - block:
   - name: Get nimble_volume_id (NimbleOS < 4)
@@ -96,7 +96,7 @@
     register: nimble_volume_snapshots
     retries: "{{ nimble_uri_retries }}"
     delay: "{{ nimble_uri_delay }}"
-    until: nimble_volume_snapshots | success
+    until: nimble_volume_snapshots is success
 
   - name: Retrieve snapshot id (NimbleOS < 4)
     set_fact:
@@ -104,7 +104,7 @@
     vars:
       local_query: "data[?vol_id=='{{ nimble_volume_id }}'].id | [0]"
 
-  when: nimble_volume_snapshot is undefined and nimble_volume_from is defined and nimble_group_version | version_compare('4', '<')
+  when: nimble_volume_snapshot is undefined and nimble_volume_from is defined and nimble_group_version is version_compare('4', '<')
 
 - block:
   - name: Ensure a snapshot name
@@ -187,5 +187,5 @@
     local_query: "volumes[?name=='{{ nimble_volume_options_default.name }}'].name"
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
-  until: nimble_volume_created | success
+  until: nimble_volume_created is success
   changed_when: nimble_volume_created.status == 201

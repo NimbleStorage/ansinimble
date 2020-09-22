@@ -43,7 +43,7 @@
       retries: "{{ nimble_uri_retries }}"
       delay: "{{ nimble_uri_delay }}"
       register: nimble_partner_deleted
-      until: nimble_partner_deleted | success
+      until: nimble_partner_deleted is success
 
     - uri:
         url: "{{ cloud_portal_api_endpoint }}/replication_partnerships/{{ cloud_partnership_data.id }}"
@@ -57,7 +57,7 @@
       retries: "{{ cloud_uri_retries }}"
       delay: "{{ cloud_uri_delay }}"
       register: cloud_partnership_deleted
-      until: cloud_partnership_deleted | success
+      until: cloud_partnership_deleted is success
 
     - uri:
         url: "{{ cloud_portal_api_endpoint }}/onprem_replication_partners/{{ cloud_partnership_data.partner_id }}"
@@ -71,5 +71,5 @@
       retries: "{{ cloud_uri_retries }}"
       delay: "{{ cloud_uri_delay }}"
       register: cloud_onprem_partner_deleted
-      until: cloud_onprem_partner_deleted | success
+      until: cloud_onprem_partner_deleted is success
   when: cloud_partnership_data or nimble_partner_id

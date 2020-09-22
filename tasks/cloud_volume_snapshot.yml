@@ -38,4 +38,4 @@
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_snapshot_created
-  until: cloud_snapshot_created | success
+  until: cloud_snapshot_created is success

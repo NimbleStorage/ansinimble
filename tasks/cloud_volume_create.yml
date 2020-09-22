@@ -71,7 +71,7 @@
     register: cloud_volume_snapshots
     retries: "{{ cloud_uri_retries }}"
     delay: "{{ cloud_uri_delay }}"
-    until: cloud_volume_snapshots | success
+    until: cloud_volume_snapshots is success
 
   when: cloud_volume_from is defined
 
@@ -121,7 +121,7 @@
       local_query: "cloud_volumes[?attributes.name=='{{ cloud_volume_options_default.name }}'].attributes.name"
     retries: "{{ cloud_uri_retries }}"
     delay: "{{ cloud_uri_delay }}"
-    until: cloud_volume_created | success
+    until: cloud_volume_created is success
   when: cloud_volume_from is undefined
 
 - block:
@@ -143,5 +143,5 @@
       local_query: "cloud_volumes[?attributes.name=='{{ cloud_volume_from_default.name }}'].attributes.name"
     retries: "{{ cloud_uri_retries }}"
     delay: "{{ cloud_uri_delay }}"
-    until: cloud_volume_created | success
+    until: cloud_volume_created is success
   when: cloud_volume_from is defined

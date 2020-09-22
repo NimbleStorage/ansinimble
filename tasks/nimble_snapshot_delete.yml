@@ -31,6 +31,6 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_snapshot_deleted
-  until: nimble_snapshot_deleted | success
+  until: nimble_snapshot_deleted is success
   changed_when: nimble_snapshot_deleted.status == 200
   when: nimble_snapshot_id != ""

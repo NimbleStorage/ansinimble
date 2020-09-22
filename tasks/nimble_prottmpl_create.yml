@@ -38,7 +38,7 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_prottmpl_created
-  until: nimble_prottmpl_created | success
+  until: nimble_prottmpl_created is success
 
 - block:
   - name: Process schedules

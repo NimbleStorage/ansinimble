@@ -30,4 +30,4 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volcoll_updated
-  until: nimble_volcoll_updated | success
+  until: nimble_volcoll_updated is success

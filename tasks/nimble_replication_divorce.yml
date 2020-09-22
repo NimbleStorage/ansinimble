@@ -33,5 +33,5 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay * 3 }}"
   register: nimble_partner_deleted
-  until: nimble_partner_deleted | success
+  until: nimble_partner_deleted is success
   when: nimble_partner_id | string

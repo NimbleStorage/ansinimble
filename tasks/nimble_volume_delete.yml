@@ -34,7 +34,7 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_deleteprep
-  until: nimble_volume_deleteprep | success
+  until: nimble_volume_deleteprep is success
   changed_when:
   - nimble_volume_deleteprep.status == 200
   when:
@@ -51,6 +51,6 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_deleted
-  until: nimble_volume_deleted | success
+  until: nimble_volume_deleted is success
   when: nimble_volume_deleteprep.changed
   changed_when: nimble_volume_deleted.status == 200

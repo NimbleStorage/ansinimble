@@ -46,5 +46,5 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_snapshot_updated
-  until: nimble_snapshot_updated | success
+  until: nimble_snapshot_updated is success
   when: nimble_snapshot_update_options_default != {}

@@ -38,5 +38,5 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_updated
-  until: nimble_volume_updated | success
+  until: nimble_volume_updated is success
   when: nimble_volume_update_options_default != {}

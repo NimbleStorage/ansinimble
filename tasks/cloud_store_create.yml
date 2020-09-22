@@ -48,4 +48,4 @@
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_store_created
-  until: cloud_store_created | success
+  until: cloud_store_created is success
