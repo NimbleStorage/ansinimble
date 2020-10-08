@@ -1,3 +1,7 @@
+# Deprecation notice
+
+This software is no longer maintained. Use https://github.com/hpe-storage/nimble-ansible-modules as a substitute.
+
 # NimbleStorage.Ansinimble
 Manages software and products from Nimble Storage. This is BETA software.
 
