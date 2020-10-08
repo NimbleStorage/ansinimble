@@ -34,7 +34,7 @@
   register: cloud_volume_snapshots
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
-  until: cloud_volume_snapshots | success
+  until: cloud_volume_snapshots is success
 
 - name: Retrieve snapshot id (named snapshot)
   set_fact:
@@ -71,4 +71,4 @@
   register: cloud_volume_restored
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
-  until: cloud_volume_restored | success
+  until: cloud_volume_restored is success

@@ -81,5 +81,5 @@
   retries: "{{ cloud_device_retries }}"
   delay: "{{ cloud_device_delay }}"
   register: cloud_volume_mounted
-  until: cloud_volume_mounted | success
+  until: cloud_volume_mounted is success
   when: cloud_volume_mountpoint_stat.rc != 0

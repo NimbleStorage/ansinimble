@@ -61,7 +61,7 @@
     local_query: "initiator_groups[?name=='{{ nimble_initiator_group_options_default.name }}'].name"
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
-  until: nimble_initiator_group | success
+  until: nimble_initiator_group is success
 
 - name: Merge nimble_initiator_options
   set_fact:
@@ -106,7 +106,7 @@
     retries: "{{ nimble_uri_retries }}"
     delay: "{{ nimble_uri_delay }}"
     register: nimble_initiator_created
-    until: nimble_initiator_created | success
+    until: nimble_initiator_created is success
   when: nimble_host_protocol == 'iscsi' and nimble_initiator_group_id is defined
 
 - block:
@@ -128,7 +128,7 @@
     retries: "{{ nimble_uri_retries }}"
     delay: "{{ nimble_uri_delay }}"
     register: nimble_initiator_created
-    until: nimble_initiator_created | success
+    until: nimble_initiator_created is success
     with_items: "{{ nimble_host_facts.wwpns }}"
     when: nimble_group_facts | json_query(local_query) == []
     vars:
@@ -157,7 +157,7 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_onlined
-  until: nimble_volume_onlined | success
+  until: nimble_volume_onlined is success
 
 - name: Create Access Control Record
   uri:
@@ -179,4 +179,4 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_acr_created
-  until: nimble_acr_created | success
+  until: nimble_acr_created is success

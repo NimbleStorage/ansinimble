@@ -52,7 +52,7 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_snapshots_created
-  until: nimble_snapshots_created | success
+  until: nimble_snapshots_created is success
   vars:
     local_query: "snapshot_collections[?name=='{{ nimble_volcoll_snapshot }}'].name | [0]"
   when: nimble_group_facts | json_query(local_query) != nimble_volcoll_snapshot

@@ -28,7 +28,7 @@
 - name: Ensure compatibility
   fail:
     msg: "Need NimbleOS >= 4.5"
-  when: nimble_group_version | version_compare('4.5', '<')
+  when: nimble_group_version is version_compare('4.5', '<')
 
 - name: Merge options
   set_fact:
@@ -74,7 +74,7 @@
       retries: "{{ cloud_uri_retries }}"
       delay: "{{ cloud_uri_delay }}"
       register: cloud_store_created
-      until: cloud_store_created | success
+      until: cloud_store_created is success
   when: not cloud_store_query
 
 - name: Create Replication Partner
@@ -98,7 +98,7 @@
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_onprem_partner_created
-  until: cloud_onprem_partner_created | success
+  until: cloud_onprem_partner_created is success
 
 - name: Create Replication Partnership
   set_fact:
@@ -123,7 +123,7 @@
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_repl_partnership_created
-  until: cloud_repl_partnership_created | success
+  until: cloud_repl_partnership_created is success
 
 - name: Create Local Partner
   set_fact:
@@ -155,7 +155,7 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_cloud_partner_created
-  until: nimble_cloud_partner_created | success
+  until: nimble_cloud_partner_created is success
 
 - name: Test partnership
   uri:
@@ -170,4 +170,4 @@
   retries: "{{ nimble_uri_retries * 3 }}"
   delay: "{{ nimble_uri_delay * 3 }}"
   register: nimble_partner_tested
-  until: nimble_partner_tested | success
+  until: nimble_partner_tested is success

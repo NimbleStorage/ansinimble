@@ -50,7 +50,7 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_partner_created
-  until: nimble_partner_created | success
+  until: nimble_partner_created is success
   when: not nimble_partner_id | string
 
 - name: Test partnership
@@ -66,5 +66,5 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_partner_tested
-  until: nimble_partner_tested | success
+  until: nimble_partner_tested is success
   when: nimble_partner_id | string

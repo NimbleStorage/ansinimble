@@ -35,7 +35,7 @@
     package: name={{ item }} state=present
     retries: 10
     delay: 30
-    until: result|success
+    until: result is success
     register: result
     with_items: "{{ nimble_host_packages }}"
 

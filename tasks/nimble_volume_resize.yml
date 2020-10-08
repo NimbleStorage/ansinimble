@@ -32,7 +32,7 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_resized
-  until: nimble_volume_resized | success
+  until: nimble_volume_resized is success
   delegate_to: 127.0.0.1
   delegate_facts: False
   connection: local

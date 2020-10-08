@@ -36,7 +36,7 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_snapshot_created
-  until: nimble_snapshot_created | success
+  until: nimble_snapshot_created is success
 
 - name: Refresh volumes
   include: nimble_group_facts.yml

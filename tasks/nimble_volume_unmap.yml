@@ -33,7 +33,7 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_acr_deleted
-  until: nimble_acr_deleted | success
+  until: nimble_acr_deleted is success
 
 - include: nimble_util_volume_id.yml
 
@@ -53,7 +53,7 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_volume_offline
-  until: nimble_volume_offline | success
+  until: nimble_volume_offline is success
 
 - name: Refresh initiator_groups
   include: nimble_group_facts.yml
@@ -83,4 +83,4 @@
     local_query: "initiator_groups[?id=='{{ nimble_initiator_group_id }}'].{v: volume_count, id: id}[?v==`0`]|[0].id"
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
-  until: nimble_initiator_group_deleted | success
+  until: nimble_initiator_group_deleted is success

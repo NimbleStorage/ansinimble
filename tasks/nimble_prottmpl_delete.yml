@@ -24,4 +24,4 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_prottmpl_deleted
-  until: nimble_prottmpl_deleted | success
+  until: nimble_prottmpl_deleted is success

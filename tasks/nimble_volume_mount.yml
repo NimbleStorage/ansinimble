@@ -70,5 +70,5 @@
     retries: "{{ nimble_device_retries }}"
     delay: "{{ nimble_device_delay }}"
     register: nimble_volume_mounted
-    until: nimble_volume_mounted | success
+    until: nimble_volume_mounted is success
   when: not (nimble_volume_mountpoint_mm.stdout == nimble_volume_device_name_mm.stdout)

@@ -39,4 +39,4 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_folder_created
-  until: nimble_folder_created | success
+  until: nimble_folder_created is success

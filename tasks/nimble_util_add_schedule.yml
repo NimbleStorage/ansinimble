@@ -41,4 +41,4 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_protsched_created
-  until: nimble_protsched_created | success
+  until: nimble_protsched_created is success

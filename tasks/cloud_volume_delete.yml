@@ -31,4 +31,4 @@
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_volume_delete
-  until: cloud_volume_delete | success
+  until: cloud_volume_delete is success

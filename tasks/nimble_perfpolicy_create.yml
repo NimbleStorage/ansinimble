@@ -36,4 +36,4 @@
   retries: "{{ nimble_uri_retries }}"
   delay: "{{ nimble_uri_delay }}"
   register: nimble_perfpolicy_created
-  until: nimble_perfpolicy_created | success
+  until: nimble_perfpolicy_created is success

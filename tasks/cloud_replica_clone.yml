@@ -59,7 +59,7 @@
   register: cloud_replica_snapshots
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
-  until: cloud_replica_snapshots | success
+  until: cloud_replica_snapshots is success
 
 - set_fact:
     cloud_replica_snapshot_id: "{{ cloud_replica_snapshots.json.data[cloud_replica_snapshot_index].id }}"
@@ -102,4 +102,4 @@
     local_query: "cloud_volumes[?attributes.name=='{{ cloud_replica_options_default.name }}'].attributes.name"
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
-  until: cloud_volume_created | success
+  until: cloud_volume_created is success

@@ -45,7 +45,7 @@
   retries: "{{ cloud_uri_retries }}"
   delay: "{{ cloud_uri_delay }}"
   register: cloud_volume_resize
-  until: cloud_volume_resize | success
+  until: cloud_volume_resize is success
 
 - name: Rescan target
   command: iscsiadm -m node -R -T {{ cloud_volume_attr.target_name }}
